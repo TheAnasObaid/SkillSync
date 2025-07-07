@@ -36,7 +36,7 @@ Built as the **capstone project** for a 3-month full-stack development program.
 ## Getting Started
 
 1. Clone the repo  
-   `git clone <paste here>`
+   `git clone git@github.com:TheAnasObaid/DevsGoneWild.git`
 2. Install dependencies
    ```bash
    cd frontend && npm install
