@@ -18,8 +18,8 @@ Built as the **capstone project** for a 3-month full-stack development program.
 
 ## Tech Stack
 
-**Programming Language:** TypeScript
-**Frontend:** React + Tailwind  
+**Programming Language:** TypeScript  
+**Frontend:** Next.js + Tailwind  
 **Backend:** Node.js + Express  
 **Database:** MongoDB  
 **Authentication:** JWT  
