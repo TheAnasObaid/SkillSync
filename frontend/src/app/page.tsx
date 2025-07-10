@@ -3,9 +3,9 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main>
-      <button className="btn btn-primary">
-        <Link href="/register">Register</Link>
-      </button>
+      <Link href="/register" className="btn btn-primary">
+        Register
+      </Link>
     </main>
   );
 }

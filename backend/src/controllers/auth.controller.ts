@@ -5,10 +5,8 @@ export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
   try {
     const user = await User.create({ name, email, password, role });
-    console.log("User", user);
-    const newUser = await user.save();
-    console.log("New User", newUser);
-    res.status(201).json({ status: "success", user: newUser });
+    await user.save();
+    res.status(201).json({ status: "success", user });
   } catch (err) {
     console.error(err);
   }

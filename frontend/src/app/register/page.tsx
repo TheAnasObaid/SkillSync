@@ -1,6 +1,7 @@
 "use client";
 
 import apiClient from "@/utils/api-client";
+import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -22,13 +23,11 @@ const RegisterPage = () => {
     setError("");
 
     try {
-      const res = await apiClient.post("/auth/register", form);
-      if (res.data) {
-        setForm({ name: "", email: "", password: "", role: "" });
-        router.push("/");
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Something went wrong");
+      await apiClient.post("/auth/register", form);
+      router.push("/");
+    } catch (err) {
+      if (err instanceof AxiosError) setError(err.message);
+      else setError("Something went wrong");
     } finally {
       setLoading(false);
     }
