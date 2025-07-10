@@ -4,89 +4,68 @@ import apiClient from "@/utils/api-client";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { SubmitHandler, useForm } from "react-hook-form";
+
+interface FormData {
+  email: string;
+  password: string;
+}
 
 const LoginPage = () => {
   const router = useRouter();
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>();
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
+  const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
-      await apiClient.post("/auth/login", form);
+      await apiClient.post("/auth/login", formData);
       router.push("/");
     } catch (err) {
-      if (err instanceof AxiosError) setError(err.message);
-      else setError("Something went wrong");
-    } finally {
-      setLoading(false);
+      if (err instanceof AxiosError) console.error(err.message);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 max-w-lg mx-auto">
-      {error && (
-        <div role="alert" className="alert alert-error">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6 shrink-0 stroke-current"
-            fill="none"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth="2"
-              d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-          {error}
-        </div>
-      )}
-
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="space-y-4 max-w-lg mx-auto"
+    >
       <h2 className="text-4xl font-bold">Log in</h2>
 
-      <fieldset className="fieldset">
-        <legend className="fieldset-legend text-sm">Email</legend>
+      <div className="space-y-1">
+        <label className="label font-semibold">Email</label>
         <input
-          type="email"
-          name="email"
           className="input w-full"
-          placeholder="john@smith.com"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-          required
+          type="text"
+          {...register("email", { required: true })}
         />
-      </fieldset>
+        {errors.email && (
+          <p className="label text-error text-sm">Email is required</p>
+        )}
+      </div>
 
-      <fieldset className="fieldset">
-        <legend className="fieldset-legend text-sm">Password</legend>
+      <div className="space-y-1">
+        <label className="label font-semibold">Password</label>
         <input
-          type="password"
-          name="password"
           className="input w-full"
-          placeholder="••••••••"
-          value={form.password}
-          onChange={(e) => setForm({ ...form, password: e.target.value })}
-          required
+          type="password"
+          {...register("password", { required: true })}
         />
-      </fieldset>
+        {errors.password && (
+          <p className="label text-error text-sm">Password is required</p>
+        )}
+      </div>
 
       <button
         type="submit"
         className="btn btn-primary w-full"
-        disabled={loading}
+        disabled={isSubmitting}
       >
-        {loading && <span className="loading loading-spinner"></span>}
-        {!loading && "Sign in"}
+        {isSubmitting && <span className="loading loading-spinner"></span>}
+        {!isSubmitting && "Sign in"}
       </button>
     </form>
   );
