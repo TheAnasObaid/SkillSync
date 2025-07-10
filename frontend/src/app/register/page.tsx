@@ -23,7 +23,8 @@ const RegisterPage = () => {
 
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
-      await apiClient.post("/auth/register", formData);
+      const res = await apiClient.post("/auth/register", formData);
+      console.log(res.data);
       router.push("/");
     } catch (err) {
       if (err instanceof AxiosError) console.error(err.message);

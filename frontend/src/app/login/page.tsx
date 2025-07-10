@@ -21,7 +21,8 @@ const LoginPage = () => {
 
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
-      await apiClient.post("/auth/login", formData);
+      const res = await apiClient.post("/auth/login", formData);
+      console.log(res.data);
       router.push("/");
     } catch (err) {
       if (err instanceof AxiosError) console.error(err.message);
