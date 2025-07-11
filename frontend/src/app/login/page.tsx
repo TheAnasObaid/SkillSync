@@ -9,7 +9,6 @@ import { SubmitHandler, useForm } from "react-hook-form";
 interface FormData {
   email: string;
   password: string;
-  username: string;
 }
 
 const LoginPage = () => {
@@ -20,8 +19,6 @@ const LoginPage = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormData>();
   const [error, setError] = useState("");
-
-  console.log(register("username"));
 
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
