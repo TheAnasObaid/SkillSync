@@ -18,6 +18,7 @@ const LoginPage = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<FormData>();
+  const [error, setError] = useState("");
 
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
@@ -25,7 +26,7 @@ const LoginPage = () => {
       console.log(res.data);
       router.push("/");
     } catch (err) {
-      if (err instanceof AxiosError) console.error(err.message);
+      if (err instanceof AxiosError) setError(err.response?.data.error);
     }
   };
 
@@ -35,6 +36,8 @@ const LoginPage = () => {
       className="space-y-4 max-w-lg mx-auto"
     >
       <h2 className="text-4xl font-bold">Log in</h2>
+
+      {error && <p className="label text-error text-sm">{error}</p>}
 
       <div className="space-y-1">
         <label className="label font-semibold">Email</label>
