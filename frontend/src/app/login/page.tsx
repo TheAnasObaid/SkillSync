@@ -11,6 +11,14 @@ interface FormData {
   password: string;
 }
 
+interface FetchUserResponse {
+  token: string;
+  status: string;
+  user: {
+    role: string;
+  };
+}
+
 const LoginPage = () => {
   const router = useRouter();
   const {
@@ -22,9 +30,14 @@ const LoginPage = () => {
 
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
-      const res = await apiClient.post("/auth/login", formData);
-      console.log(res.data);
-      router.push("/");
+      const { data } = await apiClient.post<FetchUserResponse>(
+        "/auth/login",
+        formData
+      );
+      localStorage.setItem("token", data.token);
+      if (data.user.role === "developer")
+        return router.push("/freelancer/profile");
+      else router.push("/client/profile");
     } catch (err) {
       if (err instanceof AxiosError) setError(err.response?.data.error);
     }
