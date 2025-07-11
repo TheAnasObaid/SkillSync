@@ -1,16 +1,17 @@
 import { config } from "dotenv";
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import User from "../models/user.model";
+import User, { User as IUser } from "../models/user.model";
 
 export interface AuthenticatedRequest extends Request {
+  user?: IUser;
   userId?: string;
 }
 
 config();
 const JWT_SECRET = process.env.JWT_SECRET!;
 
-export const protect = async (
+export const authenticate = async (
   req: AuthenticatedRequest,
   res: Response,
   next: NextFunction
