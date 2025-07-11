@@ -9,6 +9,7 @@ import { SubmitHandler, useForm } from "react-hook-form";
 interface FormData {
   email: string;
   password: string;
+  username: string;
 }
 
 const LoginPage = () => {
@@ -19,6 +20,8 @@ const LoginPage = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormData>();
   const [error, setError] = useState("");
+
+  console.log(register("username"));
 
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
@@ -33,7 +36,7 @@ const LoginPage = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 max-w-lg mx-auto"
+      className="space-y-4 max-w-md mx-auto"
     >
       <h2 className="text-4xl font-bold">Log in</h2>
 
