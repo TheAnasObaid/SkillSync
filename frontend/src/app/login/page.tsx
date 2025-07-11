@@ -33,7 +33,7 @@ const LoginPage = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 max-w-lg mx-auto"
+      className="space-y-4 max-w-md mx-auto"
     >
       <h2 className="text-4xl font-bold">Log in</h2>
 

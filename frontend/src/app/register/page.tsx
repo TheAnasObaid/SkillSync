@@ -20,6 +20,7 @@ const RegisterPage = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormData>();
   const router = useRouter();
+  const [error, setError] = useState("");
 
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
@@ -27,7 +28,7 @@ const RegisterPage = () => {
       console.log(res.data);
       router.push("/");
     } catch (err) {
-      if (err instanceof AxiosError) console.error(err.message);
+      if (err instanceof AxiosError) setError(err.message);
     }
   };
 
@@ -37,6 +38,8 @@ const RegisterPage = () => {
       className="space-y-4 max-w-md mx-auto"
     >
       <h2 className="text-4xl font-bold">Create account</h2>
+
+      {error && <p className="label text-error text-sm">{error}</p>}
 
       <div className="space-y-1">
         <label className="label font-semibold">Name</label>
