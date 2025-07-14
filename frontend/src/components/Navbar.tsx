@@ -1,11 +1,12 @@
 import Link from "next/link";
+import { PiDevToLogo } from "react-icons/pi";
 
 const Navbar = () => {
   return (
     <nav className="navbar bg-base-100">
       <div className="navbar-start">
-        <Link href="/" className="link link-hover font-semibold text-xl">
-          DevsGoneWild
+        <Link href="/" className="font-semibold text-xl flex flex-row">
+          <PiDevToLogo size={44} className="text-primary" />
         </Link>
       </div>
       <ul className="navbar-end space-x-3">
