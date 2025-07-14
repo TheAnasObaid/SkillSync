@@ -1,4 +1,4 @@
-# Devs Gone Wild
+# Skill Sync
 
 A developer-focused platform where employers post coding problems and developers compete to solve them in contest-style challenges. Inspired by hackathons, topcoder, freelance boards, and a love of code battles.
 
@@ -36,7 +36,7 @@ Built as the **capstone project** for a 3-month full-stack development program.
 ## Getting Started
 
 1. Clone the repo  
-   `git clone git@github.com:TheAnasObaid/DevsGoneWild.git`
+   `git clone git@github.com:TheAnasObaid/SkillSync.git`
 2. Install dependencies
    ```bash
    cd frontend && npm install
