@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuthStore } from "@/store/authStore";
+import { Role, useAuthStore } from "@/store/authStore";
 import apiClient from "@/utils/api-client";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -16,13 +16,13 @@ interface FetchUserResponse {
   token: string;
   status: string;
   user: {
-    role: string;
+    role: Role;
   };
 }
 
 const LoginPage = () => {
   const router = useRouter();
-  const { setToken } = useAuthStore();
+  const { setToken, setRole } = useAuthStore();
   const {
     register,
     handleSubmit,
@@ -37,7 +37,8 @@ const LoginPage = () => {
         formData
       );
 
-      localStorage.setItem("authToken", data.token);
+      setToken(data.token);
+      setRole(data.user.role);
       router.push("/");
     } catch (err) {
       if (err instanceof AxiosError) setError(err.response?.data.error);
