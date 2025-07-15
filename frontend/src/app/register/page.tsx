@@ -25,7 +25,6 @@ const RegisterPage = () => {
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
       const res = await apiClient.post("/auth/register", formData);
-      console.log(res.data);
       router.push("/");
     } catch (err) {
       if (err instanceof AxiosError) setError(err.message);
@@ -38,9 +37,7 @@ const RegisterPage = () => {
       className="space-y-4 max-w-md w-1/2 mt-10 mx-auto"
     >
       <h2 className="text-4xl font-bold">Create account</h2>
-
       {error && <p className="label text-error text-sm">{error}</p>}
-
       <div className="space-y-1">
         <label className="label font-semibold">Name</label>
         <input
