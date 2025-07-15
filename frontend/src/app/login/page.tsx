@@ -46,7 +46,7 @@ const LoginPage = () => {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 max-w-md mx-auto"
+      className="space-y-4 max-w-md w-1/2 mt-10 mx-auto"
     >
       <h2 className="text-4xl font-bold">Log in</h2>
 
@@ -78,7 +78,7 @@ const LoginPage = () => {
 
       <button
         type="submit"
-        className="btn btn-primary w-full"
+        className="btn btn-primary w-full mt-5"
         disabled={isSubmitting}
       >
         {isSubmitting && <span className="loading loading-spinner"></span>}
