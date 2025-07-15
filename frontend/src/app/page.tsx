@@ -1,3 +1,13 @@
+"use client";
+
+import { useAuthStore } from "@/store/authStore";
+import { useEffect } from "react";
+
 export default function Home() {
-  return <div></div>;
+  const { setLoading, setToken } = useAuthStore();
+  useEffect(() => {
+    setToken(localStorage.getItem("authToken"));
+    setLoading(false);
+  }, []);
+  return <div>Homepage</div>;
 }

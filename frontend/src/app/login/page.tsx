@@ -1,5 +1,6 @@
 "use client";
 
+import { Role, useAuthStore } from "@/store/authStore";
 import apiClient from "@/utils/api-client";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -15,12 +16,13 @@ interface FetchUserResponse {
   token: string;
   status: string;
   user: {
-    role: string;
+    role: Role;
   };
 }
 
 const LoginPage = () => {
   const router = useRouter();
+  const { setToken, setRole } = useAuthStore();
   const {
     register,
     handleSubmit,
@@ -34,10 +36,10 @@ const LoginPage = () => {
         "/auth/login",
         formData
       );
-      localStorage.setItem("token", data.token);
-      if (data.user.role === "developer")
-        return router.push("/freelancer/profile");
-      else router.push("/client/profile");
+
+      setToken(data.token);
+      setRole(data.user.role);
+      router.push("/");
     } catch (err) {
       if (err instanceof AxiosError) setError(err.response?.data.error);
     }
