@@ -2,18 +2,17 @@
 
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
+import LogoutButton from "./LogoutButton";
 
 const ButtonGroup = () => {
-  const { loading, logout, token } = useAuthStore();
+  const { loading, token } = useAuthStore();
 
   if (loading) return <span className="loading loading-spinner" />;
 
   return (
     <div>
       {token ? (
-        <button onClick={logout} className="btn btn-primary">
-          Logout
-        </button>
+        <LogoutButton />
       ) : (
         <ul className="flex gap-3">
           <li>
