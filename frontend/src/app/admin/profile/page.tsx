@@ -12,10 +12,10 @@ const ProfilePage = () => {
   }, []);
 
   return (
-    <ProtectedRoute requiredRole="developer">
+    <ProtectedRoute requiredRole="admin">
       <div className="p-4">
-        <h1 className="text-2xl font-bold">Developer Dashboard</h1>
-        <p>List of available challenges will appear here.</p>
+        <h1 className="text-2xl font-bold">Admin Panel</h1>
+        <p>Review submissions and manage users here.</p>
       </div>
     </ProtectedRoute>
   );

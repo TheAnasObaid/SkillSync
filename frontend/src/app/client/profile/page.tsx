@@ -13,7 +13,10 @@ const ProfilePage = () => {
 
   return (
     <ProtectedRoute requiredRole="client">
-      <div>Client Profile</div>
+      <div className="p-4">
+        <h1 className="text-2xl font-bold">Client Dashboard</h1>
+        <p>Form to create a new challenge will appear here.</p>
+      </div>
     </ProtectedRoute>
   );
 };
