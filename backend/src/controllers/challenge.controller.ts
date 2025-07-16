@@ -15,9 +15,20 @@ export const createChallenge = async (
       prize,
       createdBy: req.userId,
     });
-
     res.status(201).json(challenge);
   } catch (error) {
     res.status(500).json({ message: "Failed to create challenge" });
+  }
+};
+
+export const getAllChallenges = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const allChallenges = await Challenge.find();
+    res.status(201).json(allChallenges);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch challenges" });
   }
 };
