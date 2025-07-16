@@ -1,8 +1,7 @@
 import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
-import "./globals.css";
 import Container from "./Container";
-import AuthGuard from "./AuthGuard";
+import "./globals.css";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,10 +16,8 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="emerald">
       <body className="antialiased h-screen grid grid-rows-[auto_1fr_auto] gap-y-5">
-        <AuthGuard>
-          <Navbar />
-          <Container>{children}</Container>
-        </AuthGuard>
+        <Navbar />
+        <Container>{children}</Container>
       </body>
     </html>
   );

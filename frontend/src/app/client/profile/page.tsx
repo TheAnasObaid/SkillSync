@@ -1,5 +1,21 @@
+"use client";
+
+import ProtectedRoute from "@/app/ProtectedRoute";
+import { useAuthStore } from "@/store/authStore";
+import { useEffect } from "react";
+
 const ProfilePage = () => {
-  return <div>Client Profile</div>;
+  const { setLoading } = useAuthStore();
+
+  useEffect(() => {
+    setLoading(false);
+  }, []);
+
+  return (
+    <ProtectedRoute requiredRole="client">
+      <div>Client Profile</div>
+    </ProtectedRoute>
+  );
 };
 
 export default ProfilePage;
