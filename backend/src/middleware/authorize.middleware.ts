@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import { NextFunction, Response } from "express";
 import User from "../models/user.model";
 import { AuthenticatedRequest } from "./authenticate.middleware";
 
