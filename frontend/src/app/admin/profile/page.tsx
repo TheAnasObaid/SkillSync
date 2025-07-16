@@ -12,11 +12,10 @@ const ProfilePage = () => {
   }, []);
 
   return (
-    <ProtectedRoute requiredRole="developer">
+    <ProtectedRoute requiredRole="admin">
       <div className="p-4">
-        <div className="flex justify-between mb-10">
-          <h1 className="text-2xl font-bold">Developer Dashboard</h1>
-        </div>
+        <h1 className="text-2xl font-bold">Admin Panel</h1>
+        <p>Review submissions and manage users here.</p>
       </div>
     </ProtectedRoute>
   );
