@@ -1,6 +1,7 @@
 import Navbar from "@/components/Navbar";
 import type { Metadata } from "next";
 import "./globals.css";
+import Container from "./Container";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -14,9 +15,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" data-theme="emerald">
-      <body className="antialiased h-screen max-w-screen-xl mx-auto grid grid-rows-[auto_1fr_auto] gap-y-5">
+      <body className="antialiased h-screen grid grid-rows-[auto_1fr_auto] gap-y-5">
         <Navbar />
-        {children}
+        <Container>{children}</Container>
       </body>
     </html>
   );

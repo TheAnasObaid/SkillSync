@@ -16,12 +16,12 @@ const ButtonGroup = () => {
       ) : (
         <ul className="flex gap-3">
           <li>
-            <Link href="/login" className="btn btn-primary btn-outline">
+            <Link href="/login" className="btn btn-secondary btn-outline">
               Login
             </Link>
           </li>
           <li>
-            <Link href="/register" className="btn btn-primary">
+            <Link href="/register" className="btn btn-secondary">
               Register
             </Link>
           </li>
