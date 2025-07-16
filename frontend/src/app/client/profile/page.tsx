@@ -6,7 +6,7 @@ import apiClient from "@/utils/api-client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-interface Challenge {
+export interface Challenge {
   _id: string;
   title: string;
   description: string;
