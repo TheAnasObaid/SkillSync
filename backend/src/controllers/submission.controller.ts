@@ -1,0 +1,23 @@
+import { Response } from "express";
+import { AuthenticatedRequest } from "../middleware/authenticate.middleware";
+import Submission from "../models/submission.model";
+
+export const submitSolution = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { content } = req.body;
+    const challengeId = req.params.id;
+
+    const submission = await Submission.create({
+      challengeId,
+      developerId: req.userId,
+      content,
+    });
+
+    res.status(201).json(submission);
+  } catch {
+    res.status(500).json({ message: "Failed to submit solution" });
+  }
+};

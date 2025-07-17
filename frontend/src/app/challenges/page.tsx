@@ -1,11 +1,15 @@
 "use client";
 
+import { useAuthStore } from "@/store/authStore";
+import apiClient from "@/utils/api-client";
+import { AxiosError } from "axios";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Challenge } from "../client/profile/page";
-import apiClient from "@/utils/api-client";
-import { useAuthStore } from "@/store/authStore";
 
 const Challenges = () => {
+  const router = useRouter();
+  const [error, setError] = useState("");
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const { setLoading } = useAuthStore();
 
@@ -19,12 +23,14 @@ const Challenges = () => {
         const { data } = await apiClient.get("/challenges");
         setChallenges(data);
       } catch (error) {
-        console.error(error);
+        if (error instanceof AxiosError) setError(error.response?.data.message);
       }
     };
 
     fetchChallenges();
   }, []);
+
+  if (error) return <p className="text-error">{error}</p>;
 
   return (
     <div>
@@ -43,7 +49,12 @@ const Challenges = () => {
                 </p>
                 <p>{challenge.description}</p>
                 <div className="card-actions justify-end">
-                  <button className="btn btn-primary">Submit</button>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => router.push(`/challenges/${challenge._id}`)}
+                  >
+                    View Challenge
+                  </button>
                 </div>
               </div>
             </div>
