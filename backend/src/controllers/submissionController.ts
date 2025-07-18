@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "../middleware/authenticate.middleware";
-import Submission from "../models/submission.model";
+import { AuthenticatedRequest } from "../middleware/auth";
+import Submission from "../models/Submission";
 
 export const submitSolution = async (
   req: AuthenticatedRequest,

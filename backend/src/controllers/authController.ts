@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
-import User from "../models/user.model";
-import { generateToken } from "../utils/generate-token";
+import User from "../models/User";
+import generateToken from "../utils/generateToken";
 
 export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;

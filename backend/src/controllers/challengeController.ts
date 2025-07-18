@@ -1,6 +1,6 @@
 import { Response } from "express";
-import { AuthenticatedRequest } from "../middleware/authenticate.middleware";
-import Challenge from "../models/challenge.model";
+import { AuthenticatedRequest } from "../middleware/auth";
+import Challenge from "../models/Challenege";
 
 export const createChallenge = async (
   req: AuthenticatedRequest,

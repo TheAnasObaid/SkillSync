@@ -1,10 +1,10 @@
 import { config } from "dotenv";
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-import User, { User as IUser } from "../models/user.model";
+import User, { Role, UserDocument } from "../models/User";
 
 export interface AuthenticatedRequest extends Request {
-  user?: IUser;
+  user?: UserDocument;
   userId?: string;
 }
 
@@ -36,4 +36,27 @@ export const authenticate = async (
   } catch (err) {
     res.status(401).json({ message: "Invalid token" });
   }
+};
+
+export const authorize = (requiredRole: Role) => {
+  return async (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction
+  ) => {
+    if (!req.userId) res.status(401).json({ message: "Not authenticated" });
+
+    const user = await User.findById(req.userId);
+
+    if (!user) res.status(401).json({ message: "User not found" });
+
+    if (user && user.role !== requiredRole)
+      res
+        .status(403)
+        .json({ message: `Forbidden: ${requiredRole} role required` });
+
+    req.user = user!;
+
+    next();
+  };
 };
