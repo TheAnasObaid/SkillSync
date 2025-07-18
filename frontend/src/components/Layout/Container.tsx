@@ -9,6 +9,7 @@ const Container = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     setLoading(false);
   }, []);
+
   return <div className="max-w-screen-xl mx-auto w-full">{children}</div>;
 };
 

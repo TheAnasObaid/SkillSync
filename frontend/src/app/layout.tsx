@@ -1,8 +1,8 @@
-import Navbar from "@/components/Navbar";
+import Container from "@/components/Layout/Container";
+import Footer from "@/components/Layout/Footer";
+import Header from "@/components/Layout/Header";
+import "@/styles/globals.css";
 import type { Metadata } from "next";
-import Container from "./Container";
-import "./globals.css";
-import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -17,16 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="emerald">
       <body className="antialiased h-screen grid grid-rows-[auto_1fr_auto] gap-y-5">
-        <Navbar />
+        <Header />
         <Container>{children}</Container>
-        <ul className="flex gap-4 max-w-screen-xl mx-auto w-full">
-          <li>
-            <Link href="/freelancer/profile">Developer Dashboard</Link>
-          </li>
-          <li>
-            <Link href="/client/profile">Client Dashboard</Link>
-          </li>
-        </ul>
+        <Footer />
       </body>
     </html>
   );
