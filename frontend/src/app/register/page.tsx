@@ -10,7 +10,7 @@ type FormData = {
   name: string;
   email: string;
   password: string;
-  role: "client" | "developer";
+  role: "client" | "developer" | "admin";
 };
 
 const RegisterPage = () => {
@@ -24,7 +24,7 @@ const RegisterPage = () => {
 
   const onSubmit: SubmitHandler<FormData> = async (formData) => {
     try {
-      const res = await apiClient.post("/auth/register", formData);
+      await apiClient.post("/auth/register", formData);
       router.push("/");
     } catch (err) {
       if (err instanceof AxiosError) setError(err.message);
