@@ -53,7 +53,7 @@ export default function SingleChallengePage() {
   const onSubmit = async (formData: FormData) => {
     try {
       await apiClient.post(`/challenges/${id}/submit`, formData);
-      router.push("/developer/dashboard");
+      router.push("/freelancer/profile");
     } catch (error) {
       if (error instanceof AxiosError) setError(error.response?.data);
     }
