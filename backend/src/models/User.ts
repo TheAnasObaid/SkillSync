@@ -3,7 +3,7 @@ import bcrypt from "bcrypt";
 
 export type Role = "developer" | "client" | "admin";
 
-export interface User extends Document {
+export interface UserDocument extends Document {
   name: string;
   email: string;
   password: string;
@@ -16,7 +16,7 @@ export interface User extends Document {
   comparePassword: (candidate: string) => Promise<boolean>;
 }
 
-const UserSchema = new Schema<User>(
+const UserSchema = new Schema<UserDocument>(
   {
     name: {
       type: String,
@@ -62,6 +62,6 @@ UserSchema.methods.comparePassword = async function (candidate: string) {
   return bcrypt.compare(candidate, this.password);
 };
 
-const User = mongoose.model<User>("User", UserSchema);
+const User = mongoose.model<UserDocument>("User", UserSchema);
 
 export default User;

@@ -1,55 +1,10 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { Challenge } from "../client/profile/page";
-import apiClient from "@/utils/api-client";
-import { useAuthStore } from "@/store/authStore";
+import ChallengeList from "@/components/Challenge/ChallengeList";
 
 const Challenges = () => {
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const { setLoading } = useAuthStore();
-
-  useEffect(() => {
-    setLoading(false);
-  }, []);
-
-  useEffect(() => {
-    const fetchChallenges = async () => {
-      try {
-        const { data } = await apiClient.get("/challenges");
-        setChallenges(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchChallenges();
-  }, []);
-
   return (
-    <div>
-      <ul className="flex flex-col gap-3">
-        {challenges.map((challenge) => (
-          <li key={challenge._id}>
-            <div className="card bg-neutral-50">
-              <div className="card-body">
-                <h2 className="card-title text-xl">{challenge.title}</h2>
-                <h3 className="font-bold text-lg">${challenge.prize}</h3>
-                <p className="flex gap-1">
-                  Published at
-                  <span className="font-semibold">
-                    {new Date(challenge.createdAt).toLocaleDateString()}
-                  </span>
-                </p>
-                <p>{challenge.description}</p>
-                <div className="card-actions justify-end">
-                  <button className="btn btn-primary">Submit</button>
-                </div>
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <div className="grid gap-5">
+      <h2 className="text-4xl font-semibold">Challenges</h2>
+      <ChallengeList />
     </div>
   );
 };

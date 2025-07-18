@@ -43,7 +43,24 @@ Built as the **capstone project** for a 3-month full-stack development program.
    cd ../backend && npm install
    ```
 
+### Environment variables
+
+In order for this to work, you should create two `.env` files. One in your `frontend` directory and second in your `backend` directory.
+
+**Frontend:**
+
+1. NEXT_PUBLIC_API_URL
+
+**Backend:**
+
+1. PORT
+2. MONGO_URI
+3. DB_NAME
+4. JWT_SECRET
+
 ### In separate terminals
 
+```bash
 cd frontend && npm run dev
 cd backend && npm run dev
+```
