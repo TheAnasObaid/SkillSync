@@ -1,6 +1,5 @@
 "use client";
 
-import { useAuthStore } from "@/store/authStore";
 import apiClient from "@/utils/api-client";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
@@ -11,11 +10,6 @@ const Challenges = () => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const { setLoading } = useAuthStore();
-
-  useEffect(() => {
-    setLoading(false);
-  }, []);
 
   useEffect(() => {
     const fetchChallenges = async () => {

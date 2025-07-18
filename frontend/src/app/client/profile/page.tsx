@@ -1,7 +1,6 @@
 "use client";
 
 import ProtectedRoute from "@/app/ProtectedRoute";
-import { useAuthStore } from "@/store/authStore";
 import apiClient from "@/utils/api-client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -17,11 +16,6 @@ export interface Challenge {
 
 const ProfilePage = () => {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const { setLoading } = useAuthStore();
-
-  useEffect(() => {
-    setLoading(false);
-  }, []);
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -40,7 +34,7 @@ const ProfilePage = () => {
     <ProtectedRoute requiredRole="client">
       <div className="p-4">
         <div className="flex justify-between items-center mb-10">
-          <h1 className="text-2xl font-bold">Client Dashboard</h1>
+          <h1 className="text-2xl font-bold">Client</h1>
           <Link href="profile/challenge" className="btn btn-secondary">
             Create Challenge
           </Link>

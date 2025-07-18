@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/authStore";
 import apiClient from "@/utils/api-client";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 interface FormData {
@@ -18,10 +18,6 @@ const NewChallenge = () => {
   const [error, setError] = useState("");
   const { setLoading } = useAuthStore();
 
-  useEffect(() => {
-    setLoading(false);
-  }, []);
-
   const {
     register,
     handleSubmit,
@@ -31,9 +27,7 @@ const NewChallenge = () => {
   const onSubmit = async (formData: FormData) => {
     try {
       setLoading(true);
-
       await apiClient.post("/challenges", formData);
-
       router.push("/client/profile");
     } catch (error) {
       if (error instanceof AxiosError) setError(error.response?.data.error);

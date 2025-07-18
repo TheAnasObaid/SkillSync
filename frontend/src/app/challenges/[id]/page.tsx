@@ -1,12 +1,11 @@
 "use client";
 
+import ProtectedRoute from "@/app/ProtectedRoute";
+import apiClient from "@/utils/api-client";
+import { AxiosError } from "axios";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import apiClient from "@/utils/api-client";
-import ProtectedRoute from "@/app/ProtectedRoute";
-import { useAuthStore } from "@/store/authStore";
 import { useForm } from "react-hook-form";
-import { AxiosError } from "axios";
 
 interface Challenge {
   _id: string;
@@ -25,11 +24,6 @@ export default function SingleChallengePage() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [challenge, setChallenge] = useState<Challenge | null>(null);
-  const { setLoading } = useAuthStore();
-
-  useEffect(() => {
-    setLoading(false);
-  }, []);
 
   useEffect(() => {
     const fetchChallenge = async () => {
