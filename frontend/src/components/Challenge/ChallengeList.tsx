@@ -29,7 +29,7 @@ const ChallengeList = () => {
   return (
     <ul className="list bg-base-100 rounded-box shadow-md">
       {challenges.map((challenge) => (
-        <li className="p-4 pb-2 text-xs opacity-60 tracking-wide">
+        <li key={challenge._id} className="p-4 pb-2 text-xs opacity-60 tracking-wide">
           {challenge.title}
         </li>
       ))}
