@@ -1,3 +1,4 @@
+import Link from "next/link";
 interface Challenge {
   _id: string;
   title: string;
@@ -21,7 +22,9 @@ const ChallengeList = async () => {
           key={challenge._id}
           className="p-4 pb-2 text-xs opacity-60 tracking-wide"
         >
-          {challenge.title} - {challenge.description}
+          <Link href={`/challenges/${challenge._id}`}>
+            {challenge.title} - {challenge.description}
+          </Link>
         </li>
       ))}
     </ul>

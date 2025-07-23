@@ -1,10 +1,5 @@
-"use client";
-
 import ProtectedRoute from "@/components/Auth/ProtectedRoute";
 import SubmissionForm from "@/components/Submission/SubmissionForm";
-import apiClient from "@/services/apiClient";
-import { useParams } from "next/navigation";
-import { useEffect, useState } from "react";
 
 interface Challenge {
   _id: string;
@@ -14,23 +9,18 @@ interface Challenge {
   status: "open" | "closed";
 }
 
-export default function SingleChallengePage() {
-  const { id } = useParams();
+interface Props {
+  params: Promise<{ id: string }>;
+}
 
-  const [challenge, setChallenge] = useState<Challenge | null>(null);
+const SingleChallengePage = async ({ params }: Props) => {
+  const { id } = await params;
 
-  useEffect(() => {
-    const fetchChallenge = async () => {
-      try {
-        const { data } = await apiClient.get(`/challenges/${id}`);
-        setChallenge(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchChallenge();
-  }, [id]);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/challenges/${id}`
+  );
+  const challenge: Challenge = await res.json();
+  console.log(challenge);
 
   if (!challenge) return <p>Loading challenge...</p>;
 
@@ -48,4 +38,6 @@ export default function SingleChallengePage() {
       </div>
     </ProtectedRoute>
   );
-}
+};
+
+export default SingleChallengePage;
