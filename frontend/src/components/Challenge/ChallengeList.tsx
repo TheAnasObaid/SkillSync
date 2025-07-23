@@ -1,36 +1,27 @@
-"use client";
+interface Challenge {
+  _id: string;
+  title: string;
+  status: string;
+  description: string;
+  prize: number;
+}
 
-import { Challenge } from "@/app/client/dashboard/page";
-import apiClient from "@/services/apiClient";
-import { AxiosError } from "axios";
-import { useEffect, useState } from "react";
+const ChallengeList = async () => {
+  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/challenges`);
+  const challenges: Challenge[] = await res.json();
 
-const ChallengeList = () => {
-  const [error, setError] = useState("");
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-
-  useEffect(() => {
-    const fetchChallenges = async () => {
-      try {
-        const { data } = await apiClient.get("/challenges");
-        setChallenges(data);
-      } catch (error) {
-        if (error instanceof AxiosError) setError(error.response?.data.message);
-      }
-    };
-
-    fetchChallenges();
-  }, []);
-
-  if (error) return <p className="text-error">{error}</p>;
+  console.log(challenges);
 
   if (challenges.length < 1) return <p>No challenge found.</p>;
 
   return (
     <ul className="list bg-base-100 rounded-box shadow-md">
       {challenges.map((challenge) => (
-        <li key={challenge._id} className="p-4 pb-2 text-xs opacity-60 tracking-wide">
-          {challenge.title}
+        <li
+          key={challenge._id}
+          className="p-4 pb-2 text-xs opacity-60 tracking-wide"
+        >
+          {challenge.title} - {challenge.description}
         </li>
       ))}
     </ul>
