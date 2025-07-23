@@ -18,7 +18,7 @@ const LogoutButton = () => {
 
       <dialog ref={modalRef} className="modal">
         <div className="modal-box">
-          <p className="py-4">Logout</p>
+          <p className="py-4">Are you sure you want to log out?</p>
           <div className="modal-action">
             <form method="dialog" className="space-x-5">
               <button className="btn btn-neutral btn-ghost">Cancel</button>
