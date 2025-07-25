@@ -12,7 +12,23 @@ export interface UserDocument extends Document {
   bio?: string;
   createdAt: Date;
   updatedAt: Date;
-
+  profile: {
+    firstName: string;
+    lastName: string;
+    avatar: string;
+    bio: string;
+    skills: Array<string>;
+    experience: string;
+    portfolio: Array<Object>;
+    socialLinks: Object;
+  };
+  reputation: {
+    rating: number;
+    totalRatings: number;
+    completedChallenges: number;
+  };
+  isVerified: boolean;
+  lastLogin: Date;
   comparePassword: (candidate: string) => Promise<boolean>;
 }
 
@@ -42,8 +58,24 @@ const UserSchema = new Schema<UserDocument>(
       enum: ["developer", "client", "admin"],
       default: "developer",
     },
-    avatar: String,
-    bio: String,
+    avatar: { type: String },
+    profile: {
+      firstName: { type: String },
+      lastName: { type: String },
+      avatar: { type: String },
+      bio: { type: String },
+      skills: { type: [String] },
+      experience: { type: String },
+      portfolio: { type: [Object] },
+      socialLinks: { type: Object },
+    },
+    reputation: {
+      rating: { type: Number },
+      totalRatings: { type: Number },
+      completedChallenges: { type: Number },
+    },
+    isVerified: { type: Boolean },
+    lastLogin: { type: Date },
   },
   {
     timestamps: true,

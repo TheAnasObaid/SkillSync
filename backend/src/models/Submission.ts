@@ -5,6 +5,22 @@ export interface SubmissionDocument extends Document {
   developerId: mongoose.Types.ObjectId;
   content: string;
   status: "pending" | "approved" | "rejected";
+  files: Array<Object>;
+  githubRepo: string;
+  liveDemo: string;
+  description: string;
+  documentation: string;
+  submittedAt: Date;
+  version: number;
+  ratings: {
+    codeQuality: number;
+    functionality: number;
+    creativity: number;
+    documentation: number;
+    overall: number;
+  };
+  feedback: string;
+  isWinner: boolean;
   createdAt: Date;
 }
 
@@ -23,9 +39,25 @@ const SubmissionSchema = new Schema<SubmissionDocument>(
     content: { type: String, required: true },
     status: {
       type: String,
-      enum: ["pending", "approved", "rejected"],
+      enum: ["pending", "reviewed", "winner", "rejected"],
       default: "pending",
     },
+    files: [Object],
+    githubRepo: String,
+    liveDemo: String,
+    description: String,
+    documentation: String,
+    submittedAt: Date,
+    version: Number,
+    ratings: {
+      codeQuality: Number,
+      functionality: Number,
+      creativity: Number,
+      documentation: Number,
+      overall: Number,
+    },
+    feedback: String,
+    isWinner: Boolean,
   },
   { timestamps: true }
 );
