@@ -55,8 +55,7 @@ In order for this to work, you should create two `.env` files. One in your `fron
 
 1. PORT
 2. MONGO_URI
-3. DB_NAME
-4. JWT_SECRET
+3. JWT_SECRET
 
 ### In separate terminals
 
