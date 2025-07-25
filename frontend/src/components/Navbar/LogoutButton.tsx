@@ -11,7 +11,7 @@ const LogoutButton = () => {
     <>
       <button
         onClick={() => modalRef.current?.showModal()}
-        className="btn btn-neutral btn-soft"
+        className="btn btn-error btn-soft"
       >
         Logout
       </button>
