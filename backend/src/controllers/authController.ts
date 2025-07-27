@@ -5,14 +5,19 @@ import generateToken from "../utils/generateToken";
 export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
   try {
-    const user = await User.create({ name, email, password, role });
+    const user = await User.create({
+      "profile.firstName": name,
+      email,
+      password,
+      role,
+    });
     await user.save();
 
     res.status(201).json({
       status: "success",
       user: {
         id: user?.id,
-        name: user?.name,
+        name: user?.profile?.firstName,
         email: user?.email,
         role: user?.role,
       },
@@ -39,7 +44,7 @@ export const loginUser = async (req: Request, res: Response) => {
     status: "success",
     user: {
       id: user?.id,
-      name: user?.name,
+      name: user?.profile?.firstName,
       email: user?.email,
       role: user?.role,
     },
