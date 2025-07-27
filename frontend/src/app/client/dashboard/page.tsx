@@ -34,11 +34,11 @@ const Dashboard = () => {
           <div className="flex flex-col items-center gap-4 max-w-sm mx-auto">
             <div className="flex items-center gap-5 ">
               <Image
-                src="https://thispersondoesnotexist.com/"
+                src="https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NjR8fG1vZGVsfGVufDB8fDB8fHww"
                 alt="Profile"
                 width={80}
                 height={80}
-                className="rounded-full object-cover"
+                className="rounded-full h-28 w-28 object-cover"
               />
               <button className="btn btn-secondary btn-sm">Update image</button>
             </div>
@@ -60,7 +60,7 @@ const Dashboard = () => {
                 type="submit"
                 className="btn btn-secondary btn-outline w-fit"
               >
-                Done
+                Edit
               </button>
             </form>
           </div>

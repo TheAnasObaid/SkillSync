@@ -23,7 +23,7 @@ const SubmissionForm = ({ id }: { id: string }) => {
   const onSubmit = async (formData: FormData) => {
     try {
       await apiClient.post(`/challenges/${id}/submit`, formData);
-      router.push("/freelancer/profile");
+      router.push("/developer/dashboard");
     } catch (error) {
       if (error instanceof AxiosError) setError(error.response?.data);
     }
