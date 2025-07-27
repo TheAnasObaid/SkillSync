@@ -39,8 +39,8 @@ const ChallengeForm = () => {
   if (error) return <p className="label text-error">{error}</p>;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="space-y-1">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-3">
+      <div className="grid gap-2">
         <label className="label font-semibold">Title</label>
         <input
           className="input w-full"
@@ -53,7 +53,7 @@ const ChallengeForm = () => {
         )}
       </div>
 
-      <div className="space-y-1">
+      <div className="grid gap-2">
         <label className="label font-semibold">Description</label>
         <textarea
           className="textarea w-full"
@@ -66,7 +66,7 @@ const ChallengeForm = () => {
         )}
       </div>
 
-      <div className="space-y-1">
+      <div className="grid gap-2">
         <label className="label font-semibold">Prize</label>
         <input
           className="input w-full"
