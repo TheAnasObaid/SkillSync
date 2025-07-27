@@ -17,7 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="emerald">
       <body className="antialiased h-screen grid grid-rows-[auto_1fr_auto] gap-y-5">
+        <Header />
         <Container>{children}</Container>
+        <Footer />
       </body>
     </html>
   );

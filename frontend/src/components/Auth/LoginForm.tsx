@@ -41,7 +41,12 @@ const LoginForm = () => {
 
       setToken(data.token);
       setRole(data.user.role);
-      router.push("/");
+
+      if (data.user.role === "admin") router.push("/admin/panel");
+      else if (data.user.role === "developer")
+        router.push("/developer/dashboard");
+      else if (data.user.role === "client") router.push("/client/dashboard");
+      else router.push("/");
     } catch (error) {
       if (error instanceof AxiosError) setError(error.response?.data.error);
     }
