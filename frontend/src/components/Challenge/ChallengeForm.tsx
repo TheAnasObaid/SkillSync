@@ -11,6 +11,12 @@ interface FormData {
   title: string;
   description: string;
   prize: number;
+  requirements: string;
+  category: string;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  deadline: Date;
+  files: Array<Object>;
+  tags: Array<string>;
 }
 
 const ChallengeForm = () => {
@@ -39,13 +45,12 @@ const ChallengeForm = () => {
   if (error) return <p className="label text-error">{error}</p>;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <div className="space-y-1">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-3">
+      <div className="grid gap-2">
         <label className="label font-semibold">Title</label>
         <input
           className="input w-full"
           type="text"
-          placeholder="Challenge title"
           {...register("title", { required: true })}
         />
         {errors.title && (
@@ -53,12 +58,23 @@ const ChallengeForm = () => {
         )}
       </div>
 
-      <div className="space-y-1">
+      <div className="grid gap-2">
+        <label className="label font-semibold">Category</label>
+        <input
+          className="input w-full"
+          type="text"
+          {...register("category", { required: true })}
+        />
+        {errors.category && (
+          <p className="label text-error text-sm">Category is required</p>
+        )}
+      </div>
+
+      <div className="grid gap-2">
         <label className="label font-semibold">Description</label>
         <textarea
           className="textarea w-full"
           rows={5}
-          placeholder="Describe the challenge..."
           {...register("description", { required: true })}
         />
         {errors.description && (
@@ -66,16 +82,84 @@ const ChallengeForm = () => {
         )}
       </div>
 
-      <div className="space-y-1">
+      <div className="grid gap-2">
+        <label className="label font-semibold">Requirements</label>
+        <input
+          className="input w-full"
+          type="text"
+          {...register("requirements", { required: true })}
+        />
+        {errors.requirements && (
+          <p className="label text-error text-sm">Requirements are required</p>
+        )}
+      </div>
+
+      <div className="grid gap-2">
+        <label className="label font-semibold">Files</label>
+        <input
+          className="file-input w-full"
+          type="file"
+          {...register("category", { required: true })}
+        />
+        {errors.category && (
+          <p className="label text-error text-sm">Category is required</p>
+        )}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label className="label font-semibold">Difficulty</label>
+        <select
+          defaultValue=""
+          className="select w-full"
+          {...register("difficulty", { required: true })}
+        >
+          <option value="" disabled>
+            Select leavel
+          </option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+        </select>
+        {errors.difficulty && (
+          <p className="label text-error text-sm">
+            Difficulty level is required
+          </p>
+        )}
+      </div>
+
+      <div className="grid gap-2">
+        <label className="label font-semibold">Deadline</label>
+        <input
+          className="input w-full"
+          type="date"
+          {...register("deadline", { required: true })}
+        />
+        {errors.deadline && (
+          <p className="label text-error text-sm">Deadline is required</p>
+        )}
+      </div>
+
+      <div className="grid gap-2">
         <label className="label font-semibold">Prize</label>
         <input
           className="input w-full"
           type="number"
-          placeholder="100"
           {...register("prize", { required: true })}
         />
         {errors.prize && (
           <p className="label text-error text-sm">Prize is required</p>
+        )}
+      </div>
+
+      <div className="grid gap-2">
+        <label className="label font-semibold">Tags</label>
+        <input
+          className="input w-full"
+          type="text"
+          {...register("tags", { required: true })}
+        />
+        {errors.tags && (
+          <p className="label text-error text-sm">Tags are required</p>
         )}
       </div>
 

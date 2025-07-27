@@ -6,6 +6,7 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import Link from "next/link";
 
 interface FormData {
   email: string;
@@ -40,7 +41,12 @@ const LoginForm = () => {
 
       setToken(data.token);
       setRole(data.user.role);
-      router.push("/");
+
+      if (data.user.role === "admin") router.push("/admin/panel");
+      else if (data.user.role === "developer")
+        router.push("/developer/dashboard");
+      else if (data.user.role === "client") router.push("/client/dashboard");
+      else router.push("/");
     } catch (error) {
       if (error instanceof AxiosError) setError(error.response?.data.error);
     }
@@ -80,6 +86,13 @@ const LoginForm = () => {
         {isSubmitting && <span className="loading loading-spinner"></span>}
         {!isSubmitting && "Sign in"}
       </button>
+      <p className="text-gray-600 text-sm text-center">Or</p>
+      <Link
+        href="/register"
+        className="link link-hover text-secondary w-fit mx-auto"
+      >
+        Create a new account
+      </Link>
     </form>
   );
 };

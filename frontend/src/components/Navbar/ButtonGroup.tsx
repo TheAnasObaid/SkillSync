@@ -14,18 +14,9 @@ const ButtonGroup = () => {
       {token ? (
         <LogoutButton />
       ) : (
-        <ul className="flex gap-3">
-          <li>
-            <Link href="/login" className="btn btn-secondary btn-outline">
-              Login
-            </Link>
-          </li>
-          <li>
-            <Link href="/register" className="btn btn-secondary">
-              Register
-            </Link>
-          </li>
-        </ul>
+        <Link href="/register" className="btn btn-secondary">
+          Get Started
+        </Link>
       )}
     </div>
   );
