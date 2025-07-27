@@ -6,6 +6,7 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
+import Link from "next/link";
 
 interface FormData {
   email: string;
@@ -80,6 +81,13 @@ const LoginForm = () => {
         {isSubmitting && <span className="loading loading-spinner"></span>}
         {!isSubmitting && "Sign in"}
       </button>
+      <p className="text-gray-600 text-sm text-center">Or</p>
+      <Link
+        href="/register"
+        className="link link-hover text-secondary w-fit mx-auto"
+      >
+        Create a new account
+      </Link>
     </form>
   );
 };

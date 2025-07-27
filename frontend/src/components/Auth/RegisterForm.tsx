@@ -2,6 +2,7 @@
 
 import apiClient from "@/services/apiClient";
 import { AxiosError } from "axios";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
@@ -94,6 +95,13 @@ const RegisterForm = () => {
         {isSubmitting && <span className="loading loading-spinner"></span>}
         {!isSubmitting && "Sign Up"}
       </button>
+      <p className="text-gray-600 text-sm text-center">Or</p>
+      <Link
+        href="/login"
+        className="link link-hover text-secondary w-fit mx-auto"
+      >
+        Log in to your existing account
+      </Link>
     </form>
   );
 };
