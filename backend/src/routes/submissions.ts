@@ -6,8 +6,8 @@ const router = Router();
 
 router.get(
   "/challenge/:challengeId",
-  // authenticate,
-  // authorize("admin"),
+  authenticate, 
+  authorize("client"),
   getSubmissionsByChallenge
 );
 

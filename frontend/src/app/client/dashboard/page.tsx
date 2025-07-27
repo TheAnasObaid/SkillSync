@@ -1,58 +1,51 @@
 "use client";
 
 import ProtectedRoute from "@/components/Auth/ProtectedRoute";
-import AboutTab from "@/components/Profile/AboutTab";
-import AddProjectTab from "@/components/Profile/AddProjectTab";
-import GeneralTab from "@/components/Profile/GeneralTab";
+import ChallengeForm from "@/components/Challenge/ChallengeForm";
+import ClientChallengeList from "@/components/Challenge/ClientChallengeList";
 import Link from "next/link";
 import { useState } from "react";
 import { IoReturnUpBack } from "react-icons/io5";
 
-export interface Challenge {
-  _id: string;
-  title: string;
-  description: string;
-  prize: number;
-  status: "open" | "closed";
-  createdAt: string;
-}
+const tabs = [
+  { label: "My Challenges", value: "challenges" },
+  { label: "Create Challenge", value: "create" },
+];
 
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState("general");
-  const tabs = [
-    { label: "General", value: "general" },
-    { label: "About", value: "about" },
-    { label: "Add Challenge", value: "project" },
-  ];
+  const [activeTab, setActiveTab] = useState("challenges");
 
   return (
     <ProtectedRoute requiredRole="client">
-      <div className="h-screen grid grid-rows-[auto_1fr_auto]">
-        <div className="grid grid-cols-3 bg-base-100">
-          <div className="w-64 px-4">
-            <div role="tablist" className="tabs grid tabs-vertical">
-              <Link href="/" className="mb-3 w-fit tab justify-start">
-                <IoReturnUpBack size={24} />
-              </Link>
-              {tabs.map((tab) => (
-                <button
-                  key={tab.value}
-                  className={`tab justify-start font-semibold ${
-                    activeTab === tab.value ? "tab-active" : ""
-                  }`}
-                  onClick={() => setActiveTab(tab.value)}
-                >
+      <div className="min-h-screen grid grid-cols-[250px_1fr]">
+        {/* Sidebar */}
+        <div className="bg-base-200 p-4 flex flex-col">
+          <Link href="/" className="btn btn-ghost justify-start mb-6">
+            <IoReturnUpBack size={20} />
+            Back to Home
+          </Link>
+          <ul className="menu menu-vertical text-lg">
+            {tabs.map((tab) => (
+              <li key={tab.value} onClick={() => setActiveTab(tab.value)}>
+                <a className={activeTab === tab.value ? "active" : ""}>
                   {tab.label}
-                </button>
-              ))}
-            </div>
-          </div>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
 
-          <div className="flex justify-content p-4">
-            {activeTab === "general" && <GeneralTab />}
-            {activeTab === "about" && <AboutTab />}
-            {activeTab === "project" && <AddProjectTab />}
-          </div>
+        {/* Main Content Area */}
+        <div className="p-8">
+          {activeTab === "challenges" && <ClientChallengeList />}
+          {activeTab === "create" && (
+            <div>
+              <h2 className="text-3xl font-bold mb-6">
+                Create a New Challenge
+              </h2>
+              <ChallengeForm />
+            </div>
+          )}
         </div>
       </div>
     </ProtectedRoute>

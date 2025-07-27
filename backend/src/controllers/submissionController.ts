@@ -1,6 +1,7 @@
 import { Response, Request } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import Submission from "../models/Submission";
+import Challenge from "../models/Challenge";
 
 export const submitSolution = async (
   req: AuthenticatedRequest,
@@ -33,16 +34,32 @@ export const submitSolution = async (
 };
 
 export const getSubmissionsByChallenge = async (
-  req: Request,
+  req: AuthenticatedRequest,
   res: Response
 ) => {
-  const { challengeId } = req.params;
+  try {
+    const { challengeId } = req.params;
+    const userId = req.userId;
 
-  const submissions = await Submission.find({
-    challengeId,
-  }).populate("developerId", "profile.firstName email");
+    const challenge = await Challenge.findById(challengeId);
 
-  console.log("Submissions server", submissions);
+    if (!challenge) {
+      res.status(404).json({ message: "Challenge not found" });
+    }
 
-  res.json(submissions);
+    if (challenge?.createdBy.toString() !== userId) {
+      res
+        .status(403)
+        .json({ message: "Forbidden: You do not own this challenge" });
+    }
+
+    const submissions = await Submission.find({
+      challengeId,
+    }).populate("developerId", "profile.firstName email");
+
+    res.status(200).json(submissions);
+  } catch (error) {
+    console.error("Error fetching submissions:", error);
+    res.status(500).json({ message: "Failed to fetch submissions" });
+  }
 };

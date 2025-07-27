@@ -2,6 +2,7 @@ import express from "express";
 import {
   createChallenge,
   getAllChallenges,
+  getChallengesByClient,
   getSingleChallenge,
 } from "../controllers/challengeController";
 import { submitSolution } from "../controllers/submissionController";
@@ -9,9 +10,15 @@ import { authenticate, authorize } from "../middleware/auth";
 
 const challengesRouter = express.Router();
 
-challengesRouter.post("/", authenticate, authorize("client"), createChallenge);
+challengesRouter.get(
+  "/my-challenges",
+  authenticate,
+  authorize("client"),
+  getChallengesByClient
+);
 challengesRouter.get("/", getAllChallenges);
 challengesRouter.get("/:id", getSingleChallenge);
+challengesRouter.post("/", authenticate, authorize("client"), createChallenge);
 challengesRouter.post(
   "/:id/submit",
   authenticate,
