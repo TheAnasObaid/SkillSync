@@ -1,7 +1,6 @@
 "use client";
 
 import ProtectedRoute from "@/components/Auth/ProtectedRoute";
-import ChallengeForm from "@/components/Challenge/ChallengeForm";
 import AboutTab from "@/components/Profile/AboutTab";
 import AddProjectTab from "@/components/Profile/AddProjectTab";
 import GeneralTab from "@/components/Profile/GeneralTab";

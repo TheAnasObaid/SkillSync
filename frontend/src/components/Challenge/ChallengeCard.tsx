@@ -1,33 +1,31 @@
-"use client";
-
 import { Challenge } from "@/app/client/dashboard/page";
-import { useRouter } from "next/router";
+import Link from "next/link";
 
 const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
-  const router = useRouter();
-
   return (
-    <div className="card bg-neutral-50">
-      <div className="card-body">
-        <h2 className="card-title text-xl">{challenge.title}</h2>
-        <h3 className="font-bold text-lg">${challenge.prize}</h3>
-        <p className="flex gap-1">
-          Published at
-          <span className="font-semibold">
-            {new Date(challenge.createdAt).toLocaleDateString()}
-          </span>
-        </p>
-        <p>{challenge.description}</p>
-        <div className="card-actions justify-end">
-          <button
-            className="btn btn-secondary"
-            onClick={() => router.push(`/challenges/${challenge._id}`)}
-          >
-            View Challenge
-          </button>
+    <Link href={`/challenges/${challenge._id}`}>
+      <div className="card bg-white transition shadow-sm hover:shadow-md">
+        <div className="card-body">
+          <div className="flex justify-between items-start">
+            <h2 className="card-title text-2xl font-bold link">
+              {challenge.title}
+            </h2>
+            <span className="badge badge-accent text-sm font-semibold">
+              ${challenge.prize}
+            </span>
+          </div>
+          <p className="text-gray-700">{challenge.description}</p>
+          <p className="text-sm flex gap-1 text-gray-500">
+            Published on
+            <span className="font-medium text-gray-700">
+              {new Date(challenge.createdAt).toLocaleDateString("en-US", {
+                dateStyle: "medium",
+              })}
+            </span>
+          </p>
         </div>
       </div>
-    </div>
+    </Link>
   );
 };
 
