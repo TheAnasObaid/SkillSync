@@ -39,12 +39,7 @@ const ChallengeForm = () => {
   if (error) return <p className="label text-error">{error}</p>;
 
   return (
-    <form
-      onSubmit={handleSubmit(onSubmit)}
-      className="space-y-4 max-w-md w-1/2 mt-10 mx-auto"
-    >
-      <h2 className="text-4xl font-bold">New Challenge</h2>
-
+    <form onSubmit={handleSubmit(onSubmit)}>
       <div className="space-y-1">
         <label className="label font-semibold">Title</label>
         <input

@@ -5,7 +5,6 @@ import Link from "next/link";
 export default function Home() {
   return (
     <main className="bg-white text-black font-sans">
-      <h2 className="text-4xl font-semibold">Home</h2>
       {/* Hero Section */}
       <section className="text-center py-24 px-4 grid gap-5 max-w-5xl mx-auto">
         <h1 className="text-4xl md:text-5xl font-bold">

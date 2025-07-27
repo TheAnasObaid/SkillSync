@@ -28,6 +28,7 @@ const RegisterForm = () => {
       router.push("/login");
     } catch (error) {
       if (error instanceof AxiosError) setError(error.message);
+      console.log(error);
     }
   };
 

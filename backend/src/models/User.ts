@@ -4,15 +4,10 @@ import bcrypt from "bcrypt";
 export type Role = "developer" | "client" | "admin";
 
 export interface UserDocument extends Document {
-  name: string;
   email: string;
   password: string;
   role: Role;
-  avatar?: string;
-  bio?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  profile: {
+  profile?: {
     firstName: string;
     lastName: string;
     avatar: string;
@@ -22,24 +17,20 @@ export interface UserDocument extends Document {
     portfolio: Array<Object>;
     socialLinks: Object;
   };
-  reputation: {
+  reputation?: {
     rating: number;
     totalRatings: number;
     completedChallenges: number;
   };
   isVerified: boolean;
   lastLogin: Date;
+  createdAt: Date;
+  updatedAt: Date;
   comparePassword: (candidate: string) => Promise<boolean>;
 }
 
 const UserSchema = new Schema<UserDocument>(
   {
-    name: {
-      type: String,
-      required: true,
-      trim: true,
-      minlength: 2,
-    },
     email: {
       type: String,
       required: true,
@@ -58,9 +49,13 @@ const UserSchema = new Schema<UserDocument>(
       enum: ["developer", "client", "admin"],
       default: "developer",
     },
-    avatar: { type: String },
     profile: {
-      firstName: { type: String },
+      firstName: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 2,
+      },
       lastName: { type: String },
       avatar: { type: String },
       bio: { type: String },
