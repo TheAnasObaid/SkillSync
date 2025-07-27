@@ -15,7 +15,7 @@ export default function Home() {
       <Header />
       <main className="bg-white text-black font-sans">
         {/* Hero Section */}
-        <section className="text-center py-24 px-4 grid gap-5 max-w-5xl mx-auto">
+        <section className="text-center py-24 px-4 grid gap-5  max-w-5xl mx-auto">
           <h1 className="text-4xl md:text-5xl font-bold">
             Simplify Coding Collaboration
           </h1>

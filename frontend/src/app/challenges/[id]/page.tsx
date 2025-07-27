@@ -26,14 +26,16 @@ const SingleChallengePage = async ({ params }: Props) => {
 
     return (
       <ProtectedRoute requiredRole="developer">
-        <div className="grid grid-cols-2">
-          <div className="p-4 max-w-2xl mx-auto">
-            <h2 className="text-2xl font-bold">{challenge.title}</h2>
-            <p>{challenge.description}</p>
-            <p className="font-semibold">Prize: ${challenge.prize}</p>
-          </div>
-          <div>
-            <SubmissionForm id={challenge._id} />
+        <div className="h-screen grid grid-rows-[auto_1fr_auto]">
+          <div className="grid grid-cols-2">
+            <div className="p-4 max-w-2xl w-full mx-auto">
+              <h2 className="text-2xl font-bold">{challenge.title}</h2>
+              <p>{challenge.description}</p>
+              <p className="font-semibold">Prize: ${challenge.prize}</p>
+            </div>
+            <div>
+              <SubmissionForm id={challenge._id} />
+            </div>
           </div>
         </div>
       </ProtectedRoute>
