@@ -7,17 +7,27 @@ export const submitSolution = async (
   res: Response
 ) => {
   try {
-    const { content } = req.body;
-    const challengeId = req.params.id;
+    const { id: challengeId } = req.params;
+
+    const { githubRepo, liveDemo, description } = req.body;
+
+    if (!githubRepo || !description) {
+      res
+        .status(400)
+        .json({ message: "GitHub repository and description are required." });
+    }
 
     const submission = await Submission.create({
       challengeId,
       developerId: req.userId,
-      content,
+      githubRepo,
+      liveDemo,
+      description,
     });
 
     res.status(201).json(submission);
-  } catch {
+  } catch (error) {
+    console.error("Failed to submit solution:", error);
     res.status(500).json({ message: "Failed to submit solution" });
   }
 };
