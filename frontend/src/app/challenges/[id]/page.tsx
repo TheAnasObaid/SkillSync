@@ -16,28 +16,31 @@ interface Props {
 const SingleChallengePage = async ({ params }: Props) => {
   const { id } = await params;
 
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/challenges/${id}`
-  );
-  const challenge: Challenge = await res.json();
-  console.log(challenge);
+  try {
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/challenges/${id}`
+    );
+    const challenge: Challenge = await res.json();
 
-  if (!challenge) return <p>Loading challenge...</p>;
+    if (!challenge) return <p>Loading challenge...</p>;
 
-  return (
-    <ProtectedRoute requiredRole="developer">
-      <div className="grid grid-cols-2">
-        <div className="p-4 max-w-2xl mx-auto">
-          <h2 className="text-2xl font-bold">{challenge.title}</h2>
-          <p>{challenge.description}</p>
-          <p className="font-semibold">Prize: ${challenge.prize}</p>
+    return (
+      <ProtectedRoute requiredRole="developer">
+        <div className="grid grid-cols-2">
+          <div className="p-4 max-w-2xl mx-auto">
+            <h2 className="text-2xl font-bold">{challenge.title}</h2>
+            <p>{challenge.description}</p>
+            <p className="font-semibold">Prize: ${challenge.prize}</p>
+          </div>
+          <div>
+            <SubmissionForm id={challenge._id} />
+          </div>
         </div>
-        <div>
-          <SubmissionForm id={challenge._id} />
-        </div>
-      </div>
-    </ProtectedRoute>
-  );
+      </ProtectedRoute>
+    );
+  } catch (error) {
+    return <p className="text-error px-3">Something failed.</p>;
+  }
 };
 
 export default SingleChallengePage;
