@@ -1,14 +1,13 @@
 "use client";
 
-import { Role, useAuthStore } from "@/store/authStore";
 import apiClient from "@/services/apiClient";
+import { Role, useAuthStore } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
-import Link from "next/link";
+import { useForm } from "react-hook-form";
 
-interface FormData {
+interface LoginFormData {
   email: string;
   password: string;
 }
@@ -30,69 +29,86 @@ const LoginForm = () => {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>();
+  } = useForm<LoginFormData>();
 
-  const onSubmit: SubmitHandler<FormData> = async (formData) => {
+  const onSubmit = async (data: LoginFormData) => {
     try {
-      const { data } = await apiClient.post<FetchUserResponse>(
+      setError("");
+      const response = await apiClient.post<FetchUserResponse>(
         "/auth/login",
-        formData
+        data
       );
-
-      setToken(data.token);
-      setRole(data.user.role);
-
-      if (data.user.role === "admin") router.push("/admin/panel");
-      else if (data.user.role === "developer")
-        router.push("/developer/dashboard");
-      else if (data.user.role === "client") router.push("/client/dashboard");
-      else router.push("/");
+      const { token, user } = response.data;
+      setToken(token);
+      setRole(user.role);
+      router.push(
+        user.role === "admin"
+          ? "/admin/panel"
+          : user.role === "client"
+          ? "/client/dashboard"
+          : "/developer/dashboard"
+      );
+      router.refresh();
     } catch (error) {
-      if (error instanceof AxiosError) setError(error.response?.data.error);
+      if (error instanceof AxiosError) {
+        console.error(error.response?.data.error || "Login failed.");
+      } else {
+        console.error("An unexpected error occurred.");
+      }
     }
   };
 
-  if (error) return <p className="label text-error">{error}</p>;
+  if (error)
+    return (
+      <div className="toast">
+        <div className="alert alert-info">
+          <span>{error}</span>
+        </div>
+      </div>
+    );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
-      <div className="grid gap-2">
-        <label className="label font-semibold">Email</label>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-medium">Email</span>
+        </label>
         <input
-          className="input w-full"
-          type="text"
-          {...register("email", { required: true })}
+          type="email"
+          placeholder="name@example.com"
+          className="input input-bordered bg-base-200 w-full"
+          {...register("email", { required: "Email is required" })}
         />
         {errors.email && (
-          <p className="label text-error text-sm">Email is required</p>
+          <p className="text-error text-sm mt-1">{errors.email.message}</p>
         )}
       </div>
-      <div className="grid gap-2">
-        <label className="label font-semibold">Password</label>
+
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-medium">Password</span>
+        </label>
         <input
-          className="input w-full"
           type="password"
-          {...register("password", { required: true })}
+          className="input input-bordered bg-base-200 w-full"
+          {...register("password", { required: "Password is required" })}
         />
         {errors.password && (
-          <p className="label text-error text-sm">Password is required</p>
+          <p className="text-error text-sm mt-1">{errors.password.message}</p>
         )}
       </div>
+
       <button
         type="submit"
-        className="btn btn-secondary mt-5"
+        className="btn btn-primary w-full"
         disabled={isSubmitting}
       >
-        {isSubmitting && <span className="loading loading-spinner"></span>}
-        {!isSubmitting && "Sign in"}
+        {isSubmitting ? (
+          <span className="loading loading-spinner"></span>
+        ) : (
+          "Sign In"
+        )}
       </button>
-      <p className="text-gray-600 text-sm text-center">Or</p>
-      <Link
-        href="/register"
-        className="link link-hover text-secondary w-fit mx-auto"
-      >
-        Create a new account
-      </Link>
     </form>
   );
 };
