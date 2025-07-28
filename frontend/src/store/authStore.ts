@@ -2,50 +2,59 @@ import { create } from "zustand";
 
 export type Role = "developer" | "client" | "admin" | null;
 
+type User = {
+  name: string;
+  email: string;
+  role: Role;
+} | null;
+
 type AuthState = {
   token: string | null;
-  role: Role;
+  user: User;
   loading: boolean;
   setToken: (token: string | null) => void;
-  setRole: (role: Role) => void;
+  setUser: (user: User) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
+};
+
+const getInitialUser = (): User => {
+  if (typeof window === "undefined") return null;
+  const storedUser = localStorage.getItem("authUser");
+  return storedUser ? JSON.parse(storedUser) : null;
 };
 
 export const useAuthStore = create<AuthState>((set) => ({
   token:
     typeof window !== "undefined" ? localStorage.getItem("authToken") : null,
-  role:
-    typeof window !== "undefined"
-      ? (localStorage.getItem("authRole") as Role)
-      : null,
+  user: getInitialUser(),
   loading: true,
+
   setToken: (token) => {
     if (typeof window !== "undefined") {
-      if (token) {
-        localStorage.setItem("authToken", token);
-      } else {
-        localStorage.removeItem("authToken");
-      }
+      token
+        ? localStorage.setItem("authToken", token)
+        : localStorage.removeItem("authToken");
     }
     set({ token });
   },
-  setRole: (role) => {
+
+  setUser: (user) => {
     if (typeof window !== "undefined") {
-      if (role) {
-        localStorage.setItem("authRole", role);
-      } else {
-        localStorage.removeItem("authRole");
-      }
+      user
+        ? localStorage.setItem("authUser", JSON.stringify(user))
+        : localStorage.removeItem("authUser");
     }
-    set({ role });
+    set({ user });
   },
+
   setLoading: (loading) => set({ loading }),
+
   logout: () => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("authToken");
-      localStorage.removeItem("authRole");
+      localStorage.removeItem("authUser");
     }
-    set({ token: null, role: null, loading: false });
+    set({ token: null, user: null, loading: false });
   },
 }));
