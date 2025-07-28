@@ -2,16 +2,15 @@
 
 import apiClient from "@/services/apiClient";
 import { AxiosError } from "axios";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 interface FormData {
   name: string;
   email: string;
   password: string;
-  role: "client" | "developer" | "admin";
+  role: "client" | "developer";
 }
 
 const RegisterForm = () => {
@@ -21,87 +20,105 @@ const RegisterForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormData>();
   const router = useRouter();
+
   const [error, setError] = useState("");
 
-  const onSubmit: SubmitHandler<FormData> = async (formData) => {
+  const onSubmit = async (formData: FormData) => {
+    setError("");
     try {
       await apiClient.post("/auth/register", formData);
-      router.push("/login");
-    } catch (error) {
-      if (error instanceof AxiosError) setError(error.message);
-      console.log(error);
+      router.push("/login?registered=true");
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setError(err.response?.data.message || "Registration failed.");
+      } else {
+        setError("An unexpected error occurred during registration.");
+      }
     }
   };
 
-  if (error) return <p className="label text-error">{error}</p>;
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
-      <div className="flex flex-col gap-2">
-        <label className="label font-semibold">Name</label>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {error && (
+        <div className="p-3 text-center text-error-content bg-error/20 rounded-md">
+          {error}
+        </div>
+      )}
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-medium">Your Name</span>
+        </label>
         <input
-          className="input w-full"
           type="text"
-          {...register("name", { required: true })}
+          placeholder="e.g., Jane Doe"
+          className="input input-bordered bg-base-200 w-full"
+          {...register("name", { required: "Name is required" })}
         />
         {errors.name && (
-          <p className="label text-error text-sm">Name is required</p>
+          <p className="text-error text-sm mt-1">{errors.name.message}</p>
         )}
       </div>
-      <div className="flex flex-col gap-2">
-        <label className="label font-semibold">Email</label>
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-medium">Email</span>
+        </label>
         <input
-          className="input w-full"
-          type="text"
-          {...register("email", { required: true })}
+          type="email"
+          placeholder="name@example.com"
+          className="input input-bordered bg-base-200 w-full"
+          {...register("email", { required: "Email is required" })}
         />
         {errors.email && (
-          <p className="label text-error text-sm">Email is required</p>
+          <p className="text-error text-sm mt-1">{errors.email.message}</p>
         )}
       </div>
-      <div className="flex flex-col gap-2">
-        <label className="label font-semibold">Password</label>
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-medium">Password</span>
+        </label>
         <input
-          className="input w-full"
           type="password"
-          {...register("password", { required: true })}
+          placeholder="6+ characters"
+          className="input input-bordered bg-base-200 w-full"
+          {...register("password", {
+            required: "Password is required",
+            minLength: 6,
+          })}
         />
         {errors.password && (
-          <p className="label text-error text-sm">Password is required</p>
+          <p className="text-error text-sm mt-1">{errors.password.message}</p>
         )}
       </div>
-      <div className="flex flex-col gap-2">
-        <label className="label font-semibold">Role</label>
+      <div className="form-control">
+        <label className="label">
+          <span className="label-text font-medium">I am a...</span>
+        </label>
         <select
           defaultValue=""
-          className="select w-full"
-          {...register("role", { required: true })}
+          className="select select-bordered bg-base-200 w-full"
+          {...register("role", { required: "Please select a role" })}
         >
           <option value="" disabled>
             Select a role
           </option>
-          <option value="client">Client</option>
           <option value="developer">Developer</option>
+          <option value="client">Client</option>
         </select>
         {errors.role && (
-          <p className="label text-error text-sm">Role is required</p>
+          <p className="text-error text-sm mt-1">{errors.role.message}</p>
         )}
       </div>
       <button
         type="submit"
-        className="btn btn-secondary mt-5"
+        className="btn btn-primary w-full"
         disabled={isSubmitting}
       >
-        {isSubmitting && <span className="loading loading-spinner"></span>}
-        {!isSubmitting && "Sign Up"}
+        {isSubmitting ? (
+          <span className="loading loading-spinner"></span>
+        ) : (
+          "Create Account"
+        )}
       </button>
-      <p className="text-gray-600 text-sm text-center">Or</p>
-      <Link
-        href="/login"
-        className="link link-hover text-secondary w-fit mx-auto"
-      >
-        Log in to your existing account
-      </Link>
     </form>
   );
 };

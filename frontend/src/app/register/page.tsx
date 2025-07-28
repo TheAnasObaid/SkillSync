@@ -1,18 +1,15 @@
 import RegisterForm from "@/components/Auth/RegisterForm";
-import Link from "next/link";
-import { IoReturnUpBack } from "react-icons/io5";
+import AuthLayout from "@/components/Layout/AuthLayout";
 
 const RegisterPage = () => {
   return (
-    <div className="h-screen grid grid-rows-[auto_1fr_auto] my-5">
-      <Link href="/" className="w-fit tab justify-start">
-        <IoReturnUpBack size={24} />
-      </Link>
-      <div className="grid gap-5 max-w-sm w-full mx-auto">
-        <h2 className="text-4xl font-semibold">Register</h2>
-        <RegisterForm />
+    <AuthLayout>
+      <div className="text-center">
+        <h1 className="text-2xl font-bold">Create Your SkillSync Account</h1>
       </div>
-    </div>
+      <div className="divider my-6" />
+      <RegisterForm />
+    </AuthLayout>
   );
 };
 
