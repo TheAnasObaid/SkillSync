@@ -5,13 +5,14 @@ import { AxiosError } from "axios";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { FiGithub, FiExternalLink, FiAward, FiInfo } from "react-icons/fi";
 
 interface Submission {
   _id: string;
   githubRepo: string;
   liveDemo?: string;
   description: string;
-  status: string;
+  status: "pending" | "reviewed" | "winner" | "rejected";
   developerId: {
     _id: string;
     profile: {
@@ -19,59 +20,33 @@ interface Submission {
     };
     email: string;
   };
+  createdAt: string;
 }
 
 const ReviewSubmissionsPage = () => {
-  const { id } = useParams();
+  const { id } = useParams() as { id: string };
   const [submissions, setSubmissions] = useState<Submission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [challengeTitle, setChallengeTitle] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedSubmission, setSelectedSubmission] =
+    useState<Submission | null>(null);
+
   const [isUpdating, setIsUpdating] = useState(false);
 
-  const handleSelectWinner = async (submissionId: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to select this submission as the winner? This cannot be undone."
-      )
-    ) {
-      return;
-    }
-
-    setIsUpdating(true);
-    setError("");
-    try {
-      await apiClient.patch(`/submissions/${submissionId}/winner`);
-
-      setSubmissions((prev) =>
-        prev.map((sub) =>
-          sub._id === submissionId
-            ? { ...sub, status: "winner" }
-            : { ...sub, status: "rejected" }
-        )
-      );
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        setError(err.response?.data.message || "Failed to select winner.");
-      } else {
-        setError("An unexpected error occurred.");
-      }
-    } finally {
-      setIsUpdating(false);
-    }
-  };
+  const isChallengeCompleted = submissions.some((s) => s.status === "winner");
 
   useEffect(() => {
     const fetchSubmissions = async () => {
       if (!id) return;
       try {
         setLoading(true);
-        const submissionResponse = await apiClient.get(
-          `/submissions/challenge/${id}`
-        );
+        const [submissionResponse, challengeResponse] = await Promise.all([
+          apiClient.get(`/submissions/challenge/${id}`),
+          apiClient.get(`/challenges/${id}`),
+        ]);
         setSubmissions(submissionResponse.data);
-
-        const challengeResponse = await apiClient.get(`/challenges/${id}`);
         setChallengeTitle(challengeResponse.data.title);
       } catch (err) {
         if (err instanceof AxiosError) {
@@ -83,87 +58,207 @@ const ReviewSubmissionsPage = () => {
         setLoading(false);
       }
     };
-
     fetchSubmissions();
   }, [id]);
 
+  const handleSelectWinner = async () => {
+    if (!selectedSubmission) return;
+
+    setIsUpdating(true);
+    setError("");
+    try {
+      await apiClient.patch(`/submissions/${selectedSubmission._id}/winner`);
+      setSubmissions((prev) =>
+        prev.map((sub) =>
+          sub._id === selectedSubmission._id
+            ? { ...sub, status: "winner" }
+            : { ...sub, status: "rejected" }
+        )
+      );
+      setIsModalOpen(false);
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setError(err.response?.data.message || "Failed to select winner.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const openConfirmationModal = (submission: Submission) => {
+    setSelectedSubmission(submission);
+    setIsModalOpen(true);
+  };
+
+  const statusStyles: { [key: string]: string } = {
+    pending: "badge-info badge-outline",
+    reviewed: "badge-warning badge-outline",
+    winner: "badge-success badge-outline",
+    rejected: "badge-error badge-outline",
+  };
+
   if (loading)
     return (
-      <div className="text-center p-10">
+      <div className="flex justify-center items-center min-h-[50vh]">
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
-  if (error) return <p className="text-center text-error p-10">{error}</p>;
-
-  console.log("Submissions", submissions);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-2">Reviewing Submissions for:</h1>
-      <h2 className="text-2xl text-secondary mb-8">{challengeTitle}</h2>
-
-      {submissions.length === 0 ? (
-        <p>No submissions have been made for this challenge yet.</p>
-      ) : (
-        <div className="space-y-6">
-          {submissions.map((sub) => (
-            <div key={sub._id} className="card bg-base-100 shadow-lg border">
-              <div className="card-body">
-                <div className="flex justify-between items-center">
-                  <h3 className="card-title">
-                    Submission by: {sub.developerId.profile.firstName} (
-                    {sub.developerId.email})
-                  </h3>
-                  <div
-                    className={`badge ${
-                      sub.status === "winner" ? "badge-success" : "badge-ghost"
-                    }`}
-                  >
-                    {sub.status}
-                  </div>
-                </div>
-                <p className="mt-4">{sub.description}</p>
-                <div className="card-actions justify-start mt-4 gap-4">
-                  <Link
-                    href={sub.githubRepo}
-                    target="_blank"
-                    className="btn btn-outline"
-                  >
-                    GitHub Repo
-                  </Link>
-                  {sub.liveDemo && (
-                    <Link
-                      href={sub.liveDemo}
-                      target="_blank"
-                      className="btn btn-outline btn-accent"
-                    >
-                      Live Demo
-                    </Link>
-                  )}
-                </div>
-                <div className="divider"></div>
-                <div className="card-actions justify-end">
-                  <button
-                    className="btn btn-primary"
-                    onClick={() => handleSelectWinner(sub._id)}
-                    disabled={
-                      isUpdating ||
-                      submissions.some((s) => s.status === "winner")
-                    }
-                  >
-                    {isUpdating ? (
-                      <span className="loading loading-spinner"></span>
-                    ) : (
-                      "Select as Winner"
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
+    <>
+      <div className="max-w-6xl mx-auto py-10">
+        <div className="grid gap-3 mb-8">
+          <h1 className="text-4xl font-bold">{challengeTitle}</h1>
+          <p className="text-base-content/70">
+            Reviewing all submitted solutions.
+          </p>
         </div>
-      )}
-    </div>
+
+        <div className="max-w-3xl mx-auto">
+          {error && (
+            <div className="alert alert-error alert-soft my-4">{error}</div>
+          )}
+          {isChallengeCompleted && (
+            <div className="alert alert-success alert-soft my-4">
+              <FiAward /> A winner has been selected for this challenge! This
+              challenge is now complete.
+            </div>
+          )}
+        </div>
+
+        <div className="card bg-base-200/50 border border-base-300">
+          {submissions.length === 0 ? (
+            <div className="p-8 text-center text-base-content/70">
+              <FiInfo className="mx-auto text-4xl mb-4" />
+              No submissions have been made for this challenge yet.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="table">
+                <thead>
+                  <tr>
+                    <th>Developer</th>
+                    <th>Status</th>
+                    <th>Links</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {submissions.map((sub) => (
+                    <tr
+                      key={sub._id}
+                      className={`transition-colors ${
+                        sub.status === "winner" ? "bg-success/10" : "hover"
+                      }`}
+                    >
+                      <td>
+                        <div className="flex items-center gap-3">
+                          <div
+                            className={`rounded-full w-12 h-12 flex items-center justify-center text-base-content bg-base-content/10`}
+                          >
+                            <span>
+                              {sub.developerId.profile.firstName.substring(
+                                0,
+                                2
+                              )}
+                            </span>
+                          </div>
+                          <div>
+                            <div className="font-bold">
+                              {sub.developerId.profile.firstName}
+                            </div>
+                            <div className="text-sm opacity-50">
+                              {sub.developerId.email}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span className={`badge ${statusStyles[sub.status]}`}>
+                          {sub.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="flex items-center gap-2">
+                          <Link
+                            href={sub.githubRepo}
+                            target="_blank"
+                            className="btn btn-ghost btn-sm"
+                          >
+                            <FiGithub /> Repo
+                          </Link>
+                          {sub.liveDemo && (
+                            <Link
+                              href={sub.liveDemo}
+                              target="_blank"
+                              className="btn btn-ghost btn-sm"
+                            >
+                              <FiExternalLink /> Demo
+                            </Link>
+                          )}
+                        </div>
+                      </td>
+                      <th className="text-right">
+                        {!isChallengeCompleted && (
+                          <button
+                            className="btn btn-primary btn-sm"
+                            onClick={() => openConfirmationModal(sub)}
+                          >
+                            <FiAward /> Select Winner
+                          </button>
+                        )}
+                      </th>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+
+      <dialog
+        id="winner_modal"
+        className={`modal ${isModalOpen ? "modal-open" : ""}`}
+      >
+        <div className="modal-box">
+          <h3 className="font-bold text-lg">Confirm Winner Selection</h3>
+          <p className="py-4">
+            Are you sure you want to select the submission by{" "}
+            <strong className="text-primary">
+              {selectedSubmission?.developerId.profile.firstName}
+            </strong>{" "}
+            as the winner? This action will complete the challenge and cannot be
+            undone.
+          </p>
+          <div className="modal-action">
+            <button
+              className="btn btn-ghost"
+              onClick={() => setIsModalOpen(false)}
+              disabled={isUpdating}
+            >
+              Cancel
+            </button>
+            <button
+              className="btn btn-primary"
+              onClick={handleSelectWinner}
+              disabled={isUpdating}
+            >
+              {isUpdating ? (
+                <span className="loading loading-spinner"></span>
+              ) : (
+                "Confirm & Select Winner"
+              )}
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={() => setIsModalOpen(false)}>close</button>
+        </form>
+      </dialog>
+    </>
   );
 };
 
