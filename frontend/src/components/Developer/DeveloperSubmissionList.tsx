@@ -3,7 +3,11 @@
 import apiClient from "@/services/apiClient";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+// Import the icons we'll use for a richer UI
+import { FiAward, FiClock, FiExternalLink } from "react-icons/fi";
+import NoItemFound from "./NoItem";
 
+// The interface is correct, no changes needed
 interface Submission {
   _id: string;
   status: "pending" | "reviewed" | "winner" | "rejected";
@@ -15,13 +19,6 @@ interface Submission {
   };
   createdAt: string;
 }
-
-const statusStyles: { [key: string]: string } = {
-  pending: "badge-info",
-  reviewed: "badge-ghost",
-  winner: "badge-success",
-  rejected: "badge-error",
-};
 
 const DeveloperSubmissionList = () => {
   const [submissions, setSubmissions] = useState<Submission[]>([]);
@@ -41,57 +38,73 @@ const DeveloperSubmissionList = () => {
     fetchSubmissions();
   }, []);
 
-  if (loading)
+  const statusStyles: { [key: string]: string } = {
+    pending: "badge-info badge-outline",
+    reviewed: "badge-ghost badge-outline",
+    winner: "badge-success badge-soft",
+    rejected: "badge-error badge-outline",
+  };
+
+  if (loading) {
     return (
-      <div className="text-center p-10">
+      <div className="flex justify-center items-center min-h-[50vh]">
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
+  }
 
   return (
     <div className="w-full">
-      <h2 className="text-3xl font-bold mb-6">My Submissions</h2>
-      <div className="space-y-4">
-        {submissions.length > 0 ? (
-          submissions.map((sub) => (
-            <div key={sub._id} className="card bg-base-200 shadow-md">
-              <div className="card-body">
+      <h2 className="text-3xl font-bold mb-6">My Submission History</h2>
+
+      {submissions.length > 0 ? (
+        <div className="space-y-4">
+          {submissions.map((sub) => (
+            <div
+              key={sub._id}
+              className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50"
+            >
+              <div className="card-body p-6">
                 <div className="flex justify-between items-start gap-4">
-                  <div>
-                    <p className="text-sm text-gray-500">Submission for:</p>
-                    <h3 className="card-title text-xl">
-                      {sub.challengeId.title}
-                    </h3>
-                  </div>
+                  <h3 className="card-title text-xl font-bold">
+                    {sub.challengeId.title}
+                  </h3>
                   <div className={`badge ${statusStyles[sub.status]}`}>
                     {sub.status}
                   </div>
                 </div>
-                <div className="divider my-2"></div>
-                <div className="flex justify-between items-center">
-                  <p>
-                    Submitted on: {new Date(sub.createdAt).toLocaleDateString()}
-                  </p>
+
+                <div className="flex justify-between items-end mt-4">
+                  <div className="space-y-2">
+                    {/* Prize Info */}
+                    <div className="flex items-center gap-2 text-primary font-semibold">
+                      <FiAward />
+                      <span>
+                        ${sub.challengeId.prize.toLocaleString()} Prize
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-base-content/70">
+                      <FiClock />
+                      <span>
+                        Submitted on:{" "}
+                        {new Date(sub.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
                   <Link
                     href={`/challenges/${sub.challengeId._id}`}
                     className="btn btn-outline btn-sm"
                   >
-                    View Challenge
+                    View Original Challenge <FiExternalLink />
                   </Link>
                 </div>
               </div>
             </div>
-          ))
-        ) : (
-          <p>
-            You haven't submitted any solutions yet.{" "}
-            <Link href="/" className="link">
-              Find a challenge
-            </Link>{" "}
-            to get started!
-          </p>
-        )}
-      </div>
+          ))}
+        </div>
+      ) : (
+        <NoItemFound />
+      )}
     </div>
   );
 };

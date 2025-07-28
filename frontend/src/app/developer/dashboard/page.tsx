@@ -3,13 +3,14 @@ import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionL
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
-import { FiBriefcase, FiUser } from "react-icons/fi";
+import { FiUser } from "react-icons/fi";
+import { TbBriefcase2 } from "react-icons/tb";
 
 const developerSidebarLinks: DashboardLink[] = [
   {
     href: "/developer/dashboard",
     label: "My Submissions",
-    icon: <FiBriefcase />,
+    icon: <TbBriefcase2 />,
   },
   {
     href: "/developer/dashboard/profile",

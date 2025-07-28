@@ -110,7 +110,7 @@ const ChallengeDetailsPage = () => {
 
   return (
     <>
-      <div className="container mx-auto px-4 py-12">
+      <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-8">
             <h1 className="text-4xl md:text-5xl font-bold">
@@ -127,7 +127,6 @@ const ChallengeDetailsPage = () => {
               <p>{challenge.requirements}</p>
             </div>
           </div>
-
           <aside className="space-y-6 lg:sticky top-24 h-fit">
             <div className="card bg-base-200/50 border border-base-300">
               <div className="card-body">
@@ -142,9 +141,7 @@ const ChallengeDetailsPage = () => {
                     </p>
                   </div>
                 </div>
-
                 <div className="divider my-2" />
-
                 <div className="flex items-center gap-4">
                   <FiClock className="text-base-content/70 text-xl" />
                   <div>
@@ -154,9 +151,7 @@ const ChallengeDetailsPage = () => {
                     <p className="font-semibold">{formattedDeadline}</p>
                   </div>
                 </div>
-
                 <div className="divider my-2" />
-
                 <div className="flex items-center gap-4">
                   <FiHash className="text-base-content/70 text-xl mt-1" />
                   <div>
