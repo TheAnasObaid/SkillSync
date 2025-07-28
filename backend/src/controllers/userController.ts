@@ -30,6 +30,7 @@ export const updateUserProfile = async (
       ...(email && { email }),
       "profile.firstName": name,
       "profile.lastName": profile?.lastName,
+      "profile.companyName": profile?.companyName,
       "profile.bio": profile?.bio,
       "profile.skills": profile?.skills,
     };

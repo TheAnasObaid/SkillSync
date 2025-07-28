@@ -9,30 +9,22 @@ import { User } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { BsGrid } from "react-icons/bs";
-import { FiEdit, FiUser, FiX } from "react-icons/fi";
-import { GoPlusCircle } from "react-icons/go";
+import { FiClipboard, FiEdit, FiGrid, FiUser, FiX } from "react-icons/fi";
 
-interface ClientProfileFormData {
+interface AdminProfileFormData {
   name: string;
   profile: {
     lastName: string;
-    companyName: string;
-    bio: string;
   };
 }
 
-const clientSidebarLinks: DashboardLink[] = [
-  { href: "/client/dashboard", label: "My Challenges", icon: <BsGrid /> },
-  {
-    href: "/client/dashboard/create",
-    label: "Create Challenge",
-    icon: <GoPlusCircle />,
-  },
-  { href: "/client/dashboard/profile", label: "My Profile", icon: <FiUser /> },
+const adminSidebarLinks: DashboardLink[] = [
+  { href: "/admin/panel", label: "Dashboard", icon: <FiGrid /> },
+  { href: "/admin/submissions", label: "Submissions", icon: <FiClipboard /> },
+  { href: "/admin/panel/profile", label: "My Profile", icon: <FiUser /> },
 ];
 
-const ClientProfilePage = () => {
+const AdminProfilePage = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -44,7 +36,7 @@ const ClientProfilePage = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<ClientProfileFormData>();
+  } = useForm<AdminProfileFormData>();
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -61,14 +53,11 @@ const ClientProfilePage = () => {
     fetchUserProfile();
   }, []);
 
-  const handleFormSubmit = async (data: ClientProfileFormData) => {
+  const handleFormSubmit = async (data: AdminProfileFormData) => {
     setError("");
     setIsSubmitting(true);
     try {
-      const updatePayload = {
-        name: data.name,
-        profile: data.profile,
-      };
+      const updatePayload = { name: data.name, profile: data.profile };
       const response = await apiClient.put<User>(
         "/users/profile",
         updatePayload
@@ -91,8 +80,6 @@ const ClientProfilePage = () => {
         name: user.profile?.firstName || "",
         profile: {
           lastName: user.profile?.lastName || "",
-          companyName: user.profile?.companyName || "",
-          bio: user.profile?.bio || "",
         },
       });
     }
@@ -106,9 +93,9 @@ const ClientProfilePage = () => {
     );
 
   return (
-    <DashboardLayout sidebarLinks={clientSidebarLinks}>
+    <DashboardLayout sidebarLinks={adminSidebarLinks}>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">Client Profile</h2>
+        <h2 className="text-3xl font-bold">Admin Profile</h2>
         <button
           className="btn btn-ghost"
           onClick={() => setIsEditMode(!isEditMode)}
@@ -159,25 +146,6 @@ const ClientProfilePage = () => {
                 </fieldset>
               </div>
             </div>
-            <div>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Company Name</legend>
-                <input
-                  type="text"
-                  className="input w-full bg-transparent focus:outline-none"
-                  {...register("profile.companyName")}
-                />
-              </fieldset>
-            </div>
-            <div>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Bio</legend>
-                <textarea
-                  className="textarea w-full bg-transparent focus:outline-none h-24"
-                  {...register("profile.bio")}
-                ></textarea>
-              </fieldset>
-            </div>
             <div className="pt-4 flex justify-end">
               <button
                 type="submit"
@@ -200,4 +168,4 @@ const ClientProfilePage = () => {
   );
 };
 
-export default ClientProfilePage;
+export default AdminProfilePage;
