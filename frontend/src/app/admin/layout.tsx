@@ -1,18 +1,16 @@
-import Container from "@/components/Layout/Container";
 import Footer from "@/components/Layout/Footer";
 import Header from "@/components/Layout/Header";
-import "@/styles/globals.css";
 
-export default function RootLayout({
+export default function AdminLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <>
+    <div className="flex min-h-screen flex-col">
       <Header />
-      <Container>{children}</Container>
+      <main className="flex-grow">{children}</main>
       <Footer />
-    </>
+    </div>
   );
 }
