@@ -1,14 +1,24 @@
 import { Router } from "express";
 import { authenticate, authorize } from "../middleware/auth";
-import { getSubmissionsByChallenge } from "../controllers/submissionController";
+import {
+  getSubmissionsByChallenge,
+  selectWinner,
+} from "../controllers/submissionController";
 
 const router = Router();
 
 router.get(
   "/challenge/:challengeId",
-  authenticate, 
+  authenticate,
   authorize("client"),
   getSubmissionsByChallenge
+);
+
+router.patch(
+  "/:submissionId/winner",
+  authenticate,
+  authorize("client"),
+  selectWinner
 );
 
 export default router;

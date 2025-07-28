@@ -65,7 +65,7 @@ const ClientChallengeList = () => {
                 {challenge.status}
               </div>
               <Link
-                href={`/client/challenges/${challenge._id}/review`}
+                href={`/challenges/${challenge._id}/review`}
                 className="btn btn-secondary"
               >
                 Review Submissions

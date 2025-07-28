@@ -2,6 +2,7 @@ import { Response, Request } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import Submission from "../models/Submission";
 import Challenge from "../models/Challenge";
+import mongoose from "mongoose";
 
 export const submitSolution = async (
   req: AuthenticatedRequest,
@@ -61,5 +62,63 @@ export const getSubmissionsByChallenge = async (
   } catch (error) {
     console.error("Error fetching submissions:", error);
     res.status(500).json({ message: "Failed to fetch submissions" });
+  }
+};
+
+export const selectWinner = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const { submissionId } = req.params;
+  const userId = req.userId;
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+    const winnerSubmission = await Submission.findById(submissionId).session(
+      session
+    );
+    if (!winnerSubmission) {
+      throw new Error("Submission not found.");
+    }
+
+    const challenge = await Challenge.findById(
+      winnerSubmission.challengeId
+    ).session(session);
+    if (!challenge) {
+      throw new Error("Challenge not found.");
+    }
+
+    if (challenge.createdBy.toString() !== userId) {
+      throw new Error("Forbidden: You do not own this challenge.");
+    }
+
+    if (challenge.status === "completed") {
+      throw new Error("A winner has already been selected for this challenge.");
+    }
+
+    winnerSubmission.status = "winner";
+    challenge.status = "completed";
+
+    await winnerSubmission.save({ session });
+    await challenge.save({ session });
+
+    await Submission.updateMany(
+      { challengeId: challenge._id, _id: { $ne: submissionId } },
+      { $set: { status: "rejected" } },
+      { session }
+    );
+
+    await session.commitTransaction();
+    res.status(200).json({ message: "Winner selected successfully." });
+  } catch (error: any) {
+    await session.abortTransaction();
+    console.error("Winner selection failed:", error);
+    res
+      .status(400)
+      .json({ message: error.message || "Failed to select winner." });
+  } finally {
+    session.endSession();
   }
 };
