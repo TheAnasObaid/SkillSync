@@ -36,7 +36,7 @@ const AdminPanelPage = () => {
   return (
     <ProtectedRoute requiredRole="admin">
       <Container>
-        <div className="py-8">
+        <div className="py-4 max-w-6xl mx-auto">
           <h1 className="text-4xl font-bold mb-6">Admin Dashboard</h1>
 
           {loading ? (
@@ -65,7 +65,6 @@ const AdminPanelPage = () => {
                   icon={<FiClipboard size={32} />}
                   label="Pending Submissions"
                   value={stats.pendingSubmissions}
-                  className="bg-warning text-warning-content"
                 />
               </div>
             )
