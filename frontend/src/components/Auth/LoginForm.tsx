@@ -69,32 +69,32 @@ const LoginForm = () => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Email</span>
-        </label>
-        <input
-          type="email"
-          placeholder="name@example.com"
-          className="input input-bordered bg-base-200 w-full"
-          {...register("email", { required: "Email is required" })}
-        />
+      <div className="grid gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Email</legend>
+          <input
+            type="email"
+            placeholder="name@example.com"
+            className="input input-bordered bg-base-200 w-full"
+            {...register("email", { required: "Email is required" })}
+          />
+        </fieldset>
         {errors.email && (
-          <p className="text-error text-sm mt-1">{errors.email.message}</p>
+          <p className="text-error text-xs">{errors.email.message}</p>
         )}
       </div>
 
-      <div className="form-control">
-        <label className="label">
-          <span className="label-text">Password</span>
-        </label>
-        <input
-          type="password"
-          className="input input-bordered bg-base-200 w-full"
-          {...register("password", { required: "Password is required" })}
-        />
+      <div className="grid gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Password</legend>
+          <input
+            type="password"
+            className="input input-bordered bg-base-200 w-full"
+            {...register("password", { required: "Password is required" })}
+          />
+        </fieldset>
         {errors.password && (
-          <p className="text-error text-sm mt-1">{errors.password.message}</p>
+          <p className="text-error text-xs">{errors.password.message}</p>
         )}
       </div>
 
