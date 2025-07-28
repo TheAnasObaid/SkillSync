@@ -1,5 +1,6 @@
 "use client";
 
+import UserAvatar from "@/components/Profile/UserAvatar";
 import apiClient from "@/services/apiClient";
 import { AxiosError } from "axios";
 import Link from "next/link";
@@ -155,16 +156,9 @@ const ReviewSubmissionsPage = () => {
                     >
                       <td>
                         <div className="flex items-center gap-3">
-                          <div
-                            className={`rounded-full w-12 h-12 flex items-center justify-center text-base-content bg-base-content/10`}
-                          >
-                            <span>
-                              {sub.developerId.profile.firstName.substring(
-                                0,
-                                2
-                              )}
-                            </span>
-                          </div>
+                          <UserAvatar
+                            name={sub.developerId.profile.firstName}
+                          />
                           <div>
                             <div className="font-bold">
                               {sub.developerId.profile.firstName}

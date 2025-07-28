@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { FiGithub, FiExternalLink } from "react-icons/fi";
+import UserAvatar from "../Profile/UserAvatar";
 
 export interface PublicSubmission {
   _id: string;
@@ -23,14 +24,9 @@ const SubmissionCard = ({ submission }: SubmissionCardProps) => {
   return (
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all duration-300 hover:border-primary/50">
       <div className="card-body p-6">
-        {/* Submitter Info */}
         <div className="flex items-center gap-3">
-          <div
-            className={`rounded-full w-12 h-12 flex items-center justify-center text-base-content bg-base-content/10`}
-          >
-            <span>
-              {submission.developerId.profile.firstName.substring(0, 2)}
-            </span>
+          <div>
+            <UserAvatar name={submission.developerId.profile.firstName} />
           </div>{" "}
           <div>
             <div className="font-bold">

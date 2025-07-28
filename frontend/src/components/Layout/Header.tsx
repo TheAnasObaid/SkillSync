@@ -6,6 +6,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getDashboardPath } from "../Auth/LoginForm";
+import UserAvatar from "../Profile/UserAvatar";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -49,24 +50,19 @@ const Header = () => {
             <>
               {token && user ? (
                 <div className="dropdown dropdown-end">
-                  <label
-                    tabIndex={0}
-                    className="btn btn-ghost btn-circle avatar"
-                  >
-                    <div
-                      className={`rounded-full w-12 flex items-center justify-center text-base-content bg-base-content/10`}
-                    >
-                      <span>{user.name.substring(0, 2)}</span>
-                    </div>
-                  </label>
+                  <button tabIndex={0} className="btn btn-ghost btn-circle">
+                    <UserAvatar name={user.name} />
+                  </button>
                   <ul
                     tabIndex={0}
-                    className="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52"
+                    className="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52"
                   >
                     <li>
                       <Link href={dashboardHref} className="justify-between">
                         Dashboard
-                        <span className="badge badge-primary">{user.role}</span>
+                        <span className="badge badge-primary badge-soft badge-sm">
+                          {user.role}
+                        </span>
                       </Link>
                     </li>
                     <li>
