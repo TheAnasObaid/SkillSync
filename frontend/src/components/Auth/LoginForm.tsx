@@ -61,17 +61,17 @@ const LoginForm = () => {
   if (error)
     return (
       <div className="toast">
-        <div className="alert alert-info">
+        <div className="alert alert-error">
           <span>{error}</span>
         </div>
       </div>
     );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
       <div className="form-control">
         <label className="label">
-          <span className="label-text font-medium">Email</span>
+          <span className="label-text">Email</span>
         </label>
         <input
           type="email"
@@ -86,7 +86,7 @@ const LoginForm = () => {
 
       <div className="form-control">
         <label className="label">
-          <span className="label-text font-medium">Password</span>
+          <span className="label-text">Password</span>
         </label>
         <input
           type="password"
