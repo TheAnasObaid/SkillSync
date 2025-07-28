@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { FiArrowRight, FiClock } from "react-icons/fi";
 
 export interface Challenge {
   _id: string;
@@ -16,51 +17,61 @@ interface ChallengeCardProps {
 }
 
 const difficultyStyles = {
-  beginner: "bg-green-100 text-green-800",
-  intermediate: "bg-yellow-100 text-yellow-800",
-  advanced: "bg-red-100 text-red-800",
+  beginner: "badge-success",
+  intermediate: "badge-warning",
+  advanced: "badge-error",
 };
 
 const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
-  const formattedDeadline = new Date(challenge.deadline).toLocaleDateString();
+  const formattedDeadline = challenge.deadline
+    ? new Date(challenge.deadline).toLocaleDateString()
+    : "No deadline";
 
   return (
-    <div className="card w-full bg-base-100 shadow-xl transition-transform hover:-translate-y-1">
-      <div className="card-body">
-        <div className="flex justify-between items-start">
-          <h2 className="card-title text-2xl">{challenge.title}</h2>
+    <div className="card bg-base-200 shadow-md border border-base-300 transition-all duration-300 hover:border-primary/50 hover:shadow-primary/20">
+      <div className="card-body p-6">
+        <div className="flex justify-between items-start gap-4">
+          <h2 className="card-title text-2xl font-bold">{challenge.title}</h2>
+          <span className="text-2xl font-bold text-primary">
+            ${challenge.prize.toLocaleString()}
+          </span>
+        </div>
+
+        <p className="text-base-content/70 mt-2 mb-4">
+          {challenge.description.substring(0, 140)}...
+        </p>
+        <div className="flex items-center gap-4">
           <div
-            className={`badge badge-lg p-4 ${
+            className={`badge badge-soft ${
               difficultyStyles[challenge.difficulty]
             }`}
           >
             {challenge.difficulty}
           </div>
-        </div>
-        <p className="mt-2 text-gray-600">
-          {challenge.description.substring(0, 150)}...
-        </p>
-
-        <div className="mt-4 flex flex-wrap gap-2">
-          {challenge.tags.map((tag) => (
-            <div key={tag} className="badge badge-outline">
-              {tag}
-            </div>
-          ))}
-        </div>
-
-        <div className="card-actions justify-between items-center mt-6">
-          <div className="font-semibold text-lg">
-            Prize: <span className="text-secondary">${challenge.prize}</span>
+          <div className="flex flex-wrap gap-2">
+            {challenge.tags.slice(0, 3).map((tag) => (
+              <div
+                key={tag}
+                className="badge badge-neutral badge-outline font-mono text-xs"
+              >
+                {tag}
+              </div>
+            ))}
           </div>
-          <div className="text-sm text-gray-500">
-            Deadline: {formattedDeadline}
+        </div>
+
+        <div className="divider my-4"></div>
+
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2 text-sm text-base-content/70">
+            <FiClock />
+            <span>Deadline: {formattedDeadline}</span>
           </div>
           <Link
             href={`/challenges/${challenge._id}`}
-            className="btn btn-primary"
+            className="btn btn-outline btn-primary"
           >
-            View Challenge
+            View Details <FiArrowRight />
           </Link>
         </div>
       </div>

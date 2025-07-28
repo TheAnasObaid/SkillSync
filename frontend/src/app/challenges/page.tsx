@@ -2,13 +2,11 @@ import ChallengeList from "@/components/Challenge/ChallengeList";
 
 const Challenges = () => {
   return (
-    <div className="h-screen grid grid-rows-[auto_1fr_auto]">
-      <main className="container mx-auto px-4 py-8">
-        <h1 className="text-4xl font-bold text-center mb-10">
-          Open Challenges
-        </h1>
+    <div className="h-screen grid max-w-5xl w-full mx-auto grid-rows-[auto_1fr_auto]">
+      <div className="grid gap-5">
+        <h1 className="text-3xl text-center font-bold">Open Challenges</h1>
         <ChallengeList />
-      </main>
+      </div>
     </div>
   );
 };
