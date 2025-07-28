@@ -37,31 +37,33 @@ const ClientChallengeList = () => {
     fetchClientChallenges();
   }, []);
 
-  if (loading) {
+  if (loading)
     return (
-      <div className="text-center p-10">
+      <div className="w-full">
+        <h2 className="text-3xl font-bold mb-6">My Posted Challenges</h2>
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
-  }
 
   return (
     <div className="w-full">
       <h2 className="text-3xl font-bold mb-6">My Posted Challenges</h2>
-      <div className="space-y-4">
+      <div className="grid gap-4">
         {challenges.length > 0 ? (
           challenges.map((challenge) => (
             <div
               key={challenge._id}
               className="grid grid-cols-[1fr_auto_auto] gap-4 items-center p-4 bg-base-200 rounded-lg"
             >
-              <div>
-                <p className="font-bold text-lg">{challenge.title}</p>
-                <p className="text-sm text-gray-500">
+              <div className="grid gap-2">
+                <p className="font-bold text-xl">{challenge.title}</p>
+                <p className="text-sm text-base-content/50">
                   Prize: ${challenge.prize}
                 </p>
               </div>
-              <div className={`badge ${statusStyles[challenge.status]}`}>
+              <div
+                className={`badge badge-soft ${statusStyles[challenge.status]}`}
+              >
                 {challenge.status}
               </div>
               <Link
