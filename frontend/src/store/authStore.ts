@@ -2,10 +2,30 @@ import { create } from "zustand";
 
 export type Role = "developer" | "client" | "admin" | null;
 
-type User = {
-  name: string;
+export type User = {
   email: string;
+  password: string;
   role: Role;
+  profile?: {
+    firstName: string;
+    lastName: string;
+    avatar: string;
+    bio: string;
+    skills: Array<string>;
+    experience: string;
+    portfolio: Array<Object>;
+    socialLinks: Object;
+  };
+  reputation?: {
+    rating: number;
+    totalRatings: number;
+    completedChallenges: number;
+  };
+  isVerified: boolean;
+  lastLogin: Date;
+  createdAt: Date;
+  updatedAt: Date;
+  comparePassword: (candidate: string) => Promise<boolean>;
 } | null;
 
 type AuthState = {
