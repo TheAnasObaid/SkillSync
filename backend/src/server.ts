@@ -5,6 +5,7 @@ import connectDB from "./config/database";
 import authRouter from "./routes/auth";
 import challengesRoute from "./routes/challenges";
 import submissionsRoute from "./routes/submissions";
+import router from "./routes/admin";
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRouter);
+app.use("/api/admin", router);
 app.use("/api/challenges", challengesRoute);
 app.use("/api/submissions", submissionsRoute);
 
