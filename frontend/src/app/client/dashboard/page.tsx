@@ -2,15 +2,16 @@ import ClientChallengeList from "@/components/Challenge/ClientChallengeList";
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
+import { BsGrid } from "react-icons/bs";
 
-import { FiGrid, FiPlusSquare } from "react-icons/fi";
+import { GoPlusCircle } from "react-icons/go";
 
 const clientSidebarLinks: DashboardLink[] = [
-  { href: "/client/dashboard", label: "My Challenges", icon: <FiGrid /> },
+  { href: "/client/dashboard", label: "My Challenges", icon: <BsGrid /> },
   {
     href: "/client/dashboard/create",
     label: "Create Challenge",
-    icon: <FiPlusSquare />,
+    icon: <GoPlusCircle />,
   },
 ];
 

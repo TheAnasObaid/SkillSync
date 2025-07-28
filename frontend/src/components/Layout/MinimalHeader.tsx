@@ -16,24 +16,28 @@ const MinimalHeader = () => {
   const isLoginPage = pathname === "/login";
 
   return (
-    <header className={`absolute top-0 left-0 right-0 p-4`}>
-      <div className="container mx-auto flex justify-between items-center">
-        <Link
-          href="/"
-          className={`${spaceMono.variable} ${spaceMono.className} font-bold text-lg`}
-        >
-          SkillSync
-        </Link>
-        <div>
-          {isLoginPage ? (
-            <Link href="/register" className="btn btn-primary btn-outline">
-              Sign Up
-            </Link>
-          ) : (
-            <Link href="/login" className="btn btn-primary btn-outline">
-              Sign In
-            </Link>
-          )}
+    <header>
+      <div className="navbar max-w-screen-xl mx-auto flex justify-between items-center">
+        <div className="navbar-start">
+          <Link
+            href="/"
+            className={`${spaceMono.variable} ${spaceMono.className} font-bold text-lg`}
+          >
+            Skill<span className="text-primary">Sync.</span>
+          </Link>
+        </div>
+        <div className="navbar-end">
+          <nav>
+            {isLoginPage ? (
+              <Link href="/register" className="btn btn-primary btn-soft">
+                Sign Up
+              </Link>
+            ) : (
+              <Link href="/login" className="btn btn-primary btn-soft">
+                Sign In
+              </Link>
+            )}
+          </nav>
         </div>
       </div>
     </header>
