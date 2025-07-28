@@ -1,6 +1,7 @@
 import Container from "@/components/Layout/Container";
 import Footer from "@/components/Layout/Footer";
 import Header from "@/components/Layout/Header";
+import MinimalHeader from "@/components/Layout/MinimalHeader";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 
@@ -15,8 +16,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" data-theme="emerald">
+    <html lang="en" data-theme="skillsync-tech">
       <body className="antialiased h-screen grid grid-rows-[auto_1fr_auto] gap-y-5">
+        <MinimalHeader />
         <Container>{children}</Container>
       </body>
     </html>
