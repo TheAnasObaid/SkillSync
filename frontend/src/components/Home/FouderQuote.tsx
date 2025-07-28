@@ -1,16 +1,15 @@
 const FounderQuote = () => (
-  <section className="py-20">
+  <section className="py-20 border-b border-base-300/100">
     <div className="max-w-3xl mx-auto text-center">
       <div className="card bg-base-200/50 border border-base-300 shadow-xl">
         <div className="card-body items-center space-y-6 p-10">
           <div className="avatar">
-            <div className="w-24 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2">
+            <div className="w-32 rounded-full ring ring-base-content/20">
               <img src="/founder.png" alt="Founder Anas Obaid" />
             </div>
           </div>
-
           <blockquote className="text-xl leading-relaxed text-base-content/60">
-            “The most frustrating part of the tech world isn&apos;t building the
+            "The most frustrating part of the tech world isn&apos;t building the
             product - it&apos;s the process of connecting. Developers waste
             hours on proposals that are never read, while clients gamble on
             resumes that can&apos;t guarantee skill.
@@ -24,9 +23,8 @@ const FounderQuote = () => (
             </strong>
             "
           </blockquote>
-
-          <div className="text-center">
-            <p className="font-bold text-xl text-primary">Anas Obaid</p>
+          <div className="grid gap-2">
+            <p className="font-bold text-2xl text-primary">Anas Obaid</p>
             <p className="text-base-content/50 italic">Founder of SkillSync</p>
           </div>
         </div>

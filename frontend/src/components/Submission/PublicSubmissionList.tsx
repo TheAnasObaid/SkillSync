@@ -7,7 +7,7 @@ import { FiInbox } from "react-icons/fi";
 
 interface PublicSubmissionListProps {
   challengeId: string;
-  onCountChange: (count: number) => void; // A function to pass the count back to the parent
+  onCountChange: (count: number) => void;
 }
 
 const PublicSubmissionList = ({

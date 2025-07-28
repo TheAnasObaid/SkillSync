@@ -10,7 +10,7 @@ const Container = ({ children }: { children: React.ReactNode }) => {
     setLoading(false);
   }, []);
 
-  return <div className="max-w-screen-xl mx-auto w-full">{children}</div>;
+  return <div className="max-w-7xl mx-auto w-full">{children}</div>;
 };
 
 export default Container;

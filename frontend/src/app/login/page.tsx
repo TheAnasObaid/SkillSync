@@ -9,20 +9,17 @@ const LoginPage = () => {
   const isRegistered = searchParams.get("registered");
 
   return (
-    <AuthLayout>
-      <div className="grid gap-5">
-        {isRegistered && (
-          <div className="alert alert-success alert-soft">
-            Registration successful! Please sign in to continue.
-          </div>
-        )}
-        <div className="text-center">
-          <h1 className="text-2xl font-bold">Welcome Back to SkillSync</h1>
-          <div className="divider" />
+    <div className="grid gap-5 max-w-sm w-full my-10 mx-auto">
+      {isRegistered && (
+        <div className="alert alert-success alert-soft">
+          Registration successful! Please sign in to continue.
         </div>
-        <LoginForm />
-      </div>
-    </AuthLayout>
+      )}
+      <h1 className="text-center text-2xl font-bold border-b border-base-300/100 pb-10">
+        Welcome Back to SkillSync
+      </h1>
+      <LoginForm />
+    </div>
   );
 };
 

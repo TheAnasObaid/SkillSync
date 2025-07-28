@@ -1,4 +1,5 @@
-import Container from "@/components/Layout/Container";
+import AuthLayout from "@/components/Layout/AuthLayout";
+import Footer from "@/components/Layout/Footer";
 import Header from "@/components/Layout/Header";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
@@ -26,9 +27,12 @@ export default function RootLayout({
       data-theme="skillsync-tech"
       className={`${inter.className} ${inter.variable}`}
     >
-      <body className="antialiased h-screen grid grid-rows-[auto_1fr_auto] gap-y-5">
-        <Header />
-        <Container>{children}</Container>
+      <body className="antialiased grid grid-rows-[auto_1fr_auto] gap-y-5">
+        <AuthLayout>
+          <Header />
+          {children}
+          <Footer />
+        </AuthLayout>
       </body>
     </html>
   );

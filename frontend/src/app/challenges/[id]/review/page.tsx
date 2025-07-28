@@ -109,7 +109,7 @@ const ReviewSubmissionsPage = () => {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto py-10">
+      <div className=" max-w-6xl w-full mx-auto py-10">
         <div className="grid gap-3 mb-8">
           <h1 className="text-4xl font-bold">{challengeTitle}</h1>
           <p className="text-base-content/70">
@@ -117,7 +117,7 @@ const ReviewSubmissionsPage = () => {
           </p>
         </div>
 
-        <div className="max-w-3xl mx-auto">
+        <div className="max-w-3xl mx-auto w-full">
           {error && (
             <div className="alert alert-error alert-soft my-4">{error}</div>
           )}

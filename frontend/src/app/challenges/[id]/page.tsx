@@ -65,7 +65,7 @@ const ChallengeDetailsPage = () => {
   const [submissionCount, setSubmissionCount] = useState(0);
 
   const { id } = useParams() as { id: string };
-  const { role } = useAuthStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
     if (!id) return;
@@ -215,7 +215,10 @@ const ChallengeDetailsPage = () => {
               </div>
             </div>
 
-            <CtaBlock role={role} onOpenModal={() => setIsModalOpen(true)} />
+            <CtaBlock
+              role={user!.role}
+              onOpenModal={() => setIsModalOpen(true)}
+            />
           </aside>
         </div>
       </div>
@@ -225,8 +228,6 @@ const ChallengeDetailsPage = () => {
         className={`modal ${isModalOpen ? "modal-open" : ""}`}
       >
         <div className="modal-box relative">
-          {/* --- NEW: Close Icon Button --- */}
-          {/* This button is positioned absolutely relative to the modal-box */}
           <button
             className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
             onClick={handleModalClose}
@@ -234,9 +235,7 @@ const ChallengeDetailsPage = () => {
             ✕
           </button>
 
-          {/* Conditional content for success or form view */}
           {submissionSuccess ? (
-            // --- REFINED: Success State ---
             <div className="text-center p-8 space-y-4">
               <FiCheckCircle className="text-success text-6xl mx-auto" />
               <h3 className="font-bold text-2xl">Submission Successful!</h3>
@@ -250,7 +249,6 @@ const ChallengeDetailsPage = () => {
               </div>
             </div>
           ) : (
-            // --- REFINED: Form State ---
             <>
               <h3 className="font-bold text-lg mb-6">Submit Your Solution</h3>
               <SubmissionForm
@@ -260,7 +258,6 @@ const ChallengeDetailsPage = () => {
             </>
           )}
         </div>
-
         <form method="dialog" className="modal-backdrop">
           <button onClick={handleModalClose}>close</button>
         </form>

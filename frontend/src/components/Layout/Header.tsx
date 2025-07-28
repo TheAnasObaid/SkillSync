@@ -34,7 +34,7 @@ const Header = () => {
   const dashboardHref = user ? getDashboardPath(user.role) : "/";
 
   return (
-    <header className="p-3 bg-base-100/80 backdrop-blur-sm border-b border-base-300/50">
+    <header className="p-3 bg-base-100/80 backdrop-blur-sm border-b border-base-300/100">
       <div className="navbar max-w-screen-xl mx-auto flex justify-between items-center">
         <div className="navbar-start">
           <Link
@@ -44,7 +44,6 @@ const Header = () => {
             Skill<span className="text-primary">Sync.</span>
           </Link>
         </div>
-
         <div className="navbar-end">
           {isClient && (
             <>
