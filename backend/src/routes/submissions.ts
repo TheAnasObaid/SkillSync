@@ -1,9 +1,10 @@
 import { Router } from "express";
-import { authenticate, authorize } from "../middleware/auth";
 import {
   getSubmissionsByChallenge,
+  getSubmissionsByDeveloper,
   selectWinner,
 } from "../controllers/submissionController";
+import { authenticate, authorize } from "../middleware/auth";
 
 const router = Router();
 
@@ -12,6 +13,13 @@ router.get(
   authenticate,
   authorize("client"),
   getSubmissionsByChallenge
+);
+
+router.get(
+  "/my-submissions",
+  authenticate,
+  authorize("developer"),
+  getSubmissionsByDeveloper
 );
 
 router.patch(

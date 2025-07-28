@@ -1,5 +1,4 @@
 import ProtectedRoute from "@/components/Auth/ProtectedRoute";
-import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionList";
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
@@ -18,14 +17,17 @@ const developerSidebarLinks: DashboardLink[] = [
   },
 ];
 
-const DeveloperDashboardPage = () => {
+const DeveloperProfilePage = () => {
   return (
     <ProtectedRoute requiredRole="developer">
       <DashboardLayout sidebarLinks={developerSidebarLinks}>
-        <DeveloperSubmissionList />
+        <div>
+          <h2 className="text-3xl font-bold mb-6">My Profile</h2>
+          <p>This is where your profile editing form will go.</p>
+        </div>
       </DashboardLayout>
     </ProtectedRoute>
   );
 };
 
-export default DeveloperDashboardPage;
+export default DeveloperProfilePage;

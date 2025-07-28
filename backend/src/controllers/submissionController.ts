@@ -34,6 +34,24 @@ export const submitSolution = async (
   }
 };
 
+export const getSubmissionsByDeveloper = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const developerId = req.userId;
+
+    const submissions = await Submission.find({ developerId })
+      .populate("challengeId", "title status prize")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json(submissions);
+  } catch (error) {
+    console.error("Error fetching developer submissions:", error);
+    res.status(500).json({ message: "Failed to fetch developer submissions" });
+  }
+};
+
 export const getSubmissionsByChallenge = async (
   req: AuthenticatedRequest,
   res: Response
