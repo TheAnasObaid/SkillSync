@@ -1,8 +1,8 @@
 import Container from "@/components/Layout/Container";
-import { Inter } from "next/font/google";
-import MinimalHeader from "@/components/Layout/MinimalHeader";
+import Header from "@/components/Layout/Header";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -27,7 +27,7 @@ export default function RootLayout({
       className={`${inter.className} ${inter.variable}`}
     >
       <body className="antialiased h-screen grid grid-rows-[auto_1fr_auto] gap-y-5">
-        <MinimalHeader />
+        <Header />
         <Container>{children}</Container>
       </body>
     </html>
