@@ -1,18 +1,28 @@
+"use client";
+
 import LoginForm from "@/components/Auth/LoginForm";
-import Link from "next/link";
-import { IoReturnUpBack } from "react-icons/io5";
+import AuthLayout from "@/components/Layout/AuthLayout";
+import { useSearchParams } from "next/navigation";
 
 const LoginPage = () => {
+  const searchParams = useSearchParams();
+  const isRegistered = searchParams.get("registered");
+
   return (
-    <div className="h-screen grid grid-rows-[auto_1fr_auto] my-5">
-      <Link href="/" className="w-fit tab justify-start">
-        <IoReturnUpBack size={24} />
-      </Link>
-      <div className="grid gap-5 w-full max-w-sm mx-auto my-10">
-        <h2 className="text-4xl font-semibold">Login</h2>
+    <AuthLayout>
+      <div className="grid gap-5">
+        {isRegistered && (
+          <div className="alert alert-success alert-soft">
+            Registration successful! Please sign in to continue.
+          </div>
+        )}
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Welcome Back to SkillSync</h1>
+          <div className="divider" />
+        </div>
         <LoginForm />
       </div>
-    </div>
+    </AuthLayout>
   );
 };
 

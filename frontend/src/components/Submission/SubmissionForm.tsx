@@ -1,57 +1,82 @@
 "use client";
 
-import apiClient from "@/services/apiClient";
-import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
+import apiClient from "@/services/apiClient";
+import { useState } from "react";
+import { AxiosError } from "axios";
 
-interface FormData {
-  content: string;
+interface SubmissionFormData {
+  githubRepo: string;
+  liveDemo?: string;
+  description: string;
 }
 
-const SubmissionForm = ({ id }: { id: string }) => {
-  const router = useRouter();
-  const [error, setError] = useState("");
+interface SubmissionFormProps {
+  challengeId: string;
+  onSuccess: () => void;
+}
 
+const SubmissionForm = ({ challengeId, onSuccess }: SubmissionFormProps) => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>();
+  } = useForm<SubmissionFormData>();
+  const [apiError, setApiError] = useState("");
 
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async (data: SubmissionFormData) => {
+    setApiError("");
     try {
-      await apiClient.post(`/challenges/${id}/submit`, formData);
-      router.push("/developer/dashboard");
+      await apiClient.post(`/challenges/${challengeId}/submit`, data);
+      onSuccess();
     } catch (error) {
-      if (error instanceof AxiosError) setError(error.response?.data);
+      if (error instanceof AxiosError) {
+        setApiError(error.response?.data.message || "Submission failed.");
+      } else {
+        setApiError("An unexpected error occurred.");
+      }
     }
   };
 
-  if (error) return <p className="label text-error">{error}</p>;
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
-      <h2 className="text-4xl font-semibold">Submit Solution</h2>
-      <div className="grid gap-2">
-        <label className="label font-semibold">Content</label>
-        <textarea
-          className="textarea w-full"
-          rows={5}
-          {...register("content", { required: true })}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      {apiError && <p className="text-error">{apiError}</p>}
+      <div>
+        <label className="label">GitHub Repository URL</label>
+        <input
+          type="url"
+          className="input input-bordered w-full"
+          {...register("githubRepo", { required: "GitHub URL is required" })}
         />
-        {errors.content && (
-          <p className="label text-error">Content is required</p>
+        {errors.githubRepo && (
+          <p className="text-error text-sm">{errors.githubRepo.message}</p>
+        )}
+      </div>
+      <div>
+        <label className="label">Live Demo URL (Optional)</label>
+        <input
+          type="url"
+          className="input input-bordered w-full"
+          {...register("liveDemo")}
+        />
+      </div>
+      <div>
+        <label className="label">Description</label>
+        <textarea
+          className="textarea textarea-bordered w-full"
+          rows={5}
+          {...register("description", { required: "Description is required" })}
+        ></textarea>
+        {errors.description && (
+          <p className="text-error text-sm">{errors.description.message}</p>
         )}
       </div>
       <button
         type="submit"
-        className="btn btn-secondary mt-5"
+        className="btn btn-primary w-full"
         disabled={isSubmitting}
       >
-        {isSubmitting && <span className="loading loading-spinner"></span>}
-        {!isSubmitting && "Submit"}
+        {isSubmitting ? "Submitting..." : "Submit"}
       </button>
     </form>
   );

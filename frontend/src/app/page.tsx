@@ -1,174 +1,154 @@
-import Footer from "@/components/Layout/Footer";
-import Header from "@/components/Layout/Header";
+import ChallengePreview from "@/components/Home/ChallengePreview";
+import FounderQuote from "@/components/Home/FouderQuote";
+import SubmissionPreview from "@/components/Home/SubmissionPreview";
+import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import {
-  FaTasks,
-  FaCodeBranch,
-  FaChartLine,
-  FaCheckCircle,
-  FaTimesCircle,
-} from "react-icons/fa";
+  FiArrowRight,
+  FiCheckCircle,
+  FiCode,
+  FiFilePlus,
+  FiStar,
+  FiXCircle,
+} from "react-icons/fi";
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "700"],
+  variable: "--font-space-mono",
+});
 
 export default function Home() {
   return (
-    <>
-      <Header />
-      <main className="bg-white text-black font-sans">
-        {/* Hero Section */}
-        <section className="text-center py-24 px-4 grid gap-5  max-w-5xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold">
-            Simplify Coding Collaboration
-          </h1>
-          <div className="flex flex-col">
-            <p className="text-lg text-gray-600">
-              SkillSync connects clients, developers, and admins in a unified
-              platform for challenge submission and review.
+    <div className="bg-base-100 text-base-content font-sans">
+      <main className="max-w-6xl mx-auto px-4 py-16">
+        <section className="grid md:grid-cols-2 gap-12 items-center min-h-[70vh]">
+          <div className="space-y-6 text-center md:text-left">
+            <h1
+              className={`${spaceMono.variable} ${spaceMono.className} text-4xl md:text-7xl font-bold leading-none`}
+            >
+              Solve real <span className="text-primary">&lt;</span>challenges
+              <span className="text-primary">&gt;</span>
+              <br />
+              Find <span className="text-primary">proven talent.</span>
+            </h1>
+            <p className="text-lg text-base-content/70 max-w-lg mx-auto md:mx-0">
+              A competitive platform where businesses meet right developers to
+              deliver the best solutions. It's where talent is proven, not just
+              promised.
             </p>
-            <p className="text-lg text-secondary font-semibold w-fit mx-auto">
-              Collaborate. Submit. Succeed.
-            </p>
+            <Link href="/register" className="btn btn-primary">
+              Start Creating <FiArrowRight />
+            </Link>
           </div>
-          <Link href="/challenges" className="btn btn-secondary w-fit mx-auto">
-            Explore Challenges
-          </Link>
-          <div className="mt-12 border rounded-xl shadow p-6">
-            <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
-              Dashboard Preview
-            </div>
+          <div className="space-y-6">
+            <SubmissionPreview />
+            <ChallengePreview />
           </div>
         </section>
+        <div className="divider my-20"></div>
 
-        {/* Problems vs Solutions */}
-        <section className="py-20 px-4 bg-gray-50">
-          <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-2xl font-bold">
-              Developer workflows shouldn’t be chaotic.
+        <section className="py-20 max-w-5xl mx-auto">
+          <div className="text-center space-y-3 mb-12">
+            <h2 className="text-4xl font-bold">
+              Stop Guessing. Start Building.
             </h2>
-            <div className="mt-10 grid md:grid-cols-2 gap-8 text-left">
-              {/* Problems List */}
-              <ul className="space-y-3 text-error">
-                {[
-                  "Unclear challenge requirements",
-                  "Disorganized submissions and reviews",
-                  "Manual task tracking",
-                  "Lack of role-based access",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <FaTimesCircle />
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-
-              {/* Solutions List */}
-              <ul className="space-y-3 text-primary">
-                {[
-                  "Create and assign challenges with intent",
-                  "Submit and track developer solutions",
-                  "Streamlined review process for admins",
-                  "Clean role-based workflows",
-                ].map((item, i) => (
-                  <li key={i} className="flex items-center gap-2">
-                    <FaCheckCircle />
-                    <span>{item}</span>
-                  </li>
-                ))}
+            <p className="text-lg text-base-content/70">
+              Traditional hiring is broken. We replace ambiguity with tangible
+              results.
+            </p>
+          </div>
+          <div className="grid md:grid-cols-2 gap-8 text-left">
+            <div className="space-y-4 p-6 bg-base-200/50 border border-base-300 rounded-lg">
+              <h3 className="font-bold text-xl text-error flex items-center gap-2">
+                <FiXCircle /> The Old Way
+              </h3>
+              <ul className="space-y-2 list-inside text-base-content/70">
+                <li>Hours spent sifting through résumés.</li>
+                <li>Uncertain technical skills and "talkers" vs. "doers".</li>
+                <li>Lengthy, expensive interview cycles.</li>
+                <li>Projects stalling due to a bad hire.</li>
               </ul>
             </div>
-          </div>
-        </section>
-
-        {/* Role-Based Workflow */}
-        <section className="py-20 px-4 max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-bold">One platform. Three roles.</h2>
-          <p className="mt-2 text-gray-600">
-            Clients post challenges, developers submit solutions, and admins
-            review — all in one place.
-          </p>
-          <div className="mt-10 border rounded-xl shadow p-6 bg-white">
-            <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
-              Role-Based Workflow UI
+            <div className="space-y-4 p-6 bg-primary/10 border border-primary/50 rounded-lg">
+              <h3 className="font-bold text-xl text-primary flex items-center gap-2">
+                <FiCheckCircle /> The SkillSync Way
+              </h3>
+              <ul className="space-y-2 list-inside text-base-content/90">
+                <li>Code speaks louder than words.</li>
+                <li>See real-world problem-solving in action.</li>
+                <li>Vet talent based on actual, relevant work.</li>
+                <li>
+                  Reward the best solution and move forward with confidence.
+                </li>
+              </ul>
             </div>
           </div>
         </section>
 
-        {/* Submission Tracking */}
-        <section className="py-20 px-4 max-w-4xl mx-auto text-center">
-          <h2 className="text-2xl font-bold">Track Every Submission</h2>
-          <p className="mt-2 text-gray-600">
-            Developers submit. Clients and admins review. Everything is visible,
-            organized, and traceable.
-          </p>
-          <div className="mt-10 border rounded-xl shadow p-6 bg-white">
-            <div className="h-64 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400">
-              Submissions View UI
-            </div>
-          </div>
-        </section>
+        <div className="divider my-20"></div>
 
-        {/* Testimonial */}
-        <section className="py-16 px-4 text-center max-w-2xl mx-auto text-gray-700">
-          <blockquote className="italic">
-            “SkillSync helped us manage real challenges, track developer
-            progress, and streamline our workflow without any confusion.”
-          </blockquote>
-          <p className="mt-4 font-semibold">– Anas Obaid, Engineering Lead</p>
-        </section>
-
-        {/* Feature Highlights */}
-        <section className="py-20 px-4 bg-gray-50 max-w-6xl mx-auto grid gap-6 md:grid-cols-3 text-left mb-10">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <FaTasks className="text-warning" />
-              <h4 className="font-semibold">Post Challenges</h4>
-            </div>
-            <p className="text-gray-600 text-sm">
-              Let clients and admins create coding tasks with clear goals and
-              requirements.
+        <section className="py-20 text-center max-w-6xl mx-auto">
+          <div className="text-center space-y-3 mb-16">
+            <h2 className="text-4xl font-bold">A Simple, Powerful Workflow</h2>
+            <p className="text-lg text-base-content/70">
+              Get from idea to execution in three clear steps.
             </p>
           </div>
-
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <FaCodeBranch className="text-accent" />
-              <h4 className="font-semibold">Submit & Review</h4>
+          <div className="grid md:grid-cols-3 gap-8">
+            <div className="flex flex-col items-center p-6 space-y-4 group">
+              <div className="p-4 bg-primary/10 rounded-full transition-transform group-hover:scale-110">
+                <FiFilePlus className="text-primary text-4xl" />
+              </div>
+              <h3 className="text-2xl font-bold">1. Post a Challenge</h3>
+              <p className="text-base-content/70">
+                Clients define a real-world problem, set the requirements, and
+                offer a prize.
+              </p>
             </div>
-            <p className="text-gray-600 text-sm">
-              Developers submit work while admins and clients review and respond
-              in one place.
-            </p>
-          </div>
-
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <FaChartLine className="text-primary" />
-              <h4 className="font-semibold">Real-Time Visibility</h4>
+            <div className="flex flex-col items-center p-6 space-y-4 group">
+              <div className="p-4 bg-primary/10 rounded-full transition-transform group-hover:scale-110">
+                <FiCode className="text-primary text-4xl" />
+              </div>
+              <h3 className="text-2xl font-bold">2. Compete & Submit</h3>
+              <p className="text-base-content/70">
+                Top developers from around the world compete to build the best
+                solution.
+              </p>
             </div>
-            <p className="text-gray-600 text-sm">
-              Know who’s working on what, what’s pending, and what’s done — at a
-              glance.
-            </p>
+            <div className="flex flex-col items-center p-6 space-y-4 group">
+              <div className="p-4 bg-primary/10 rounded-full transition-transform group-hover:scale-110">
+                <FiStar className="text-primary text-4xl" />
+              </div>
+              <h3 className="text-2xl font-bold">3. Review & Reward</h3>
+              <p className="text-base-content/70">
+                Clients review the submissions, provide feedback, and reward the
+                winning developer.
+              </p>
+            </div>
           </div>
         </section>
 
-        {/* Final CTA */}
-        <section className="grid gap-5 items-center justify-center mb-10 text-center">
-          <h2 className="text-2xl font-bold">
-            Ready to streamline your developer collaboration?
-          </h2>
-          <Link href="/challenges" className="btn btn-secondary w-fit mx-auto">
-            Get Started
-          </Link>
-        </section>
+        <FounderQuote />
 
-        {/* Footer */}
-        <footer className="py-12 text-center text-sm text-gray-400">
-          <p>
-            &copy; 2025 SkillSync. Built for seamless technical collaboration.
-          </p>
-        </footer>
+        <section className="py-32 text-center">
+          <div className="space-y-6">
+            <h2 className="text-5xl font-bold">Ready to Redefine Talent?</h2>
+            <p className="text-lg text-base-content/70 max-w-xl mx-auto">
+              Join the platform that values skill above all else. Whether you're
+              looking to hire or prove your talent, your journey starts here.
+            </p>
+            <Link href="/register" className="btn btn-primary">
+              Get Started for Free
+            </Link>
+          </div>
+        </section>
       </main>
-      <Footer />
-    </>
+
+      <footer className="py-8 text-center text-sm text-base-content/50">
+        <p>© 2025 SkillSync. All rights reserved.</p>
+      </footer>
+    </div>
   );
 }

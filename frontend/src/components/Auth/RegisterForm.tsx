@@ -2,16 +2,15 @@
 
 import apiClient from "@/services/apiClient";
 import { AxiosError } from "axios";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 interface FormData {
   name: string;
   email: string;
   password: string;
-  role: "client" | "developer" | "admin";
+  role: "client" | "developer";
 }
 
 const RegisterForm = () => {
@@ -21,87 +20,113 @@ const RegisterForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<FormData>();
   const router = useRouter();
+
   const [error, setError] = useState("");
 
-  const onSubmit: SubmitHandler<FormData> = async (formData) => {
+  const onSubmit = async (formData: FormData) => {
+    setError("");
     try {
       await apiClient.post("/auth/register", formData);
-      router.push("/login");
-    } catch (error) {
-      if (error instanceof AxiosError) setError(error.message);
-      console.log(error);
+      router.push("/login?registered=true");
+    } catch (err) {
+      if (err instanceof AxiosError) {
+        setError(err.response?.data.message || "Registration failed.");
+      } else {
+        setError("An unexpected error occurred during registration.");
+      }
     }
   };
 
-  if (error) return <p className="label text-error">{error}</p>;
+  if (error)
+    return (
+      <div className="toast">
+        <div className="alert alert-error">
+          <span>{error}</span>
+        </div>
+      </div>
+    );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
-      <div className="flex flex-col gap-2">
-        <label className="label font-semibold">Name</label>
-        <input
-          className="input w-full"
-          type="text"
-          {...register("name", { required: true })}
-        />
+      <div className="grid gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">First Name</legend>
+          <input
+            type="text"
+            placeholder="e.g., John"
+            className="input input-bordered bg-base-200 w-full"
+            {...register("name", { required: "Name is required" })}
+          />
+        </fieldset>
         {errors.name && (
-          <p className="label text-error text-sm">Name is required</p>
+          <p className="text-error text-xs">{errors.name.message}</p>
         )}
       </div>
-      <div className="flex flex-col gap-2">
-        <label className="label font-semibold">Email</label>
-        <input
-          className="input w-full"
-          type="text"
-          {...register("email", { required: true })}
-        />
+
+      <div className="grid gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Email</legend>
+          <input
+            type="email"
+            placeholder="name@example.com"
+            className="input input-bordered bg-base-200 w-full"
+            {...register("email", { required: "Email is required" })}
+          />
+        </fieldset>
         {errors.email && (
-          <p className="label text-error text-sm">Email is required</p>
+          <p className="text-error text-xs">{errors.email.message}</p>
         )}
       </div>
-      <div className="flex flex-col gap-2">
-        <label className="label font-semibold">Password</label>
-        <input
-          className="input w-full"
-          type="password"
-          {...register("password", { required: true })}
-        />
+
+      <div className="grid gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Password</legend>
+          <input
+            type="password"
+            placeholder="6+ characters"
+            className="input input-bordered bg-base-200 w-full"
+            {...register("password", {
+              required: "Password is required",
+              minLength: 6,
+            })}
+          />
+        </fieldset>
         {errors.password && (
-          <p className="label text-error text-sm">Password is required</p>
+          <p className="text-error text-xs">{errors.password.message}</p>
         )}
       </div>
-      <div className="flex flex-col gap-2">
-        <label className="label font-semibold">Role</label>
-        <select
-          defaultValue=""
-          className="select w-full"
-          {...register("role", { required: true })}
-        >
-          <option value="" disabled>
-            Select a role
-          </option>
-          <option value="client">Client</option>
-          <option value="developer">Developer</option>
-        </select>
+
+      <div className="grid gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">I am a...</legend>
+          <select
+            defaultValue=""
+            className="select select-bordered bg-base-200 w-full"
+            {...register("role", { required: "Please select a role" })}
+          >
+            <option value="" disabled>
+              Select a role
+            </option>
+            <option value="developer">Developer</option>
+            <option value="client">Client</option>
+          </select>
+        </fieldset>
         {errors.role && (
-          <p className="label text-error text-sm">Role is required</p>
+          <p className="text-error text-xs">{errors.role.message}</p>
         )}
       </div>
+
       <button
         type="submit"
-        className="btn btn-secondary mt-5"
+        className="btn btn-primary w-full"
         disabled={isSubmitting}
       >
-        {isSubmitting && <span className="loading loading-spinner"></span>}
-        {!isSubmitting && "Sign Up"}
+        {isSubmitting ? (
+          <span className="loading loading-spinner"></span>
+        ) : (
+          "Create Account"
+        )}
       </button>
-      <p className="text-gray-600 text-sm text-center">Or</p>
-      <Link
-        href="/login"
-        className="link link-hover text-secondary w-fit mx-auto"
-      >
-        Log in to your existing account
-      </Link>
     </form>
   );
 };

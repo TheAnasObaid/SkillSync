@@ -1,31 +1,81 @@
-import { Challenge } from "@/app/client/dashboard/page";
 import Link from "next/link";
+import { FiArrowRight, FiClock } from "react-icons/fi";
 
-const ChallengeCard = ({ challenge }: { challenge: Challenge }) => {
+export interface Challenge {
+  _id: string;
+  title: string;
+  description: string;
+  requirements: string;
+  prize: number;
+  difficulty: "beginner" | "intermediate" | "advanced";
+  tags: string[];
+  deadline: string;
+}
+
+interface ChallengeCardProps {
+  challenge: Challenge;
+}
+
+const difficultyStyles = {
+  beginner: "badge-success",
+  intermediate: "badge-warning",
+  advanced: "badge-error",
+};
+
+const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
+  const formattedDeadline = challenge.deadline
+    ? new Date(challenge.deadline).toLocaleDateString()
+    : "No deadline";
+
   return (
-    <Link href={`/challenges/${challenge._id}`}>
-      <div className="card bg-white transition shadow-sm hover:shadow-md">
-        <div className="card-body">
-          <div className="flex justify-between items-start">
-            <h2 className="card-title text-2xl font-bold link">
-              {challenge.title}
-            </h2>
-            <span className="badge badge-accent text-sm font-semibold">
-              ${challenge.prize}
-            </span>
+    <div className="card bg-base-200 shadow-md border border-base-300 transition-all duration-300 hover:border-primary/50 hover:shadow-primary/20">
+      <div className="card-body p-6">
+        <div className="flex justify-between items-start gap-4">
+          <h2 className="card-title text-2xl font-bold">{challenge.title}</h2>
+          <span className="text-2xl font-bold text-primary">
+            ${challenge.prize.toLocaleString()}
+          </span>
+        </div>
+
+        <p className="text-base-content/70 mt-2 mb-4">
+          {challenge.description.substring(0, 140)}...
+        </p>
+        <div className="flex items-center gap-4">
+          <div
+            className={`badge badge-soft ${
+              difficultyStyles[challenge.difficulty]
+            }`}
+          >
+            {challenge.difficulty}
           </div>
-          <p className="text-gray-700">{challenge.description}</p>
-          <p className="text-sm flex gap-1 text-gray-500">
-            Published on
-            <span className="font-medium text-gray-700">
-              {new Date(challenge.createdAt).toLocaleDateString("en-US", {
-                dateStyle: "medium",
-              })}
-            </span>
-          </p>
+          <div className="flex flex-wrap gap-2">
+            {challenge.tags.slice(0, 3).map((tag) => (
+              <div
+                key={tag}
+                className="badge badge-neutral badge-outline font-mono text-xs"
+              >
+                {tag}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div className="divider my-4"></div>
+
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-2 text-sm text-base-content/70">
+            <FiClock />
+            <span>Deadline: {formattedDeadline}</span>
+          </div>
+          <Link
+            href={`/challenges/${challenge._id}`}
+            className="btn btn-outline btn-primary"
+          >
+            View Details <FiArrowRight />
+          </Link>
         </div>
       </div>
-    </Link>
+    </div>
   );
 };
 
