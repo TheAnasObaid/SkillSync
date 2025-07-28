@@ -32,7 +32,7 @@ const clientSidebarLinks: DashboardLink[] = [
   { href: "/client/dashboard/profile", label: "My Profile", icon: <FiUser /> },
 ];
 
-const ClientProfilePage = () => {
+const DeveloperProfilePage = () => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -201,4 +201,4 @@ const ClientProfilePage = () => {
   );
 };
 
-export default ClientProfilePage;
+export default DeveloperProfilePage;
