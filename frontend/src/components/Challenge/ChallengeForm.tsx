@@ -54,122 +54,138 @@ const ChallengeForm = () => {
       {error && <p className="alert alert-error alert-soft">{error}</p>}
 
       <div className="grid gap-2">
-        <label className="label font-semibold">Title</label>
-        <input
-          className="input input-bordered w-full"
-          type="text"
-          {...register("title", { required: "Title is required" })}
-        />
-        {errors.title && (
-          <p className="text-red-500 text-sm">{errors.title.message}</p>
-        )}
-      </div>
-
-      <div className="grid gap-2">
-        <label className="label font-semibold">Description</label>
-        <textarea
-          className="textarea textarea-bordered w-full"
-          rows={5}
-          {...register("description", { required: "Description is required" })}
-        />
-        {errors.description && (
-          <p className="text-red-500 text-sm">{errors.description.message}</p>
-        )}
-      </div>
-
-      <div className="grid gap-2">
-        <label className="label font-semibold">Requirements</label>
-        <textarea
-          className="textarea textarea-bordered w-full"
-          rows={3}
-          {...register("requirements", {
-            required: "Requirements are required",
-          })}
-        />
-        {errors.requirements && (
-          <p className="text-red-500 text-sm">{errors.requirements.message}</p>
-        )}
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <label className="label font-semibold">Category</label>
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Title</legend>
           <input
-            className="input input-bordered w-full"
             type="text"
-            placeholder="e.g., Web Development"
-            {...register("category", { required: "Category is required" })}
+            className="input input-bordered bg-base-200 w-full"
+            {...register("title", { required: "Title is required" })}
           />
+        </fieldset>
+        {errors.title && (
+          <p className="text-error text-xs">{errors.title.message}</p>
+        )}
+      </div>
+
+      <div className="grid gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Description</legend>
+          <textarea
+            rows={5}
+            className="textarea input-bordered bg-base-200 w-full"
+            {...register("description", {
+              required: "Description is required",
+            })}
+          />
+        </fieldset>
+        {errors.description && (
+          <p className="text-error text-xs">{errors.description.message}</p>
+        )}
+      </div>
+
+      <div className="grid gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Requirements</legend>
+          <textarea
+            rows={5}
+            className="textarea input-bordered bg-base-200 w-full"
+            {...register("requirements", {
+              required: "Requirements are required",
+            })}
+          />
+        </fieldset>
+        {errors.requirements && (
+          <p className="text-error text-xs">{errors.requirements.message}</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid gap-2">
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Category</legend>
+            <input
+              type="text"
+              className="input input-bordered bg-base-200 w-full"
+              {...register("category", { required: "Category is required" })}
+            />
+          </fieldset>
           {errors.category && (
-            <p className="text-red-500 text-sm">{errors.category.message}</p>
+            <p className="text-error text-xs">{errors.category.message}</p>
           )}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <label className="label font-semibold">Difficulty</label>
-          <select
-            defaultValue=""
-            className="select select-bordered w-full"
-            {...register("difficulty", {
-              required: "Difficulty level is required",
-            })}
-          >
-            <option value="" disabled>
-              Select level
-            </option>
-            <option value="beginner">Beginner</option>
-            <option value="intermediate">Intermediate</option>
-            <option value="advanced">Advanced</option>
-          </select>
+        <div className="grid gap-2">
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Difficulty</legend>
+            <select
+              defaultValue=""
+              className="select input-bordered bg-base-200 w-full"
+              {...register("difficulty", {
+                required: "Difficulty level is required",
+              })}
+            >
+              <option value="" disabled>
+                Select level
+              </option>
+              <option value="beginner">Beginner</option>
+              <option value="intermediate">Intermediate</option>
+              <option value="advanced">Advanced</option>
+            </select>
+          </fieldset>
           {errors.difficulty && (
-            <p className="text-red-500 text-sm">{errors.difficulty.message}</p>
+            <p className="text-error text-xs">{errors.difficulty.message}</p>
           )}
         </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="grid gap-2">
-          <label className="label font-semibold">Deadline</label>
-          <input
-            className="input input-bordered w-full"
-            type="date"
-            {...register("deadline", { required: "Deadline is required" })}
-          />
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Deadline</legend>
+            <input
+              type="date"
+              className="input input-bordered bg-base-200 w-full"
+              {...register("deadline", { required: "Deadline is required" })}
+            />
+          </fieldset>
           {errors.deadline && (
-            <p className="text-red-500 text-sm">{errors.deadline.message}</p>
+            <p className="text-error text-xs">{errors.deadline.message}</p>
           )}
         </div>
 
         <div className="grid gap-2">
-          <label className="label font-semibold">Prize ($)</label>
-          <input
-            className="input input-bordered w-full"
-            type="number"
-            {...register("prize", {
-              required: "Prize is required",
-              valueAsNumber: true,
-            })}
-          />
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Prize ($)</legend>
+            <input
+              type="number"
+              className="input input-bordered bg-base-200 w-full"
+              {...register("prize", { required: "Prize is required" })}
+            />
+          </fieldset>
           {errors.prize && (
-            <p className="text-red-500 text-sm">{errors.prize.message}</p>
+            <p className="text-error text-xs">{errors.prize.message}</p>
           )}
         </div>
       </div>
-
       <div className="grid gap-2">
-        <label className="label font-semibold">Tags</label>
-        <input
-          className="input input-bordered w-full"
-          type="text"
-          placeholder="e.g., javascript, react, nodejs"
-          {...register("tags")}
-        />
-        <p className="text-xs text-gray-500">Enter tags separated by commas.</p>
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Tags</legend>
+          <input
+            type="text"
+            placeholder="e.g., javascript, react, nodejs"
+            className="input input-bordered bg-base-200 w-full"
+            {...register("tags", { required: "Tags are required" })}
+          />
+          <p className="label">Enter tags separated by commas.</p>
+        </fieldset>
+        {errors.tags && (
+          <p className="text-error text-xs">{errors.tags.message}</p>
+        )}
       </div>
 
       <button
         type="submit"
-        className="btn btn-primary w-full mt-5"
+        className="btn btn-primary w-full"
         disabled={isSubmitting}
       >
         {isSubmitting ? (
