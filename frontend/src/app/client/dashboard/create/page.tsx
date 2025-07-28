@@ -1,4 +1,4 @@
-import ClientChallengeList from "@/components/Challenge/ClientChallengeList";
+import ChallengeForm from "@/components/Challenge/ChallengeForm";
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
@@ -14,12 +14,15 @@ const clientSidebarLinks: DashboardLink[] = [
   },
 ];
 
-const ClientDashboardPage = () => {
+const CreateChallengePage = () => {
   return (
     <DashboardLayout sidebarLinks={clientSidebarLinks}>
-      <ClientChallengeList />
+      <div>
+        <h2 className="text-3xl font-bold mb-6">Create a New Challenge</h2>
+        <ChallengeForm />
+      </div>
     </DashboardLayout>
   );
 };
 
-export default ClientDashboardPage;
+export default CreateChallengePage;
