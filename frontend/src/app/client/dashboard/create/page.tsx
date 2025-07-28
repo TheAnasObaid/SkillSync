@@ -3,7 +3,7 @@ import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
 
-import { FiGrid, FiPlusSquare } from "react-icons/fi";
+import { FiGrid, FiPlusSquare, FiUser } from "react-icons/fi";
 
 const clientSidebarLinks: DashboardLink[] = [
   { href: "/client/dashboard", label: "My Challenges", icon: <FiGrid /> },
@@ -12,6 +12,7 @@ const clientSidebarLinks: DashboardLink[] = [
     label: "Create Challenge",
     icon: <FiPlusSquare />,
   },
+  { href: "/client/dashboard/profile", label: "My Profile", icon: <FiUser /> },
 ];
 
 const CreateChallengePage = () => {

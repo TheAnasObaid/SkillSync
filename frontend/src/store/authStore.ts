@@ -9,6 +9,7 @@ export type User = {
   profile?: {
     firstName: string;
     lastName: string;
+    companyName: string;
     avatar: string;
     bio: string;
     skills: Array<string>;

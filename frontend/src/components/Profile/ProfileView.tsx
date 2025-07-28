@@ -1,5 +1,5 @@
 import { User } from "@/store/authStore";
-import { FiAward, FiMail } from "react-icons/fi";
+import { FiAward, FiBriefcase, FiMail } from "react-icons/fi";
 import UserAvatar from "./UserAvatar";
 
 interface ProfileViewProps {
@@ -22,6 +22,13 @@ const ProfileView = ({ user }: ProfileViewProps) => {
           <h2 className="text-3xl font-bold">
             {user.profile?.firstName} {user.profile?.lastName}
           </h2>
+
+          {user.role === "client" && user.profile?.companyName && (
+            <p className="text-lg text-primary flex items-center justify-center md:justify-start gap-2 mt-1">
+              <FiBriefcase /> {user.profile.companyName}
+            </p>
+          )}
+
           <p className="text-base-content/70 flex items-center justify-center md:justify-start gap-2 mt-1">
             <FiMail /> {user.email}
           </p>

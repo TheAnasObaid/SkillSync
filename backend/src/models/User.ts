@@ -10,6 +10,7 @@ export interface UserDocument extends Document {
   profile?: {
     firstName: string;
     lastName: string;
+    companyName: { type: String };
     avatar: string;
     bio: string;
     skills: Array<string>;

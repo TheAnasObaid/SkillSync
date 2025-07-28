@@ -3,15 +3,15 @@
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
+import ProfileView from "@/components/Profile/ProfileView";
 import apiClient from "@/services/apiClient";
+import { User } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FiEdit, FiUser, FiX } from "react-icons/fi";
-import ProfileView from "@/components/Profile/ProfileView";
 import { BsGrid } from "react-icons/bs";
+import { FiEdit, FiUser, FiX } from "react-icons/fi";
 import { GoPlusCircle } from "react-icons/go";
-import { User } from "@/store/authStore";
 
 interface ClientProfileFormData {
   name: string;
@@ -86,6 +86,7 @@ const ClientProfilePage = () => {
     }
   };
 
+  // When entering edit mode, pre-fill the form with the current user data
   useEffect(() => {
     if (isEditMode && user) {
       reset({
@@ -129,6 +130,7 @@ const ClientProfilePage = () => {
       {error && <div className="alert alert-error mb-6">{error}</div>}
 
       {isEditMode ? (
+        // --- THE EDIT FORM ---
         <div className="card bg-base-200/50 border border-base-300 p-8">
           <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
             <div className="grid md:grid-cols-2 gap-6">
