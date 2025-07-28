@@ -1,6 +1,14 @@
 import Footer from "@/components/Layout/Footer";
+import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import { FiArrowRight, FiCheckCircle, FiClock } from "react-icons/fi";
+
+const spaceMono = Space_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  weight: ["400", "700"],
+  variable: "--font-space-mono",
+});
 
 const ChallengePreview = () => (
   <div className="card bg-base-200/50 shadow-lg border border-base-300 text-left">
@@ -72,7 +80,9 @@ export default function Home() {
       <main className="container mx-auto px-4 py-16">
         <section className="grid md:grid-cols-2 gap-12 items-center min-h-[70vh]">
           <div className="space-y-6 text-center md:text-left">
-            <h1 className="text-5xl md:text-7xl font-bold leading-tight">
+            <h1
+              className={`${spaceMono.variable} ${spaceMono.className} text-5xl md:text-7xl font-bold leading-none`}
+            >
               Build your <span className="text-primary"></span>
               <br />
               we can take care of the rest.

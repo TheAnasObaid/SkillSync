@@ -10,16 +10,18 @@ const LoginPage = () => {
 
   return (
     <AuthLayout>
-      {isRegistered && (
-        <div className="p-3 mb-6 text-center text-success-content bg-success/20 rounded-md">
-          Registration successful! Please sign in to continue.
+      <div className="grid gap-5">
+        {isRegistered && (
+          <div className="alert alert-success alert-soft">
+            Registration successful! Please sign in to continue.
+          </div>
+        )}
+        <div className="text-center">
+          <h1 className="text-2xl font-bold">Welcome Back to SkillSync</h1>
+          <div className="divider" />
         </div>
-      )}
-      <div className="text-center">
-        <h1 className="text-2xl font-bold">Welcome Back to SkillSync</h1>
+        <LoginForm />
       </div>
-      <div className="divider my-6" />
-      <LoginForm />
     </AuthLayout>
   );
 };
