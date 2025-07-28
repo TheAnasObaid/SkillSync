@@ -52,6 +52,23 @@ export const getSubmissionsByDeveloper = async (
   }
 };
 
+export const getPublicSubmissionsByChallenge = async (
+  req: Request,
+  res: Response
+) => {
+  try {
+    const { challengeId } = req.params;
+    const submissions = await Submission.find({ challengeId: challengeId })
+      .select("developerId description githubRepo liveDemo createdAt")
+      .populate("developerId", "profile.firstName");
+
+    res.status(200).json(submissions);
+  } catch (error) {
+    console.error("Error fetching public submissions:", error);
+    res.status(500).json({ message: "Failed to fetch submissions" });
+  }
+};
+
 export const getSubmissionsByChallenge = async (
   req: AuthenticatedRequest,
   res: Response

@@ -15,6 +15,7 @@ import {
   FiLogIn,
   FiCheckCircle,
 } from "react-icons/fi";
+import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
 
 const CtaBlock = ({
   role,
@@ -58,6 +59,10 @@ const ChallengeDetailsPage = () => {
   const [error, setError] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState<"description" | "submissions">(
+    "description"
+  );
+  const [submissionCount, setSubmissionCount] = useState(0);
 
   const { id } = useParams() as { id: string };
   const { role } = useAuthStore();
@@ -116,21 +121,51 @@ const ChallengeDetailsPage = () => {
             <h1 className="text-4xl md:text-5xl font-bold">
               {challenge.title}
             </h1>
-            <div className="prose max-w-none grid gap-2 text-base-content/80">
-              <h2 className="text-2xl font-semibold text-base-content">
+
+            <div role="tablist" className="tabs tabs-bordered">
+              <a
+                role="tab"
+                className={`tab ${
+                  activeTab === "description" ? "tab-active" : ""
+                }`}
+                onClick={() => setActiveTab("description")}
+              >
                 Description
-              </h2>
-              <p>{challenge.description}</p>
-              <h2 className="text-2xl font-semibold text-base-content mt-8">
-                Requirements
-              </h2>
-              <p>{challenge.requirements}</p>
+              </a>
+              <a
+                role="tab"
+                className={`tab ${
+                  activeTab === "submissions" ? "tab-active" : ""
+                }`}
+                onClick={() => setActiveTab("submissions")}
+              >
+                Submissions ({submissionCount})
+              </a>
             </div>
+
+            {activeTab === "description" && (
+              <div className="prose max-w-none text-base-content/80">
+                <h2 className="text-2xl font-semibold text-base-content">
+                  Description
+                </h2>
+                <p>{challenge.description}</p>
+                <h2 className="text-2xl font-semibold text-base-content mt-8">
+                  Requirements
+                </h2>
+                <p>{challenge.requirements}</p>
+              </div>
+            )}
+            {activeTab === "submissions" && (
+              <PublicSubmissionList
+                challengeId={challenge._id}
+                onCountChange={setSubmissionCount}
+              />
+            )}
           </div>
           <aside className="space-y-6 lg:sticky top-24 h-fit">
             <div className="card bg-base-200/50 border border-base-300">
               <div className="card-body">
-                <div className="flex items-center gap-4">
+                <div className="flex items-start gap-4">
                   <FiAward className="text-primary text-2xl mt-1" />
                   <div>
                     <h3 className="font-semibold text-base-content/70">
@@ -152,7 +187,7 @@ const ChallengeDetailsPage = () => {
                   </div>
                 </div>
                 <div className="divider my-2" />
-                <div className="flex items-center gap-4">
+                <div className="flex items-start gap-4">
                   <FiHash className="text-base-content/70 text-xl mt-1" />
                   <div>
                     <h3 className="font-semibold text-base-content/70 mb-2">
@@ -160,7 +195,7 @@ const ChallengeDetailsPage = () => {
                     </h3>
                     <div className="flex flex-wrap items-center gap-2">
                       <div
-                        className={`badge badge-soft ${
+                        className={`badge badge-outline ${
                           difficultyStyles[challenge.difficulty]
                         }`}
                       >
@@ -185,39 +220,47 @@ const ChallengeDetailsPage = () => {
         </div>
       </div>
 
-      {/* Submission Modal */}
       <dialog
         id="submission_modal"
         className={`modal ${isModalOpen ? "modal-open" : ""}`}
       >
-        <div className="modal-box">
+        <div className="modal-box relative">
+          {/* --- NEW: Close Icon Button --- */}
+          {/* This button is positioned absolutely relative to the modal-box */}
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={handleModalClose}
+          >
+            ✕
+          </button>
+
+          {/* Conditional content for success or form view */}
           {submissionSuccess ? (
+            // --- REFINED: Success State ---
             <div className="text-center p-8 space-y-4">
               <FiCheckCircle className="text-success text-6xl mx-auto" />
               <h3 className="font-bold text-2xl">Submission Successful!</h3>
-              <p>Your work has been submitted for review.</p>
-              <button
-                className="btn btn-primary mt-4"
-                onClick={handleModalClose}
-              >
-                Done
-              </button>
+              <p className="text-base-content/70">
+                Your solution has been submitted for review. Good luck!
+              </p>
+              <div className="modal-action justify-center mt-4">
+                <button className="btn btn-primary" onClick={handleModalClose}>
+                  Done
+                </button>
+              </div>
             </div>
           ) : (
+            // --- REFINED: Form State ---
             <>
-              <h3 className="font-bold text-lg mb-4">Submit Your Solution</h3>
+              <h3 className="font-bold text-lg mb-6">Submit Your Solution</h3>
               <SubmissionForm
                 challengeId={challenge._id}
                 onSuccess={() => setSubmissionSuccess(true)}
               />
-              <div className="modal-action mt-0">
-                <button className="btn btn-ghost" onClick={handleModalClose}>
-                  Cancel
-                </button>
-              </div>
             </>
           )}
         </div>
+
         <form method="dialog" className="modal-backdrop">
           <button onClick={handleModalClose}>close</button>
         </form>
