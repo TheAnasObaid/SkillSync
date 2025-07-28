@@ -1,4 +1,3 @@
-import ProtectedRoute from "@/components/Auth/ProtectedRoute";
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
@@ -19,14 +18,12 @@ const developerSidebarLinks: DashboardLink[] = [
 
 const DeveloperProfilePage = () => {
   return (
-    <ProtectedRoute requiredRole="developer">
-      <DashboardLayout sidebarLinks={developerSidebarLinks}>
-        <div>
-          <h2 className="text-3xl font-bold mb-6">My Profile</h2>
-          <p>This is where your profile editing form will go.</p>
-        </div>
-      </DashboardLayout>
-    </ProtectedRoute>
+    <DashboardLayout sidebarLinks={developerSidebarLinks}>
+      <div>
+        <h2 className="text-3xl font-bold mb-6">My Profile</h2>
+        <p>This is where your profile editing form will go.</p>
+      </div>
+    </DashboardLayout>
   );
 };
 

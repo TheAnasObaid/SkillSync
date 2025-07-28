@@ -1,4 +1,3 @@
-import ProtectedRoute from "@/components/Auth/ProtectedRoute";
 import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionList";
 import DashboardLayout, {
   DashboardLink,
@@ -21,11 +20,9 @@ const developerSidebarLinks: DashboardLink[] = [
 
 const DeveloperDashboardPage = () => {
   return (
-    <ProtectedRoute requiredRole="developer">
-      <DashboardLayout sidebarLinks={developerSidebarLinks}>
-        <DeveloperSubmissionList />
-      </DashboardLayout>
-    </ProtectedRoute>
+    <DashboardLayout sidebarLinks={developerSidebarLinks}>
+      <DeveloperSubmissionList />
+    </DashboardLayout>
   );
 };
 
