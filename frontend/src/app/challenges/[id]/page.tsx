@@ -41,7 +41,7 @@ const CtaBlock = ({
   }
 
   return (
-    <div className="alert bg-base-300 text-center">
+    <div className="alert alert-warning text-center">
       <Link
         href="/login"
         className="flex items-center justify-center gap-2 w-full"
@@ -115,7 +115,7 @@ const ChallengeDetailsPage = () => {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="max-w-6xl w-full mx-auto px-4 py-12">
         <div className="grid lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-8">
             <h1 className="text-4xl md:text-5xl font-bold">
@@ -215,10 +215,12 @@ const ChallengeDetailsPage = () => {
               </div>
             </div>
 
-            {/* <CtaBlock
-              role={user?.role}
-              onOpenModal={() => setIsModalOpen(true)}
-            /> */}
+            {user && (
+              <CtaBlock
+                role={user.role}
+                onOpenModal={() => setIsModalOpen(true)}
+              />
+            )}
           </aside>
         </div>
       </div>
@@ -227,7 +229,7 @@ const ChallengeDetailsPage = () => {
         id="submission_modal"
         className={`modal ${isModalOpen ? "modal-open" : ""}`}
       >
-        <div className="modal-box relative">
+        <div className="modal-box relative border border-base-300">
           <button
             className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
             onClick={handleModalClose}

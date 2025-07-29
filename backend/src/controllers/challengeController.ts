@@ -2,6 +2,8 @@ import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 
 import Challenge from "../models/Challenge";
+import Submission from "../models/Submission";
+import upload from "../middleware/upload";
 
 export const createChallenge = async (
   req: AuthenticatedRequest,
@@ -87,4 +89,55 @@ export const getSingleChallenge = async (
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch challenges" });
   }
+};
+
+export const submitSolution = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  // 1. Call the upload middleware first.
+  // The rest of our logic will run inside its callback.
+  upload(req, res, async (err) => {
+    // Handle any upload-specific errors first
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+
+    // Now, inside this callback, Multer has finished its job.
+    // req.body and req.file are guaranteed to be populated.
+    try {
+      const { id: challengeId } = req.params;
+      // 2. We can now safely destructure req.body.
+      const { githubRepo, liveDemo, description } = req.body;
+
+      if (!githubRepo || !description) {
+        return res
+          .status(400)
+          .json({ message: "GitHub repository and description are required." });
+      }
+
+      const submissionData = {
+        challengeId: challengeId,
+        developerId: req.userId,
+        githubRepo,
+        liveDemo,
+        description,
+        files: [] as { name: string; path: string }[],
+      };
+
+      if (req.file) {
+        submissionData.files.push({
+          name: req.file.originalname,
+          path: req.file.path,
+        });
+      }
+
+      const submission = await Submission.create(submissionData);
+
+      res.status(201).json(submission);
+    } catch (error) {
+      console.error("Failed to submit solution:", error);
+      res.status(500).json({ message: "Failed to submit solution" });
+    }
+  });
 };

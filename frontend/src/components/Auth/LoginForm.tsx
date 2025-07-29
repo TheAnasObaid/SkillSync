@@ -1,24 +1,14 @@
 "use client";
 
+import { LoginFormData, loginSchema } from "@/lib/validationSchemas";
 import apiClient from "@/services/apiClient";
-import { Role, useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-
-interface LoginFormData {
-  email: string;
-  password: string;
-}
-
-interface FetchUserResponse {
-  token: string;
-  status: string;
-  user: {
-    role: Role;
-  };
-}
 
 export const getDashboardPath = (
   role: "client" | "developer" | "admin" | null
@@ -39,16 +29,22 @@ const LoginForm = () => {
   const router = useRouter();
   const { setToken, setUser } = useAuthStore();
   const [error, setError] = useState("");
+  const [isUnverified, setIsUnverified] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors, isSubmitting },
-  } = useForm<LoginFormData>();
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+  });
 
   const onSubmit = async (data: LoginFormData) => {
+    setError("");
+    setIsUnverified(false);
     try {
-      setError("");
       const response = await apiClient.post("/auth/login", data);
       const { token, user } = response.data;
 
@@ -61,24 +57,72 @@ const LoginForm = () => {
       router.refresh();
     } catch (error) {
       if (error instanceof AxiosError) {
-        console.error(error.response?.data.error || "Login failed.");
+        const errorMessage =
+          error.response?.data?.message || "Invalid credentials.";
+        if (errorMessage.includes("Please verify your email")) {
+          setIsUnverified(true);
+        }
       } else {
-        console.error("An unexpected error occurred.");
+        setError("An unexpected error occurred.");
       }
     }
   };
 
-  if (error)
-    return (
-      <div className="toast">
-        <div className="alert alert-error">
-          <span>{error}</span>
-        </div>
-      </div>
-    );
+  const handleResendVerification = async () => {
+    const email = getValues("email"); // Get the email from the form
+    if (!email) {
+      setError("Please enter your email address first.");
+      return;
+    }
+
+    setIsResending(true);
+    setError("");
+    try {
+      await apiClient.post("/auth/resend-verification", { email });
+      // On success, we don't need to stay in the "unverified" state
+      setIsUnverified(false);
+      // Give the user positive feedback
+      alert(
+        "A new verification email has been sent to your inbox. Please check it to continue."
+      );
+    } catch (err) {
+      setError("Failed to resend the email. Please try again.");
+    } finally {
+      setIsResending(false);
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
+      {isUnverified ? (
+        <div className="alert alert-warning alert-vertical alert-soft">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div>
+              <p className="font-bold">Account Not Verified</p>
+              <p className="text-sm">{error}</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-sm btn-warning"
+              onClick={handleResendVerification}
+              disabled={isResending}
+            >
+              {isResending ? (
+                <span className="loading loading-spinner loading-xs"></span>
+              ) : (
+                "Resend Verification Email"
+              )}
+            </button>
+          </div>
+        </div>
+      ) : (
+        error && (
+          <div className="toast">
+            <p className="alert alert-error">{error}</p>
+          </div>
+        )
+      )}
+
       <div className="grid gap-2">
         <fieldset className="fieldset">
           <legend className="fieldset-legend">Email</legend>
@@ -90,7 +134,7 @@ const LoginForm = () => {
           />
         </fieldset>
         {errors.email && (
-          <p className="text-error text-xs">{errors.email.message}</p>
+          <p className="text-error text-sm">{errors.email.message}</p>
         )}
       </div>
 
@@ -99,13 +143,26 @@ const LoginForm = () => {
           <legend className="fieldset-legend">Password</legend>
           <input
             type="password"
+            placeholder="6+ characters"
             className="input input-bordered bg-base-200 w-full"
-            {...register("password", { required: "Password is required" })}
+            {...register("password", {
+              required: "Password is required",
+              minLength: 6,
+            })}
           />
         </fieldset>
         {errors.password && (
-          <p className="text-error text-xs">{errors.password.message}</p>
+          <p className="text-error text-sm">{errors.password.message}</p>
         )}
+      </div>
+
+      <div className="text-right">
+        <Link
+          href="/forgot-password"
+          className="text-sm link link-hover text-primary"
+        >
+          Forgot Password?
+        </Link>
       </div>
 
       <button

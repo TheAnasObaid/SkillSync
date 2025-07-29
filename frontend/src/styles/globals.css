@@ -1,7 +1,8 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
 @plugin "daisyui/theme" {
-  name: "skillsync-tech";
+  name: "skillsync-pro";
   default: true;
   prefersdark: true;
   color-scheme: "dark";
@@ -37,9 +38,10 @@
   --noise: 0;
 }
 
+/* Remove below them */
+
 @plugin "daisyui/theme" {
-  name: "skillsync-brutal-light";
-  default: true;
+  name: "skillsync-lol";
   prefersdark: false;
   color-scheme: "light";
   --color-base-100: oklch(98% 0 0); /* White background */
@@ -75,7 +77,7 @@
   --radius-field: 0;
   --radius-box: 0;
   --size-selector: 0;
-  --size-field: 0;
+  --size-field: 4px;
   --border: 1px solid oklch(60% 0 0); /* Just a flat gray line */
   --depth: 0;
   --noise: 0;

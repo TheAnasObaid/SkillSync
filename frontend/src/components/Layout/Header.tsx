@@ -34,26 +34,36 @@ const Header = () => {
   };
 
   const dashboardHref = user ? getDashboardPath(user.role) : "/";
-  console.log(user);
+
   return (
     <>
-      <header className="p-3 bg-base-100/80 backdrop-blur-sm border-b border-base-300/100">
+      <header className="p-3 bg-base-100/80 backdrop-blur-sm border-b border-base-300/100 z-9">
         <div className="navbar max-w-screen-xl mx-auto flex justify-between items-center">
           <div className="navbar-start">
             <Link
               href="/"
               className={`${spaceMono.variable} ${spaceMono.className} font-bold text-lg`}
             >
-              Skill<span className="text-primary">Sync.</span>
+              Skill<span className="text-primary">Sync</span>
             </Link>
           </div>
-          <div className="navbar-end">
+
+          <div className="navbar-end flex gap-5">
+            <Link
+              href="/challenges"
+              className="link link-hover text-base-content text-sm w-fit"
+            >
+              Challenges
+            </Link>
             {isClient && (
               <>
                 {token && user ? (
                   <div className="dropdown dropdown-end">
                     <button tabIndex={0} className="btn btn-ghost btn-circle">
-                      <UserAvatar name={user.profile?.firstName} />
+                      <UserAvatar
+                        name={user.profile?.firstName}
+                        avatarUrl={user.profile?.avatar}
+                      />
                     </button>
                     <ul
                       tabIndex={0}

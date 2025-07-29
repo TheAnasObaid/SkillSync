@@ -4,12 +4,11 @@ import LoginForm from "@/components/Auth/LoginForm";
 import { useSearchParams } from "next/navigation";
 
 const LoginClientComponent = () => {
-  // All the logic that uses the client-side hook is now safely inside this component
   const searchParams = useSearchParams();
   const isRegistered = searchParams.get("registered");
 
   return (
-    <div className="grid gap-5 max-w-sm w-full my-10 mx-auto">
+    <div className="grid gap-5 max-w-md w-full mx-auto my-10 p-8 bg-base-200/50 border border-base-300 rounded-lg">
       {isRegistered && (
         <div className="alert alert-success alert-soft">
           Registration successful! Please sign in to continue.

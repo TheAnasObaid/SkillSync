@@ -1,5 +1,10 @@
 import mongoose, { Schema, Document } from "mongoose";
 
+const FileSchema = new Schema({
+  name: { type: String, required: true },
+  path: { type: String, required: true },
+});
+
 export interface SubmissionDocument extends Document {
   challengeId: mongoose.Types.ObjectId;
   developerId: mongoose.Types.ObjectId;
@@ -7,11 +12,9 @@ export interface SubmissionDocument extends Document {
   liveDemo?: string;
   description: string;
   status: "pending" | "reviewed" | "winner" | "rejected";
+  files: { name: string; path: string }[];
   ratings?: {
     overall: number;
-    codeQuality: number;
-    functionality: number;
-    creativity: number;
   };
   feedback?: string;
   createdAt: Date;
@@ -34,9 +37,7 @@ const SubmissionSchema = new Schema<SubmissionDocument>(
       type: String,
       required: [true, "GitHub repository URL is required."],
     },
-    liveDemo: {
-      type: String,
-    },
+    liveDemo: String,
     description: {
       type: String,
       required: [true, "A description of your submission is required."],
@@ -46,11 +47,10 @@ const SubmissionSchema = new Schema<SubmissionDocument>(
       enum: ["pending", "reviewed", "winner", "rejected"],
       default: "pending",
     },
+
+    files: [FileSchema],
     ratings: {
       overall: { type: Number, min: 1, max: 5 },
-      codeQuality: { type: Number, min: 1, max: 5 },
-      functionality: { type: Number, min: 1, max: 5 },
-      creativity: { type: Number, min: 1, max: 5 },
     },
     feedback: {
       type: String,

@@ -7,6 +7,7 @@ import authRoute from "./routes/auth";
 import challengesRoute from "./routes/challenges";
 import submissionsRoute from "./routes/submissions";
 import userRoute from "./routes/user";
+import path from "path";
 
 const app = express();
 
@@ -15,6 +16,7 @@ connectDB();
 
 app.use(cors());
 app.use(express.json());
+app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 
 app.use("/api/auth", authRoute);
 app.use("/api/admin", adminRoute);

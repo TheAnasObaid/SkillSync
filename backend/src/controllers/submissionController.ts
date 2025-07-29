@@ -1,38 +1,8 @@
-import { Response, Request } from "express";
-import { AuthenticatedRequest } from "../middleware/auth";
-import Submission from "../models/Submission";
-import Challenge from "../models/Challenge";
+import { Request, Response } from "express";
 import mongoose from "mongoose";
-
-export const submitSolution = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
-    const { id: challengeId } = req.params;
-
-    const { githubRepo, liveDemo, description } = req.body;
-
-    if (!githubRepo || !description) {
-      res
-        .status(400)
-        .json({ message: "GitHub repository and description are required." });
-    }
-
-    const submission = await Submission.create({
-      challengeId,
-      developerId: req.userId,
-      githubRepo,
-      liveDemo,
-      description,
-    });
-
-    res.status(201).json(submission);
-  } catch (error) {
-    console.error("Failed to submit solution:", error);
-    res.status(500).json({ message: "Failed to submit solution" });
-  }
-};
+import { AuthenticatedRequest } from "../middleware/auth";
+import Challenge from "../models/Challenge";
+import Submission from "../models/Submission";
 
 export const getSubmissionsByDeveloper = async (
   req: AuthenticatedRequest,
@@ -60,7 +30,7 @@ export const getPublicSubmissionsByChallenge = async (
     const { challengeId } = req.params;
     const submissions = await Submission.find({ challengeId: challengeId })
       .select("developerId description githubRepo liveDemo createdAt")
-      .populate("developerId", "profile.firstName");
+      .populate("developerId", "profile.firstName profile.avatar");
 
     res.status(200).json(submissions);
   } catch (error) {
@@ -91,7 +61,7 @@ export const getSubmissionsByChallenge = async (
 
     const submissions = await Submission.find({
       challengeId,
-    }).populate("developerId", "profile.firstName email");
+    }).populate("developerId", "profile.firstName email profile.avatar");
 
     res.status(200).json(submissions);
   } catch (error) {
@@ -179,11 +149,10 @@ export const rateSubmission = async (
       return;
     }
 
-    // Update the submission with the new data
     submission.ratings = ratings;
     submission.feedback = feedback;
     if (submission.status === "pending") {
-      submission.status = "reviewed"; // Mark as reviewed
+      submission.status = "reviewed";
     }
 
     await submission.save();

@@ -1,57 +1,53 @@
 "use client";
 
-import { useAuthStore } from "@/store/authStore";
 import apiClient from "@/services/apiClient";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-
-// This interface now matches exactly what the backend expects
-interface FormData {
-  title: string;
-  description: string;
-  prize: number;
-  requirements: string;
-  category: string;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  deadline: string; // Send deadline as a string in "YYYY-MM-DD" format
-  tags: string; // Send tags as a single comma-separated string
-}
+import { zodResolver } from "@hookform/resolvers/zod";
+import { challengeSchema, ChallengeFormData } from "@/lib/validationSchemas";
 
 const ChallengeForm = () => {
   const router = useRouter();
   const [error, setError] = useState("");
-  const { setLoading } = useAuthStore();
 
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>();
+  } = useForm<ChallengeFormData>({
+    resolver: zodResolver(challengeSchema),
+  });
 
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async (formData: ChallengeFormData) => {
     setError("");
     try {
-      setLoading(true);
       await apiClient.post("/challenges", formData);
       router.push("/client/dashboard");
     } catch (error) {
       if (error instanceof AxiosError) {
-        setError(
-          error.response?.data.message || "An unexpected error occurred."
-        );
+        const zodIssues = error.response?.data?.issues;
+        if (zodIssues) {
+          setError(zodIssues.map((issue: any) => issue.message).join(". "));
+        } else {
+          setError(
+            error.response?.data.message || "An unexpected error occurred."
+          );
+        }
       } else {
         setError("An unexpected error occurred.");
       }
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
-      {error && <p className="alert alert-error alert-soft">{error}</p>}
+      {error && (
+        <div className="toast">
+          <p className="alert alert-error">{error}</p>
+        </div>
+      )}
 
       <div className="grid gap-2">
         <fieldset className="fieldset">

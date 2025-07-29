@@ -8,7 +8,7 @@ import ProfileView from "@/components/Profile/ProfileView";
 import apiClient from "@/services/apiClient";
 import { User } from "@/store/authStore";
 import { AxiosError } from "axios";
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { BsGrid } from "react-icons/bs";
 import { FiEdit, FiUser, FiX } from "react-icons/fi";
@@ -39,6 +39,7 @@ const ClientProfilePage = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const {
     register,
@@ -61,6 +62,30 @@ const ClientProfilePage = () => {
     };
     fetchUserProfile();
   }, []);
+
+  const handleAvatarUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("file", file); // 'file' must match the name in the multer config
+
+    try {
+      const response = await apiClient.post("/users/upload-avatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      // Update the user in the global store to reflect the new avatar
+      setUser({
+        ...user!,
+        profile: { ...user!.profile!, avatar: response.data.avatarUrl },
+      });
+      alert("Avatar updated successfully!");
+    } catch (error) {
+      alert("Failed to upload avatar.");
+    }
+  };
 
   const handleFormSubmit = async (data: ClientProfileFormData) => {
     setError("");
@@ -129,7 +154,6 @@ const ClientProfilePage = () => {
       {error && <div className="alert alert-error mb-6">{error}</div>}
 
       {isEditMode ? (
-        // UPDATE: Use the new component here
         <ProfileEditForm
           onSubmit={handleSubmit(handleFormSubmit)}
           isSubmitting={isSubmitting}
@@ -181,7 +205,20 @@ const ClientProfilePage = () => {
           </div>
         </ProfileEditForm>
       ) : (
-        <ProfileView user={user} />
+        <>
+          <ProfileView
+            user={user}
+            onAvatarClick={() => avatarInputRef.current?.click()}
+          />
+
+          <input
+            type="file"
+            ref={avatarInputRef}
+            onChange={handleAvatarUpload}
+            className="hidden"
+            accept="image/png, image/jpeg, image/gif"
+          />
+        </>
       )}
     </DashboardLayout>
   );

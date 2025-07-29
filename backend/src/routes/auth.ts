@@ -3,14 +3,20 @@ import {
   forgotPassword,
   loginUser,
   registerUser,
+  resendVerificationEmail,
   resetPassword,
+  verifyEmail,
 } from "../controllers/authController";
+import validate from "../middleware/validate";
+import { loginSchema, registerSchema } from "../utils/validationSchemas";
 
 const authRouter = Router();
 
-authRouter.post("/register", registerUser);
-authRouter.post("/login", loginUser);
+authRouter.post("/register", validate(registerSchema), registerUser);
+authRouter.post("/login", validate(loginSchema), loginUser);
 authRouter.post("/forgot-password", forgotPassword);
 authRouter.patch("/reset-password/:token", resetPassword);
+authRouter.get("/verify-email/:token", verifyEmail);
+authRouter.post("/resend-verification", resendVerificationEmail);
 
 export default authRouter;

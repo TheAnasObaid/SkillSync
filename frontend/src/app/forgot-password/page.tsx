@@ -23,11 +23,7 @@ const ForgotPasswordPage = () => {
     setMessage("");
     try {
       const response = await apiClient.post("/auth/forgot-password", data);
-      setMessage(
-        "If an account with that email exists, a reset link has been generated. (Check the backend console for your dummy link)."
-      );
-      // In a real app, you wouldn't show the token to the user.
-      console.log("TESTING TOKEN:", response.data.resetTokenForTesting);
+      setMessage(response.data.message);
     } catch (err) {
       setError(
         err instanceof AxiosError
@@ -38,30 +34,31 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto my-10 p-8 bg-base-200/50 rounded-lg shadow-md">
+    <div className="max-w-md w-full mx-auto my-10 p-8 bg-base-200/50 border border-base-300 rounded-lg">
       <h1 className="text-2xl font-bold text-center mb-6">
         Forgot Your Password?
       </h1>
       <p className="text-center text-base-content/70 mb-6">
-        No problem. Enter your email address and we'll send you a link to reset
-        it.
+        No problem. Enter your email address below, and we'll send you a link to
+        reset it.
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label htmlFor="email" className="label">
-            Email Address
-          </label>
-          <input
-            id="email"
-            type="email"
-            className="input input-bordered w-full"
-            {...register("email", { required: "Email is required" })}
-          />
+        <div className="grid gap-2">
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Email</legend>
+            <input
+              type="email"
+              placeholder="name@example.com"
+              className="input input-bordered bg-base-200 w-full"
+              {...register("email", { required: "Email is required" })}
+            />
+          </fieldset>
           {errors.email && (
-            <p className="text-error text-xs mt-1">{errors.email.message}</p>
+            <p className="text-error text-sm">{errors.email.message}</p>
           )}
         </div>
+
         <button
           type="submit"
           className="btn btn-primary w-full"
@@ -75,7 +72,9 @@ const ForgotPasswordPage = () => {
         </button>
       </form>
 
-      {message && <div className="alert alert-success mt-4">{message}</div>}
+      {message && (
+        <div className="alert alert-info alert-soft mt-4">{message}</div>
+      )}
       {error && <div className="alert alert-error mt-4">{error}</div>}
     </div>
   );

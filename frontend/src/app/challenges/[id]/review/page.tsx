@@ -12,6 +12,7 @@ import {
   FiAward,
   FiChevronDown,
   FiChevronUp,
+  FiDownload,
   FiExternalLink,
   FiGithub,
   FiInfo,
@@ -19,7 +20,6 @@ import {
   FiStar,
 } from "react-icons/fi";
 
-// Updated interface to include all necessary fields from the spec
 interface Submission {
   _id: string;
   githubRepo: string;
@@ -30,9 +30,11 @@ interface Submission {
     _id: string;
     profile: {
       firstName: string;
+      avatar: string;
     };
     email: string;
   };
+  files: { name: string; path: string }[];
   ratings?: {
     overall: number;
   };
@@ -289,6 +291,7 @@ const ReviewSubmissionsPage = () => {
                           <div className="flex items-center gap-3">
                             <UserAvatar
                               name={sub.developerId.profile.firstName}
+                              avatarUrl={sub.developerId.profile.avatar}
                             />
                             <div>
                               <div className="font-bold">
@@ -345,15 +348,18 @@ const ReviewSubmissionsPage = () => {
                           )}
                         </td>
                       </tr>
-                      {/* EXPANDED ROW */}
+
                       {expandedId === sub._id && (
                         <tr
                           className={
-                            sub.status === "winner" ? "bg-success/5" : ""
+                            sub.status === "winner"
+                              ? "bg-success/5"
+                              : "" + "bg-base-100/50"
                           }
                         >
+                          <td className="p-0"></td>
                           <td colSpan={5} className="p-0">
-                            <div className="p-6 bg-base-100/50 space-y-4">
+                            <div className="p-6 space-y-4">
                               <h4 className="font-bold">Submission Details:</h4>
                               <p className="whitespace-pre-wrap">
                                 {sub.description || "No description provided."}
@@ -376,6 +382,32 @@ const ReviewSubmissionsPage = () => {
                                   </Link>
                                 )}
                               </div>
+
+                              {sub.files && sub.files.length > 0 && (
+                                <div className="pt-2">
+                                  <h5 className="font-bold">
+                                    Submitted Files:
+                                  </h5>
+                                  <div className="flex flex-wrap gap-2 mt-2">
+                                    {sub.files.map((file, index) => (
+                                      <a
+                                        key={index}
+                                        href={`${
+                                          process.env.NEXT_PUBLIC_API_BASE_URL
+                                        }/${file.path.replace(/\\/g, "/")}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="btn btn-outline btn-success btn-sm"
+                                        download={file.name}
+                                      >
+                                        <FiDownload className="mr-2" />
+                                        {file.name}
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+                              )}
+
                               {sub.feedback && (
                                 <div className="pt-2">
                                   <h5 className="font-bold flex items-center gap-2">
