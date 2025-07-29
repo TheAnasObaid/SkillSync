@@ -1,15 +1,15 @@
-import ProtectedRoute from "@/components/Auth/ProtectedRoute";
 import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionList";
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
-import { FiBriefcase, FiUser } from "react-icons/fi";
+import { FiUser } from "react-icons/fi";
+import { TbBriefcase2 } from "react-icons/tb";
 
 const developerSidebarLinks: DashboardLink[] = [
   {
     href: "/developer/dashboard",
     label: "My Submissions",
-    icon: <FiBriefcase />,
+    icon: <TbBriefcase2 />,
   },
   {
     href: "/developer/dashboard/profile",
@@ -20,11 +20,9 @@ const developerSidebarLinks: DashboardLink[] = [
 
 const DeveloperDashboardPage = () => {
   return (
-    <ProtectedRoute requiredRole="developer">
-      <DashboardLayout sidebarLinks={developerSidebarLinks}>
-        <DeveloperSubmissionList />
-      </DashboardLayout>
-    </ProtectedRoute>
+    <DashboardLayout sidebarLinks={developerSidebarLinks}>
+      <DeveloperSubmissionList />
+    </DashboardLayout>
   );
 };
 

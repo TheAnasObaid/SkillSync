@@ -1,8 +1,9 @@
-import Container from "@/components/Layout/Container";
-import { Inter } from "next/font/google";
-import MinimalHeader from "@/components/Layout/MinimalHeader";
+import AuthLayout from "@/components/Layout/AuthLayout";
+import Footer from "@/components/Layout/Footer";
+import Header from "@/components/Layout/Header";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,12 +24,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="skillsync-tech"
+      data-theme="skillsync-brutal-light"
       className={`${inter.className} ${inter.variable}`}
     >
-      <body className="antialiased h-screen grid grid-rows-[auto_1fr_auto] gap-y-5">
-        <MinimalHeader />
-        <Container>{children}</Container>
+      <body className="antialiased grid grid-rows-[auto_1fr_auto] gap-y-5">
+        <AuthLayout>
+          <Header />
+          {children}
+          <Footer />
+        </AuthLayout>
       </body>
     </html>
   );

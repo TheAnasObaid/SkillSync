@@ -6,118 +6,121 @@ import DashboardLayout, {
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
 import apiClient from "@/services/apiClient";
-import { User, useAuthStore } from "@/store/authStore";
+import { User } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { BsGrid } from "react-icons/bs";
 import { FiEdit, FiUser, FiX } from "react-icons/fi";
-import { TbBriefcase2 } from "react-icons/tb";
+import { GoPlusCircle } from "react-icons/go";
 
-// This interface now lives in the page, specific to the developer's form
-export interface ProfileFormData {
+interface ClientProfileFormData {
   name: string;
-  email: string;
   profile: {
     lastName: string;
+    companyName: string;
     bio: string;
-    skills: string; // Use a string for the input field
   };
 }
 
-const developerSidebarLinks: DashboardLink[] = [
+const clientSidebarLinks: DashboardLink[] = [
+  { href: "/client/dashboard", label: "My Challenges", icon: <BsGrid /> },
   {
-    href: "/developer/dashboard",
-    label: "My Submissions",
-    icon: <TbBriefcase2 />,
+    href: "/client/dashboard/create",
+    label: "Create Challenge",
+    icon: <GoPlusCircle />,
   },
-  {
-    href: "/developer/dashboard/profile",
-    label: "My Profile",
-    icon: <FiUser />,
-  },
+  { href: "/client/dashboard/profile", label: "My Profile", icon: <FiUser /> },
 ];
 
-const DeveloperProfilePage = () => {
-  const { user, setUser } = useAuthStore();
+const ClientProfilePage = () => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  // The useForm hook is now managed by the parent page
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<ProfileFormData>();
+  } = useForm<ClientProfileFormData>();
 
-  const handleFormSubmit = async (data: ProfileFormData) => {
-    setIsSubmitting(true);
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      setLoading(true);
+      try {
+        const response = await apiClient.get<User>("/users/profile");
+        setUser(response.data);
+      } catch (err) {
+        setError("Failed to load profile data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserProfile();
+  }, []);
+
+  const handleFormSubmit = async (data: ClientProfileFormData) => {
     setError("");
+    setIsSubmitting(true);
     try {
-      // Prepare the payload for the API
       const updatePayload = {
-        ...data,
-        profile: {
-          ...data.profile,
-          skills: data.profile.skills.split(",").map((s) => s.trim()), // Convert string to array
-        },
+        name: data.name,
+        profile: data.profile,
       };
-
       const response = await apiClient.put<User>(
         "/users/profile",
         updatePayload
       );
-      setUser(response.data); // Update global state
+      setUser(response.data);
       setIsEditMode(false);
+      alert("Profile updated successfully!");
     } catch (err) {
-      setError(
-        err instanceof AxiosError
-          ? err.response?.data.message
-          : "Failed to update profile."
-      );
+      if (err instanceof AxiosError) {
+        setError(err.response?.data.message || "Failed to update profile.");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  // Set default form values when entering edit mode
   useEffect(() => {
     if (isEditMode && user) {
       reset({
         name: user.profile?.firstName || "",
-        email: user.email || "",
         profile: {
           lastName: user.profile?.lastName || "",
+          companyName: user.profile?.companyName || "",
           bio: user.profile?.bio || "",
-          skills: (user.profile?.skills || []).join(", "), // Convert array to string
         },
       });
     }
   }, [isEditMode, user, reset]);
 
-  if (!user)
+  if (loading)
     return (
-      <div className="text-center p-10">
+      <div className="flex justify-center p-10">
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
 
   return (
-    <DashboardLayout sidebarLinks={developerSidebarLinks}>
+    <DashboardLayout sidebarLinks={clientSidebarLinks}>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">Developer Profile</h2>
+        <h2 className="text-3xl font-bold">Client Profile</h2>
         <button
           className="btn btn-ghost"
           onClick={() => setIsEditMode(!isEditMode)}
         >
           {isEditMode ? (
             <>
-              <FiX /> Cancel
+              <FiX className="mr-2" /> Cancel
             </>
           ) : (
             <>
-              <FiEdit /> Edit Profile
+              <FiEdit className="mr-2" /> Edit Profile
             </>
           )}
         </button>
@@ -126,12 +129,12 @@ const DeveloperProfilePage = () => {
       {error && <div className="alert alert-error mb-6">{error}</div>}
 
       {isEditMode ? (
-        // Use the new reusable form and pass the unique fields as children
+        // UPDATE: Use the new component here
         <ProfileEditForm
           onSubmit={handleSubmit(handleFormSubmit)}
           isSubmitting={isSubmitting}
         >
-          {/* These fields are specific to the Developer */}
+          {/* These are the specific fields for the CLIENT role */}
           <div className="grid md:grid-cols-2 gap-6">
             <div>
               <fieldset className="fieldset">
@@ -159,16 +162,13 @@ const DeveloperProfilePage = () => {
           </div>
           <div>
             <fieldset className="fieldset">
-              <legend className="fieldset-legend">Email Address</legend>
+              <legend className="fieldset-legend">Company Name</legend>
               <input
-                type="email"
+                type="text"
                 className="input w-full bg-transparent focus:outline-none"
-                {...register("email", { required: "Email is required" })}
+                {...register("profile.companyName")}
               />
             </fieldset>
-            {errors.email && (
-              <p className="text-error text-xs mt-1">{errors.email.message}</p>
-            )}
           </div>
           <div>
             <fieldset className="fieldset">
@@ -179,20 +179,6 @@ const DeveloperProfilePage = () => {
               ></textarea>
             </fieldset>
           </div>
-          <div>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Skills</legend>
-              <input
-                type="text"
-                className="input w-full bg-transparent focus:outline-none"
-                placeholder="React, Node.js, Python"
-                {...register("profile.skills")}
-              />
-            </fieldset>
-            <p className="text-xs text-base-content/60 mt-2">
-              Enter skills separated by commas.
-            </p>
-          </div>
         </ProfileEditForm>
       ) : (
         <ProfileView user={user} />
@@ -201,4 +187,4 @@ const DeveloperProfilePage = () => {
   );
 };
 
-export default DeveloperProfilePage;
+export default ClientProfilePage;

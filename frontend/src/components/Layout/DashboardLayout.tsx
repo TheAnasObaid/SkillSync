@@ -25,7 +25,7 @@ const DashboardLayout = ({
   const pathname = usePathname();
 
   return (
-    <div className="min-h-screen grid grid-cols-[250px_1fr]">
+    <div className="min-h-screen grid grid-cols-[250px_1fr] py-5">
       <aside className="flex flex-col px-2">
         <Link href={homeHref} className="btn btn-ghost w-fit justify-start">
           <IoReturnUpBack size={20} />

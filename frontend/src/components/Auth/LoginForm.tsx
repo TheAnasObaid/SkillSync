@@ -20,9 +20,24 @@ interface FetchUserResponse {
   };
 }
 
+export const getDashboardPath = (
+  role: "client" | "developer" | "admin" | null
+): string => {
+  switch (role) {
+    case "admin":
+      return "/admin/panel";
+    case "developer":
+      return "/developer/dashboard";
+    case "client":
+      return "/client/dashboard";
+    default:
+      return "/";
+  }
+};
+
 const LoginForm = () => {
   const router = useRouter();
-  const { setToken, setRole } = useAuthStore();
+  const { setToken, setUser } = useAuthStore();
   const [error, setError] = useState("");
 
   const {
@@ -34,20 +49,15 @@ const LoginForm = () => {
   const onSubmit = async (data: LoginFormData) => {
     try {
       setError("");
-      const response = await apiClient.post<FetchUserResponse>(
-        "/auth/login",
-        data
-      );
+      const response = await apiClient.post("/auth/login", data);
       const { token, user } = response.data;
+
       setToken(token);
-      setRole(user.role);
-      router.push(
-        user.role === "admin"
-          ? "/admin/panel"
-          : user.role === "client"
-          ? "/client/dashboard"
-          : "/developer/dashboard"
-      );
+      setUser(user);
+
+      const dashboardPath = getDashboardPath(user.role);
+
+      router.push(dashboardPath);
       router.refresh();
     } catch (error) {
       if (error instanceof AxiosError) {

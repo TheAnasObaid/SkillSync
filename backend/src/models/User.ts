@@ -10,6 +10,7 @@ export interface UserDocument extends Document {
   profile?: {
     firstName: string;
     lastName: string;
+    companyName: string;
     avatar: string;
     bio: string;
     skills: Array<string>;
@@ -57,6 +58,7 @@ const UserSchema = new Schema<UserDocument>(
         minlength: 2,
       },
       lastName: { type: String },
+      companyName: { type: String },
       avatar: { type: String },
       bio: { type: String },
       skills: { type: [String] },

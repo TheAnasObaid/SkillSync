@@ -73,10 +73,14 @@ const SubmissionForm = ({ challengeId, onSuccess }: SubmissionFormProps) => {
       </div>
       <button
         type="submit"
-        className="btn btn-primary w-full"
+        className="btn btn-primary w-full mt-4"
         disabled={isSubmitting}
       >
-        {isSubmitting ? "Submitting..." : "Submit"}
+        {isSubmitting ? (
+          <span className="loading loading-spinner"></span>
+        ) : (
+          "Submit for Review"
+        )}
       </button>
     </form>
   );

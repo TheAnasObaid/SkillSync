@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+  getPublicSubmissionsByChallenge,
   getSubmissionsByChallenge,
   getSubmissionsByDeveloper,
   selectWinner,
@@ -14,6 +15,8 @@ router.get(
   authorize("client"),
   getSubmissionsByChallenge
 );
+
+router.get("/public/challenge/:challengeId", getPublicSubmissionsByChallenge);
 
 router.get(
   "/my-submissions",
