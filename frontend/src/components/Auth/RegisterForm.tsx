@@ -1,29 +1,26 @@
 "use client";
 
+import { RegisterFormData, registerSchema } from "@/lib/validationSchemas";
 import apiClient from "@/services/apiClient";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-
-interface FormData {
-  name: string;
-  email: string;
-  password: string;
-  role: "client" | "developer";
-}
 
 const RegisterForm = () => {
   const {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<FormData>();
-  const router = useRouter();
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+  });
 
+  const router = useRouter();
   const [error, setError] = useState("");
 
-  const onSubmit = async (formData: FormData) => {
+  const onSubmit = async (formData: RegisterFormData) => {
     setError("");
     try {
       await apiClient.post("/auth/register", formData);
@@ -37,17 +34,14 @@ const RegisterForm = () => {
     }
   };
 
-  if (error)
-    return (
-      <div className="toast">
-        <div className="alert alert-error">
-          <span>{error}</span>
-        </div>
-      </div>
-    );
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
+      {error && (
+        <div className="toast">
+          <p className="alert alert-error">{error}</p>
+        </div>
+      )}
+
       <div className="grid gap-2">
         <fieldset className="fieldset">
           <legend className="fieldset-legend">First Name</legend>
@@ -59,7 +53,7 @@ const RegisterForm = () => {
           />
         </fieldset>
         {errors.name && (
-          <p className="text-error text-xs">{errors.name.message}</p>
+          <p className="text-error text-sm">{errors.name.message}</p>
         )}
       </div>
 
@@ -74,7 +68,7 @@ const RegisterForm = () => {
           />
         </fieldset>
         {errors.email && (
-          <p className="text-error text-xs">{errors.email.message}</p>
+          <p className="text-error text-sm">{errors.email.message}</p>
         )}
       </div>
 
@@ -92,7 +86,7 @@ const RegisterForm = () => {
           />
         </fieldset>
         {errors.password && (
-          <p className="text-error text-xs">{errors.password.message}</p>
+          <p className="text-error text-sm">{errors.password.message}</p>
         )}
       </div>
 
@@ -112,7 +106,7 @@ const RegisterForm = () => {
           </select>
         </fieldset>
         {errors.role && (
-          <p className="text-error text-xs">{errors.role.message}</p>
+          <p className="text-error text-sm">{errors.role.message}</p>
         )}
       </div>
 
