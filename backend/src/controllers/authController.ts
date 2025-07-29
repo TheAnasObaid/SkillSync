@@ -80,9 +80,7 @@ export const forgotPassword = async (req: Request, res: Response) => {
 
   // 3) Send it to user's email
   try {
-    const resetURL = `${req.protocol}://${req.get(
-      "host"
-    )}/reset-password/${resetToken}`;
+    const resetURL = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
     // Create the email message
     const message = `
