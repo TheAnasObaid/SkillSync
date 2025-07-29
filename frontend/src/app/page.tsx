@@ -9,17 +9,17 @@ export default function Home() {
   return (
     <div className="bg-base-100 text-base-content font-sans">
       <main className="max-w-6xl mx-auto px-4 py-16">
-        <Hero />
-        <Benefits />
+        {/* <Hero />
+        <Benefits /> */}
         <section id="challenges" className="py-12 md:py-20">
           <h2 className="text-3xl text-center font-bold mb-8">
             Open Challenges
           </h2>
           <ChallengeList />
         </section>
-        <Workflow />
+        {/* <Workflow />
         <FounderQuote />
-        <CTA />
+        <CTA /> */}
       </main>
     </div>
   );

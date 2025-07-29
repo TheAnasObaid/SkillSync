@@ -37,6 +37,50 @@
   --noise: 0;
 }
 
+@plugin "daisyui/theme" {
+  name: "skillsync-brutal-light";
+  default: true;
+  prefersdark: false;
+  color-scheme: "light";
+  --color-base-100: oklch(98% 0 0); /* White background */
+  --color-base-200: oklch(95% 0 0); /* Light gray */
+  --color-base-300: oklch(90% 0 0); /* Slightly darker gray */
+  --color-base-content: oklch(10% 0 0); /* Black text */
+
+  --color-primary: oklch(80% 0.1 250); /* Dull grayish blue (like faded link) */
+  --color-primary-content: oklch(10% 0 0); /* Black text on blue */
+
+  --color-secondary: oklch(92% 0 0); /* Almost white */
+  --color-secondary-content: oklch(10% 0 0);
+
+  --color-accent: oklch(80% 0.1 250); /* Same blue reused */
+  --color-accent-content: oklch(10% 0 0);
+
+  --color-neutral: oklch(85% 0 0); /* Bland gray */
+  --color-neutral-content: oklch(10% 0 0);
+
+  --color-info: oklch(80% 0.1 250); /* Reusing blue */
+  --color-info-content: oklch(10% 0 0);
+
+  --color-success: oklch(85% 0 0); /* Just gray */
+  --color-success-content: oklch(10% 0 0);
+
+  --color-warning: oklch(85% 0 0);
+  --color-warning-content: oklch(10% 0 0);
+
+  --color-error: oklch(85% 0 0);
+  --color-error-content: oklch(10% 0 0);
+
+  --radius-selector: 0;
+  --radius-field: 0;
+  --radius-box: 0;
+  --size-selector: 0;
+  --size-field: 0;
+  --border: 1px solid oklch(60% 0 0); /* Just a flat gray line */
+  --depth: 0;
+  --noise: 0;
+}
+
 @keyframes scroll-vertical {
   from {
     transform: translateY(0);
