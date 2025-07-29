@@ -5,6 +5,7 @@ import apiClient from "@/services/apiClient";
 import { useAuthStore } from "@/store/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -66,6 +67,7 @@ const LoginForm = () => {
           <p className="alert alert-error">{error}</p>
         </div>
       )}
+
       <div className="grid gap-2">
         <fieldset className="fieldset">
           <legend className="fieldset-legend">Email</legend>
@@ -97,6 +99,15 @@ const LoginForm = () => {
         {errors.password && (
           <p className="text-error text-sm">{errors.password.message}</p>
         )}
+      </div>
+
+      <div className="text-right">
+        <Link
+          href="/forgot-password"
+          className="text-sm link link-hover text-primary"
+        >
+          Forgot Password?
+        </Link>
       </div>
 
       <button

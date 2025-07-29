@@ -34,7 +34,7 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="max-w-md w-full mx-auto my-10 p-8 bg-base-200/50 border border-base-300 rounded-lg shadow-md">
+    <div className="max-w-md w-full mx-auto my-10 p-8 bg-base-200/50 border border-base-300 rounded-lg">
       <h1 className="text-2xl font-bold text-center mb-6">
         Forgot Your Password?
       </h1>
@@ -45,19 +45,20 @@ const ForgotPasswordPage = () => {
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div className="grid gap-2">
-          <label htmlFor="email" className="label">
-            Email Address
-          </label>
-          <input
-            id="email"
-            type="email"
-            className="input input-bordered w-full"
-            {...register("email", { required: "Email is required" })}
-          />
+          <fieldset className="fieldset">
+            <legend className="fieldset-legend">Email</legend>
+            <input
+              type="email"
+              placeholder="name@example.com"
+              className="input input-bordered bg-base-200 w-full"
+              {...register("email", { required: "Email is required" })}
+            />
+          </fieldset>
           {errors.email && (
-            <p className="text-error text-xs mt-1">{errors.email.message}</p>
+            <p className="text-error text-sm">{errors.email.message}</p>
           )}
         </div>
+
         <button
           type="submit"
           className="btn btn-primary w-full"
