@@ -1,7 +1,17 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 export type Role = "developer" | "client" | "admin";
+
+export interface PortfolioItem {
+  _id?: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  liveUrl?: string;
+  githubUrl?: string;
+}
 
 export interface UserDocument extends Document {
   email: string;
@@ -15,7 +25,7 @@ export interface UserDocument extends Document {
     bio: string;
     skills: Array<string>;
     experience: string;
-    portfolio: Array<Object>;
+    portfolio: PortfolioItem[];
     socialLinks: Object;
   };
   reputation?: {
@@ -27,8 +37,19 @@ export interface UserDocument extends Document {
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
+  passwordResetToken?: string; // Add this
+  passwordResetExpires?: Date; // Add this
   comparePassword: (candidate: string) => Promise<boolean>;
+  createPasswordResetToken(): string;
 }
+
+const PortfolioItemSchema = new Schema<PortfolioItem>({
+  title: { type: String, required: true, trim: true },
+  description: { type: String, required: true, trim: true },
+  imageUrl: { type: String, required: true },
+  liveUrl: { type: String, trim: true },
+  githubUrl: { type: String, trim: true },
+});
 
 const UserSchema = new Schema<UserDocument>(
   {
@@ -63,7 +84,7 @@ const UserSchema = new Schema<UserDocument>(
       bio: { type: String },
       skills: { type: [String] },
       experience: { type: String },
-      portfolio: { type: [Object] },
+      portfolio: { type: [PortfolioItemSchema] },
       socialLinks: { type: Object },
     },
     reputation: {
@@ -73,6 +94,8 @@ const UserSchema = new Schema<UserDocument>(
     },
     isVerified: { type: Boolean },
     lastLogin: { type: Date },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,
@@ -89,6 +112,21 @@ UserSchema.pre("save", async function (next) {
 
 UserSchema.methods.comparePassword = async function (candidate: string) {
   return bcrypt.compare(candidate, this.password);
+};
+
+UserSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // Token is valid for 10 minutes
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  // Return the unhashed token to be "sent" to the user
+  return resetToken;
 };
 
 const User = mongoose.model<UserDocument>("User", UserSchema);

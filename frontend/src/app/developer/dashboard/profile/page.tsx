@@ -3,6 +3,9 @@
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
+import PortfolioCard, {
+  PortfolioItem,
+} from "@/components/Profile/PortfolioCard";
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
 import apiClient from "@/services/apiClient";
@@ -10,7 +13,7 @@ import { User, useAuthStore } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FiEdit, FiUser, FiX } from "react-icons/fi";
+import { FiEdit, FiPlus, FiUser, FiX } from "react-icons/fi";
 import { TbBriefcase2 } from "react-icons/tb";
 
 // This interface now lives in the page, specific to the developer's form
@@ -42,6 +45,8 @@ const DeveloperProfilePage = () => {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
+  const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
+  const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
 
   // The useForm hook is now managed by the parent page
   const {
@@ -50,6 +55,66 @@ const DeveloperProfilePage = () => {
     reset,
     formState: { errors },
   } = useForm<ProfileFormData>();
+
+  const {
+    register: registerPortfolio,
+    handleSubmit: handlePortfolioSubmit,
+    reset: resetPortfolio,
+    formState: { errors: portfolioErrors, isSubmitting: isPortfolioSubmitting },
+  } = useForm<PortfolioItem>();
+
+  useEffect(() => {
+    // When the user data is loaded, set the portfolio state
+    if (user?.profile?.portfolio) {
+      setPortfolio(user.profile.portfolio);
+    }
+  }, [user]);
+
+  // --- THE FIX: State to prevent hydration mismatch ---
+  const [hasMounted, setHasMounted] = useState(false);
+
+  // --- THE FIX: Run this effect only on the client, after the component mounts ---
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
+
+  const handleAddPortfolioItem = async (data: PortfolioItem) => {
+    const newItem = {
+      ...data,
+      imageUrl: "https://placehold.co/600x400/1a1a1a/ffffff?text=Project",
+    };
+    try {
+      const response = await apiClient.post<PortfolioItem[]>(
+        "/users/profile/portfolio",
+        newItem
+      );
+      const updatedPortfolio = response.data;
+      setPortfolio(updatedPortfolio);
+      setUser({
+        ...user!,
+        profile: { ...user!.profile!, portfolio: updatedPortfolio },
+      });
+      setIsPortfolioModalOpen(false);
+      resetPortfolio();
+    } catch (err) {
+      alert("Failed to add project.");
+    }
+  };
+
+  const handleDeletePortfolioItem = async (id: string) => {
+    if (!confirm("Are you sure?")) return;
+    try {
+      await apiClient.delete(`/users/profile/portfolio/${id}`);
+      const updatedPortfolio = portfolio.filter((p) => p._id !== id);
+      setPortfolio(updatedPortfolio);
+      setUser({
+        ...user!,
+        profile: { ...user!.profile!, portfolio: updatedPortfolio },
+      });
+    } catch (err) {
+      alert("Failed to delete project.");
+    }
+  };
 
   const handleFormSubmit = async (data: ProfileFormData) => {
     setIsSubmitting(true);
@@ -96,108 +161,210 @@ const DeveloperProfilePage = () => {
     }
   }, [isEditMode, user, reset]);
 
-  if (!user)
+  if (!hasMounted || !user) {
     return (
       <div className="text-center p-10">
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
+  }
 
   return (
-    <DashboardLayout sidebarLinks={developerSidebarLinks}>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">Developer Profile</h2>
-        <button
-          className="btn btn-ghost"
-          onClick={() => setIsEditMode(!isEditMode)}
-        >
-          {isEditMode ? (
-            <>
-              <FiX /> Cancel
-            </>
-          ) : (
-            <>
-              <FiEdit /> Edit Profile
-            </>
-          )}
-        </button>
-      </div>
+    <>
+      <DashboardLayout sidebarLinks={developerSidebarLinks}>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-3xl font-bold">Developer Profile</h2>
+          <button
+            className="btn btn-ghost"
+            onClick={() => setIsEditMode(!isEditMode)}
+          >
+            {isEditMode ? (
+              <>
+                <FiX /> Cancel
+              </>
+            ) : (
+              <>
+                <FiEdit /> Edit Profile
+              </>
+            )}
+          </button>
+        </div>
 
-      {error && <div className="alert alert-error mb-6">{error}</div>}
+        {error && <div className="alert alert-error mb-6">{error}</div>}
 
-      {isEditMode ? (
-        // Use the new reusable form and pass the unique fields as children
-        <ProfileEditForm
-          onSubmit={handleSubmit(handleFormSubmit)}
-          isSubmitting={isSubmitting}
-        >
-          {/* These fields are specific to the Developer */}
-          <div className="grid md:grid-cols-2 gap-6">
+        {isEditMode ? (
+          // Use the new reusable form and pass the unique fields as children
+          <ProfileEditForm
+            onSubmit={handleSubmit(handleFormSubmit)}
+            isSubmitting={isSubmitting}
+          >
+            {/* These fields are specific to the Developer */}
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <fieldset className="fieldset">
+                  <legend className="fieldset-legend">First Name</legend>
+                  <input
+                    type="text"
+                    className="input w-full bg-transparent focus:outline-none"
+                    {...register("name", {
+                      required: "First name is required",
+                    })}
+                  />
+                </fieldset>
+                {errors.name && (
+                  <p className="text-error text-xs mt-1">
+                    {errors.name.message}
+                  </p>
+                )}
+              </div>
+              <div>
+                <fieldset className="fieldset">
+                  <legend className="fieldset-legend">Last Name</legend>
+                  <input
+                    type="text"
+                    className="input w-full bg-transparent focus:outline-none"
+                    {...register("profile.lastName")}
+                  />
+                </fieldset>
+              </div>
+            </div>
             <div>
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">First Name</legend>
+                <legend className="fieldset-legend">Email Address</legend>
                 <input
-                  type="text"
+                  type="email"
                   className="input w-full bg-transparent focus:outline-none"
-                  {...register("name", { required: "First name is required" })}
+                  {...register("email", { required: "Email is required" })}
                 />
               </fieldset>
-              {errors.name && (
-                <p className="text-error text-xs mt-1">{errors.name.message}</p>
+              {errors.email && (
+                <p className="text-error text-xs mt-1">
+                  {errors.email.message}
+                </p>
               )}
             </div>
             <div>
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">Last Name</legend>
+                <legend className="fieldset-legend">Bio</legend>
+                <textarea
+                  className="textarea w-full bg-transparent focus:outline-none h-24"
+                  {...register("profile.bio")}
+                ></textarea>
+              </fieldset>
+            </div>
+            <div>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Skills</legend>
                 <input
                   type="text"
                   className="input w-full bg-transparent focus:outline-none"
-                  {...register("profile.lastName")}
+                  placeholder="React, Node.js, Python"
+                  {...register("profile.skills")}
                 />
               </fieldset>
+              <p className="text-xs text-base-content/60 mt-2">
+                Enter skills separated by commas.
+              </p>
             </div>
+          </ProfileEditForm>
+        ) : (
+          <ProfileView user={user} />
+        )}
+
+        <div className="mt-12">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-2xl font-bold">My Portfolio</h2>
+            <button
+              className="btn btn-primary btn-sm"
+              onClick={() => setIsPortfolioModalOpen(true)}
+            >
+              <FiPlus /> Add Project
+            </button>
           </div>
-          <div>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Email Address</legend>
-              <input
-                type="email"
-                className="input w-full bg-transparent focus:outline-none"
-                {...register("email", { required: "Email is required" })}
-              />
-            </fieldset>
-            {errors.email && (
-              <p className="text-error text-xs mt-1">{errors.email.message}</p>
-            )}
-          </div>
-          <div>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Bio</legend>
-              <textarea
-                className="textarea w-full bg-transparent focus:outline-none h-24"
-                {...register("profile.bio")}
-              ></textarea>
-            </fieldset>
-          </div>
-          <div>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Skills</legend>
+          {portfolio.length > 0 ? (
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {portfolio.map((item) => (
+                <PortfolioCard
+                  key={item._id}
+                  item={item}
+                  onDelete={handleDeletePortfolioItem}
+                  isOwner={true}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center p-12 bg-base-200/50 border border-dashed border-base-300 rounded-lg">
+              <p className="text-base-content/60">
+                Your portfolio is empty. Add a project to showcase your skills!
+              </p>
+            </div>
+          )}
+        </div>
+      </DashboardLayout>
+      <dialog className={`modal ${isPortfolioModalOpen ? "modal-open" : ""}`}>
+        <div className="modal-box border border-base-300">
+          <button
+            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+            onClick={() => setIsPortfolioModalOpen(false)}
+          >
+            ✕
+          </button>
+          <h3 className="font-bold text-lg mb-4">Add New Portfolio Project</h3>
+          <form
+            onSubmit={handlePortfolioSubmit(handleAddPortfolioItem)}
+            className="space-y-4"
+          >
+            <div className="grid gap-2">
+              <label className="label text-sm">Project Title</label>
               <input
                 type="text"
-                className="input w-full bg-transparent focus:outline-none"
-                placeholder="React, Node.js, Python"
-                {...register("profile.skills")}
+                className="input input-bordered w-full"
+                {...registerPortfolio("title", { required: true })}
               />
-            </fieldset>
-            <p className="text-xs text-base-content/60 mt-2">
-              Enter skills separated by commas.
-            </p>
-          </div>
-        </ProfileEditForm>
-      ) : (
-        <ProfileView user={user} />
-      )}
-    </DashboardLayout>
+            </div>
+            <div className="grid gap-2">
+              <label className="label text-sm">Description</label>
+              <textarea
+                className="textarea textarea-bordered w-full"
+                {...registerPortfolio("description", { required: true })}
+              ></textarea>
+            </div>
+            <div className="grid gap-2">
+              <label className="label text-sm">Live URL (Optional)</label>
+              <input
+                type="url"
+                className="input input-bordered w-full"
+                {...registerPortfolio("liveUrl")}
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="label text-sm">GitHub URL (Optional)</label>
+              <input
+                type="url"
+                className="input input-bordered w-full"
+                {...registerPortfolio("githubUrl")}
+              />
+            </div>
+            <div className="modal-action">
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={isPortfolioSubmitting}
+              >
+                {isPortfolioSubmitting ? (
+                  <span className="loading loading-spinner"></span>
+                ) : (
+                  "Add Project"
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={() => setIsPortfolioModalOpen(false)}>close</button>
+        </form>
+      </dialog>
+    </>
   );
 };
 

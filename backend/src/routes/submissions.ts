@@ -3,6 +3,7 @@ import {
   getPublicSubmissionsByChallenge,
   getSubmissionsByChallenge,
   getSubmissionsByDeveloper,
+  rateSubmission,
   selectWinner,
 } from "../controllers/submissionController";
 import { authenticate, authorize } from "../middleware/auth";
@@ -30,6 +31,13 @@ router.patch(
   authenticate,
   authorize("client"),
   selectWinner
+);
+
+router.post(
+  "/:submissionId/rate",
+  authenticate,
+  authorize("client"),
+  rateSubmission
 );
 
 export default router;
