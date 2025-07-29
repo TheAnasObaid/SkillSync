@@ -53,7 +53,7 @@ const LoginForm = () => {
       const { token, user } = response.data;
 
       setToken(token);
-      setUser({ name: user.name, email: user.email, role: user.role });
+      setUser(user);
 
       const dashboardPath = getDashboardPath(user.role);
 

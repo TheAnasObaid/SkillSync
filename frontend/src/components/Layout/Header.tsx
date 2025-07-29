@@ -21,6 +21,7 @@ const Header = () => {
   const { token, user, logout } = useAuthStore();
 
   const [isClient, setIsClient] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
@@ -29,64 +30,93 @@ const Header = () => {
   const handleLogout = () => {
     logout();
     router.push("/");
+    setIsLogoutModalOpen(false);
   };
 
   const dashboardHref = user ? getDashboardPath(user.role) : "/";
-
+  console.log(user);
   return (
-    <header className="p-3 bg-base-100/80 backdrop-blur-sm border-b border-base-300/100">
-      <div className="navbar max-w-screen-xl mx-auto flex justify-between items-center">
-        <div className="navbar-start">
-          <Link
-            href="/"
-            className={`${spaceMono.variable} ${spaceMono.className} font-bold text-lg`}
-          >
-            Skill<span className="text-primary">Sync.</span>
-          </Link>
-        </div>
-        <div className="navbar-end">
-          {isClient && (
-            <>
-              {token && user ? (
-                <div className="dropdown dropdown-end">
-                  <button tabIndex={0} className="btn btn-ghost btn-circle">
-                    <UserAvatar name={user.name} />
-                  </button>
-                  <ul
-                    tabIndex={0}
-                    className="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52"
-                  >
-                    <li>
-                      <Link href={dashboardHref} className="justify-between">
-                        Dashboard
-                        <span className="badge badge-primary badge-soft badge-sm">
-                          {user.role}
-                        </span>
+    <>
+      <header className="p-3 bg-base-100/80 backdrop-blur-sm border-b border-base-300/100">
+        <div className="navbar max-w-screen-xl mx-auto flex justify-between items-center">
+          <div className="navbar-start">
+            <Link
+              href="/"
+              className={`${spaceMono.variable} ${spaceMono.className} font-bold text-lg`}
+            >
+              Skill<span className="text-primary">Sync.</span>
+            </Link>
+          </div>
+          <div className="navbar-end">
+            {isClient && (
+              <>
+                {token && user ? (
+                  <div className="dropdown dropdown-end">
+                    <button tabIndex={0} className="btn btn-ghost btn-circle">
+                      <UserAvatar name={user.profile?.firstName} />
+                    </button>
+                    <ul
+                      tabIndex={0}
+                      className="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52"
+                    >
+                      <li>
+                        <Link href={dashboardHref} className="justify-between">
+                          Dashboard
+                          <span className="badge badge-primary badge-soft badge-sm">
+                            {user.role}
+                          </span>
+                        </Link>
+                      </li>
+                      <li>
+                        <button onClick={() => setIsLogoutModalOpen(true)}>
+                          Logout
+                        </button>
+                      </li>
+                    </ul>
+                  </div>
+                ) : (
+                  <nav>
+                    {pathname === "/login" ? (
+                      <Link href="/register" className="btn btn-ghost">
+                        Sign Up
                       </Link>
-                    </li>
-                    <li>
-                      <button onClick={handleLogout}>Logout</button>
-                    </li>
-                  </ul>
-                </div>
-              ) : (
-                <nav>
-                  {pathname === "/login" ? (
-                    <Link href="/register" className="btn btn-ghost">
-                      Sign Up
-                    </Link>
-                  ) : (
-                    <Link href="/login" className="btn btn-primary">
-                      Sign In
-                    </Link>
-                  )}
-                </nav>
-              )}
-            </>
-          )}
+                    ) : (
+                      <Link href="/login" className="btn btn-primary">
+                        Sign In
+                      </Link>
+                    )}
+                  </nav>
+                )}
+              </>
+            )}
+          </div>
         </div>
-      </div>
-    </header>
+      </header>
+
+      <dialog
+        id="logout_confirmation_modal"
+        className={`modal ${isLogoutModalOpen ? "modal-open" : ""}`}
+      >
+        <div className="modal-box border border-base-300">
+          <h3 className="font-bold text-lg">Confirm Logout</h3>
+          <p className="py-4">Are you sure you want to log out?</p>
+          <div className="modal-action">
+            <button
+              className="btn btn-ghost"
+              onClick={() => setIsLogoutModalOpen(false)}
+            >
+              Cancel
+            </button>
+            <button className="btn btn-error" onClick={handleLogout}>
+              Yes, Logout
+            </button>
+          </div>
+        </div>
+        <form method="dialog" className="modal-backdrop">
+          <button onClick={() => setIsLogoutModalOpen(false)}>close</button>
+        </form>
+      </dialog>
+    </>
   );
 };
 

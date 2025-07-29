@@ -34,34 +34,27 @@ export const loginUser = async (req: Request, res: Response) => {
 
   if (!user) {
     res.status(400).json({ status: "failed", error: "User not found" });
+    return;
   }
 
-  const isMatch = await user?.comparePassword(password);
+  const isMatch = await user.comparePassword(password);
 
   if (!isMatch) {
     res.status(400).json({ status: "failed", error: "Invalid credentials" });
+    return;
   }
 
-  const token = generateToken(user?.id.toString());
+  // --- START OF CHANGE ---
 
-  // Set the token in an HttpOnly cookie for Server Components
-  res.cookie("authToken", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV !== "development", // Use secure cookies in production
-    sameSite: "strict",
-    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    path: "/",
-  });
+  // Instead of creating a simplified object like { name: user.profile.firstName, ... }
+  // Send the entire user object, which already has the correct structure.
+  // We can manually remove the password to be safe, although .select('-password') on a new query would also work.
+  const userPayload = user.toObject();
+  console.log(userPayload);
 
-  // Also send the token in the response for client-side storage (for immediate use)
   res.status(200).json({
     status: "success",
-    user: {
-      id: user?.id,
-      name: user?.profile?.firstName,
-      email: user?.email,
-      role: user?.role,
-    },
-    token: token,
+    user: userPayload, // Send the correctly structured user object
+    token: generateToken(user.id),
   });
 };
