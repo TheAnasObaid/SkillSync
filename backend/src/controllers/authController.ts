@@ -32,14 +32,28 @@ export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email }).select("+password");
 
-  if (!user)
+  if (!user) {
     res.status(400).json({ status: "failed", error: "User not found" });
+  }
 
   const isMatch = await user?.comparePassword(password);
 
-  if (!isMatch)
+  if (!isMatch) {
     res.status(400).json({ status: "failed", error: "Invalid credentials" });
+  }
 
+  const token = generateToken(user?.id.toString());
+
+  // Set the token in an HttpOnly cookie for Server Components
+  res.cookie("authToken", token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV !== "development", // Use secure cookies in production
+    sameSite: "strict",
+    maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    path: "/",
+  });
+
+  // Also send the token in the response for client-side storage (for immediate use)
   res.status(200).json({
     status: "success",
     user: {
@@ -48,6 +62,6 @@ export const loginUser = async (req: Request, res: Response) => {
       email: user?.email,
       role: user?.role,
     },
-    token: generateToken(user?.id.toString()),
+    token: token,
   });
 };
