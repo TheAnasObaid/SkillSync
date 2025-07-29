@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
+import crypto from "crypto";
 
 export type Role = "developer" | "client" | "admin";
 
@@ -27,7 +28,10 @@ export interface UserDocument extends Document {
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
+  passwordResetToken?: string; // Add this
+  passwordResetExpires?: Date; // Add this
   comparePassword: (candidate: string) => Promise<boolean>;
+  createPasswordResetToken(): string;
 }
 
 const UserSchema = new Schema<UserDocument>(
@@ -73,6 +77,8 @@ const UserSchema = new Schema<UserDocument>(
     },
     isVerified: { type: Boolean },
     lastLogin: { type: Date },
+    passwordResetToken: String,
+    passwordResetExpires: Date,
   },
   {
     timestamps: true,
@@ -89,6 +95,21 @@ UserSchema.pre("save", async function (next) {
 
 UserSchema.methods.comparePassword = async function (candidate: string) {
   return bcrypt.compare(candidate, this.password);
+};
+
+UserSchema.methods.createPasswordResetToken = function () {
+  const resetToken = crypto.randomBytes(32).toString("hex");
+
+  this.passwordResetToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  // Token is valid for 10 minutes
+  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
+
+  // Return the unhashed token to be "sent" to the user
+  return resetToken;
 };
 
 const User = mongoose.model<UserDocument>("User", UserSchema);
