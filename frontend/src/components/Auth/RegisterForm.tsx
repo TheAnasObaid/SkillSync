@@ -24,7 +24,7 @@ const RegisterForm = () => {
     setError("");
     try {
       await apiClient.post("/auth/register", formData);
-      router.push("/login?registered=true");
+      router.push(`/check-inbox?email=${formData.email}`);
     } catch (err) {
       if (err instanceof AxiosError) {
         setError(err.response?.data.message || "Registration failed.");

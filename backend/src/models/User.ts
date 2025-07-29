@@ -37,8 +37,9 @@ export interface UserDocument extends Document {
   lastLogin: Date;
   createdAt: Date;
   updatedAt: Date;
-  passwordResetToken?: string; // Add this
-  passwordResetExpires?: Date; // Add this
+  verificationToken?: string;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   comparePassword: (candidate: string) => Promise<boolean>;
   createPasswordResetToken(): string;
 }
@@ -92,8 +93,9 @@ const UserSchema = new Schema<UserDocument>(
       totalRatings: { type: Number },
       completedChallenges: { type: Number },
     },
-    isVerified: { type: Boolean },
     lastLogin: { type: Date },
+    isVerified: { type: Boolean, default: false },
+    verificationToken: String,
     passwordResetToken: String,
     passwordResetExpires: Date,
   },
