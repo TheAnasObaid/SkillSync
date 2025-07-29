@@ -4,6 +4,15 @@ import crypto from "crypto";
 
 export type Role = "developer" | "client" | "admin";
 
+export interface PortfolioItem {
+  _id?: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  liveUrl?: string;
+  githubUrl?: string;
+}
+
 export interface UserDocument extends Document {
   email: string;
   password: string;
@@ -16,7 +25,7 @@ export interface UserDocument extends Document {
     bio: string;
     skills: Array<string>;
     experience: string;
-    portfolio: Array<Object>;
+    portfolio: PortfolioItem[];
     socialLinks: Object;
   };
   reputation?: {
@@ -33,6 +42,14 @@ export interface UserDocument extends Document {
   comparePassword: (candidate: string) => Promise<boolean>;
   createPasswordResetToken(): string;
 }
+
+const PortfolioItemSchema = new Schema<PortfolioItem>({
+  title: { type: String, required: true, trim: true },
+  description: { type: String, required: true, trim: true },
+  imageUrl: { type: String, required: true },
+  liveUrl: { type: String, trim: true },
+  githubUrl: { type: String, trim: true },
+});
 
 const UserSchema = new Schema<UserDocument>(
   {
@@ -67,7 +84,7 @@ const UserSchema = new Schema<UserDocument>(
       bio: { type: String },
       skills: { type: [String] },
       experience: { type: String },
-      portfolio: { type: [Object] },
+      portfolio: { type: [PortfolioItemSchema] },
       socialLinks: { type: Object },
     },
     reputation: {

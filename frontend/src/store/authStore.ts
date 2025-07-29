@@ -1,9 +1,11 @@
+import { PortfolioItem } from "@/components/Profile/PortfolioCard";
 import { create } from "zustand";
 
 export type Role = "developer" | "client" | "admin" | null;
 
 export type User = {
   email: string;
+  // This password field is likely incorrect in a user store, but we'll leave it for now
   password: string;
   role: Role;
   profile?: {
@@ -14,7 +16,7 @@ export type User = {
     bio: string;
     skills: Array<string>;
     experience: string;
-    portfolio: Array<Object>;
+    portfolio: PortfolioItem[]; // <-- 2. UPDATE THIS LINE from Array<Object> to PortfolioItem[]
     socialLinks: Object;
   };
   reputation?: {
