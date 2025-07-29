@@ -157,3 +157,40 @@ export const selectWinner = async (
     session.endSession();
   }
 };
+
+export const rateSubmission = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  const { submissionId } = req.params;
+  const { ratings, feedback } = req.body;
+  const userId = req.userId;
+
+  try {
+    const submission = await Submission.findById(submissionId);
+    if (!submission) {
+      res.status(404).json({ message: "Submission not found." });
+      return;
+    }
+
+    const challenge = await Challenge.findById(submission.challengeId);
+    if (challenge?.createdBy.toString() !== userId) {
+      res.status(403).json({ message: "You do not own this challenge." });
+      return;
+    }
+
+    // Update the submission with the new data
+    submission.ratings = ratings;
+    submission.feedback = feedback;
+    if (submission.status === "pending") {
+      submission.status = "reviewed"; // Mark as reviewed
+    }
+
+    await submission.save();
+
+    res.status(200).json(submission);
+  } catch (error) {
+    console.error("Failed to rate submission:", error);
+    res.status(500).json({ message: "Failed to rate submission." });
+  }
+};

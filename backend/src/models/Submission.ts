@@ -7,6 +7,13 @@ export interface SubmissionDocument extends Document {
   liveDemo?: string;
   description: string;
   status: "pending" | "reviewed" | "winner" | "rejected";
+  ratings?: {
+    overall: number;
+    codeQuality: number;
+    functionality: number;
+    creativity: number;
+  };
+  feedback?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -38,6 +45,16 @@ const SubmissionSchema = new Schema<SubmissionDocument>(
       type: String,
       enum: ["pending", "reviewed", "winner", "rejected"],
       default: "pending",
+    },
+    ratings: {
+      overall: { type: Number, min: 1, max: 5 },
+      codeQuality: { type: Number, min: 1, max: 5 },
+      functionality: { type: Number, min: 1, max: 5 },
+      creativity: { type: Number, min: 1, max: 5 },
+    },
+    feedback: {
+      type: String,
+      trim: true,
     },
   },
   {
