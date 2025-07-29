@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="skillsync-brutal-light"
+      data-theme="skillsync-tech"
       className={`${inter.className} ${inter.variable}`}
     >
       <body className="antialiased grid grid-rows-[auto_1fr_auto] gap-y-5">

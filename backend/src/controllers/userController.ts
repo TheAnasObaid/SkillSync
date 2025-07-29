@@ -1,6 +1,7 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import User, { PortfolioItem } from "../models/User";
+import upload from "../middleware/upload";
 
 export const getUserProfile = async (
   req: AuthenticatedRequest,
@@ -90,7 +91,6 @@ export const addPortfolioItem = async (
   }
 };
 
-// 2. DELETE A PORTFOLIO ITEM
 export const deletePortfolioItem = async (
   req: AuthenticatedRequest,
   res: Response
@@ -121,4 +121,36 @@ export const deletePortfolioItem = async (
   } catch (error) {
     res.status(500).json({ message: "Failed to delete portfolio item." });
   }
+};
+
+export const uploadAvatar = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  upload(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
+    }
+    if (req.file == undefined) {
+      return res.status(400).json({ message: "Error: No File Selected!" });
+    }
+
+    try {
+      const user = await User.findById(req.userId);
+      if (!user || !user.profile) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      // Save the file path to the user's profile
+      user.profile.avatar = req.file.path;
+      await user.save();
+
+      res.status(200).json({
+        message: "Avatar uploaded successfully!",
+        avatarUrl: req.file.path,
+      });
+    } catch (error) {
+      res.status(500).json({ message: "Server error while updating profile." });
+    }
+  });
 };

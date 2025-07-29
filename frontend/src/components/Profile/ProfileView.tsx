@@ -1,24 +1,56 @@
 import { User } from "@/store/authStore";
-import { FiAward, FiBriefcase, FiMail, FiShield } from "react-icons/fi";
+import {
+  FiAward,
+  FiBriefcase,
+  FiCamera,
+  FiMail,
+  FiShield,
+} from "react-icons/fi";
 import UserAvatar from "./UserAvatar";
 
-interface ProfileViewProps {
+interface Props {
   user: User | null;
+  onAvatarClick?: () => void;
 }
 
-const ProfileView = ({ user }: ProfileViewProps) => {
+const ProfileView = ({ user, onAvatarClick }: Props) => {
   if (!user) {
     return null;
   }
+
+  const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   return (
     <div className="space-y-6">
       <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
         <div className="card-body p-8 flex flex-col md:flex-row items-center gap-6">
-          <UserAvatar
-            name={user.profile?.firstName}
-            className="w-24 h-24 text-4xl"
-          />
+          <div
+            className="relative group cursor-pointer"
+            onClick={onAvatarClick}
+          >
+            {/* Check if the user has a custom avatar from our uploads */}
+            {user.profile?.avatar ? (
+              <div className="avatar">
+                <div className="w-24 h-24 rounded-full">
+                  {/* Construct the full URL to the backend */}
+                  <img
+                    src={`${API_URL}/${user.profile.avatar.replace(
+                      /\\/g,
+                      "/"
+                    )}`}
+                  />
+                </div>
+              </div>
+            ) : (
+              <UserAvatar
+                name={user.profile?.firstName}
+                className="w-24 h-24 text-4xl"
+              />
+            )}
+            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <FiCamera className="text-white text-2xl" />
+            </div>
+          </div>
           <div className="text-center md:text-left">
             <h2 className="text-3xl font-bold">
               {user.profile?.firstName} {user.profile?.lastName}
