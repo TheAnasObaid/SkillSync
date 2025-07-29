@@ -38,7 +38,7 @@ const ForgotPasswordPage = () => {
   };
 
   return (
-    <div className="max-w-md mx-auto my-10 p-8 bg-base-200/50 rounded-lg shadow-md">
+    <div className="max-w-md mx-auto w-full my-10 p-8 bg-base-200/50 rounded-lg shadow-md">
       <h1 className="text-2xl font-bold text-center mb-6">
         Forgot Your Password?
       </h1>
@@ -48,7 +48,7 @@ const ForgotPasswordPage = () => {
       </p>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
+        <div className="grid gap-2">
           <label htmlFor="email" className="label">
             Email Address
           </label>

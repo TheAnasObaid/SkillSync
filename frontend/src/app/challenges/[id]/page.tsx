@@ -115,7 +115,7 @@ const ChallengeDetailsPage = () => {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto px-4 py-12">
+      <div className="max-w-6xl w-full mx-auto px-4 py-12">
         <div className="grid lg:grid-cols-3 gap-12">
           <div className="lg:col-span-2 space-y-8">
             <h1 className="text-4xl md:text-5xl font-bold">

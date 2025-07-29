@@ -4,7 +4,6 @@ import LoginForm from "@/components/Auth/LoginForm";
 import { useSearchParams } from "next/navigation";
 
 const LoginClientComponent = () => {
-  // All the logic that uses the client-side hook is now safely inside this component
   const searchParams = useSearchParams();
   const isRegistered = searchParams.get("registered");
 
