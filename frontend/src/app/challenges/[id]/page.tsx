@@ -41,7 +41,7 @@ const CtaBlock = ({
   }
 
   return (
-    <div className="alert bg-base-300 text-center">
+    <div className="alert alert-warning text-center">
       <Link
         href="/login"
         className="flex items-center justify-center gap-2 w-full"
@@ -215,10 +215,12 @@ const ChallengeDetailsPage = () => {
               </div>
             </div>
 
-            {/* <CtaBlock
-              role={user?.role}
-              onOpenModal={() => setIsModalOpen(true)}
-            /> */}
+            {user && (
+              <CtaBlock
+                role={user.role}
+                onOpenModal={() => setIsModalOpen(true)}
+              />
+            )}
           </aside>
         </div>
       </div>
