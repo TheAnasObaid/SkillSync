@@ -1,37 +1,89 @@
-import { FiXCircle, FiCheckCircle } from "react-icons/fi";
+import {
+  FiAward,
+  FiCheck,
+  FiClock,
+  FiCode,
+  FiThumbsDown,
+  FiXCircle,
+  FiZap,
+} from "react-icons/fi";
+
+// A small, reusable component for each benefit/pain point to keep the code DRY
+const BenefitItem = ({
+  icon,
+  text,
+}: {
+  icon: React.ReactNode;
+  text: string;
+}) => (
+  <li className="flex items-start gap-3">
+    <div className="flex-shrink-0 mt-1">{icon}</div>
+    <span>{text}</span>
+  </li>
+);
 
 const Benefits = () => {
   return (
-    <section className="py-20 max-w-5xl mx-auto border-b border-base-300/100">
+    <section className="py-20 max-w-5xl mx-auto">
       <div className="text-center space-y-3 mb-12">
-        <h2 className="text-4xl font-bold">Stop Guessing. Start Building.</h2>
-        <p className="text-lg text-base-content/70">
-          Traditional hiring is broken. We replace ambiguity with tangible
-          results.
+        <h2 className="text-4xl font-bold tracking-tight">
+          Stop Guessing. Start Building.
+        </h2>
+        <p className="text-lg text-base-content/70 max-w-2xl mx-auto">
+          Traditional hiring is slow, biased, and inefficient. We replace
+          ambiguity with tangible results from day one.
         </p>
       </div>
+
+      {/* The main grid layout remains effective */}
       <div className="grid md:grid-cols-2 gap-8 text-left">
-        <div className="space-y-4 p-6 bg-base-200/50 border border-base-300 rounded-lg">
-          <h3 className="font-bold text-xl text-error flex items-center gap-2">
-            <FiXCircle /> The Old Way
-          </h3>
-          <ul className="space-y-2 list-inside text-base-content/70">
-            <li>Hours spent sifting through résumés.</li>
-            <li>Uncertain technical skills and "talkers" vs. "doers".</li>
-            <li>Lengthy, expensive interview cycles.</li>
-            <li>Projects stalling due to a bad hire.</li>
-          </ul>
+        {/* CARD 1: The Old Way (Muted and less appealing) */}
+        <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all duration-300">
+          <div className="card-body">
+            <h3 className="card-title text-error/80 flex items-center gap-2">
+              <FiXCircle /> The Old Way
+            </h3>
+            <div className="divider mt-2 mb-4"></div>
+            <ul className="space-y-4 text-base-content/70">
+              <BenefitItem
+                icon={<FiThumbsDown className="text-error/60" />}
+                text="Hiring based on résumés and claims, not proven skill."
+              />
+              <BenefitItem
+                icon={<FiClock className="text-error/60" />}
+                text="Lengthy, expensive interview cycles that stall projects."
+              />
+              <BenefitItem
+                icon={<FiCode className="text-error/60" />}
+                text="Onboarding a new hire only to discover a technical mismatch."
+              />
+            </ul>
+          </div>
         </div>
-        <div className="space-y-4 p-6 bg-primary/10 border border-primary/50 rounded-lg">
-          <h3 className="font-bold text-xl text-primary flex items-center gap-2">
-            <FiCheckCircle /> The SkillSync Way
-          </h3>
-          <ul className="space-y-2 list-inside text-base-content/90">
-            <li>Code speaks louder than words.</li>
-            <li>See real-world problem-solving in action.</li>
-            <li>Vet talent based on actual, relevant work.</li>
-            <li>Reward the best solution and move forward with confidence.</li>
-          </ul>
+
+        {/* CARD 2: The SkillSync Way (Vibrant and elevated) */}
+        {/* The hover effect here is more pronounced to draw attention */}
+        <div className="card bg-base-200/50 border border-base-300 shadow-lg transition-all duration-300 hover:border-primary hover:shadow-primary/20 hover:-translate-y-2">
+          <div className="card-body">
+            <h3 className="card-title text-primary flex items-center gap-2">
+              <FiZap /> The SkillSync Way
+            </h3>
+            <div className="divider mt-2 mb-4"></div>
+            <ul className="space-y-4 text-base-content/90 font-medium">
+              <BenefitItem
+                icon={<FiCheck className="text-primary" />}
+                text="Code speaks louder. Vet talent based on actual work."
+              />
+              <BenefitItem
+                icon={<FiAward className="text-primary" />}
+                text="Reward the best solution and move forward with confidence."
+              />
+              <BenefitItem
+                icon={<FiCode className="text-primary" />}
+                text="Integrate winning developers who already understand the problem."
+              />
+            </ul>
+          </div>
         </div>
       </div>
     </section>

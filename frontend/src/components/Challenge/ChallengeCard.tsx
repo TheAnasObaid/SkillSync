@@ -28,7 +28,7 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
     : "No deadline";
 
   return (
-    <div className="card bg-base-200 shadow-md border border-base-300 transition-all duration-300 hover:border-primary/50 hover:shadow-primary/20">
+    <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
       <div className="card-body p-6">
         <div className="flex justify-between items-start gap-4">
           <h2 className="card-title text-2xl font-bold">{challenge.title}</h2>

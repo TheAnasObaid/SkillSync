@@ -1,16 +1,9 @@
+import ChallengeList from "@/components/Challenge/ChallengeList";
 import Benefits from "@/components/Home/Benefits";
 import CTA from "@/components/Home/CTA";
 import FounderQuote from "@/components/Home/FouderQuote";
 import Hero from "@/components/Home/Hero";
 import Workflow from "@/components/Home/Workflow";
-import Link from "next/link";
-import {
-  FiCheckCircle,
-  FiCode,
-  FiFilePlus,
-  FiStar,
-  FiXCircle,
-} from "react-icons/fi";
 
 export default function Home() {
   return (
@@ -18,6 +11,12 @@ export default function Home() {
       <main className="max-w-6xl mx-auto px-4 py-16">
         <Hero />
         <Benefits />
+        <section id="challenges" className="py-12 md:py-20">
+          <h2 className="text-3xl text-center font-bold mb-8">
+            Open Challenges
+          </h2>
+          <ChallengeList />
+        </section>
         <Workflow />
         <FounderQuote />
         <CTA />

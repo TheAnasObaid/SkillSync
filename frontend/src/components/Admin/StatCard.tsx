@@ -8,12 +8,12 @@ export interface StatCardProps {
 
 const StatCard = ({ icon, label, value }: StatCardProps) => {
   return (
-    <div className={`card bg-base-200 shadow-md`}>
+    <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
       <div className="card-body flex-row items-center gap-4">
         <div className="text-primary">{icon}</div>
         <div>
           <div className="text-3xl font-bold">{value}</div>
-          <div className="text-base-content/70">{label}</div>
+          <div className="text-sm text-base-content/70">{label}</div>
         </div>
       </div>
     </div>

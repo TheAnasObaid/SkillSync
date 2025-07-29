@@ -36,3 +36,26 @@
   --depth: 0;
   --noise: 0;
 }
+
+@keyframes scroll-vertical {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(
+      -50%
+    ); /* This is the magic for a seamless loop with a duplicated list */
+  }
+}
+
+/* Add this if it doesn't already exist */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

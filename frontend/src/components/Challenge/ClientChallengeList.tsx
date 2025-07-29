@@ -53,25 +53,31 @@ const ClientChallengeList = () => {
           challenges.map((challenge) => (
             <div
               key={challenge._id}
-              className="grid grid-cols-[1fr_auto_auto] gap-4 items-center p-4 bg-base-200 rounded-lg"
+              className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50"
             >
-              <div className="grid gap-2">
-                <p className="font-bold text-xl">{challenge.title}</p>
-                <p className="text-sm text-base-content/50">
-                  Prize: ${challenge.prize}
-                </p>
+              <div className="card-body p-4 flex-row justify-between items-center">
+                <div className="grid gap-2">
+                  <p className="font-bold text-xl">{challenge.title}</p>
+                  <p className="text-sm text-base-content/50">
+                    Prize: ${challenge.prize}
+                  </p>
+                </div>
+                <div className="flex items-center gap-4">
+                  <div
+                    className={`badge badge-soft ${
+                      statusStyles[challenge.status]
+                    }`}
+                  >
+                    {challenge.status}
+                  </div>
+                  <Link
+                    href={`/challenges/${challenge._id}/review`}
+                    className="btn btn-secondary"
+                  >
+                    Review Submissions
+                  </Link>
+                </div>
               </div>
-              <div
-                className={`badge badge-soft ${statusStyles[challenge.status]}`}
-              >
-                {challenge.status}
-              </div>
-              <Link
-                href={`/challenges/${challenge._id}/review`}
-                className="btn btn-secondary"
-              >
-                Review Submissions
-              </Link>
             </div>
           ))
         ) : (

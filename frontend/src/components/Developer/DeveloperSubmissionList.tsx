@@ -39,10 +39,10 @@ const DeveloperSubmissionList = () => {
   }, []);
 
   const statusStyles: { [key: string]: string } = {
-    pending: "badge-info badge-outline",
-    reviewed: "badge-ghost badge-outline",
-    winner: "badge-success badge-soft",
-    rejected: "badge-error badge-outline",
+    pending: "badge-info",
+    reviewed: "badge-ghost",
+    winner: "badge-success",
+    rejected: "badge-error",
   };
 
   if (loading) {
@@ -69,7 +69,9 @@ const DeveloperSubmissionList = () => {
                   <h3 className="card-title text-xl font-bold">
                     {sub.challengeId.title}
                   </h3>
-                  <div className={`badge ${statusStyles[sub.status]}`}>
+                  <div
+                    className={`badge badge-soft ${statusStyles[sub.status]}`}
+                  >
                     {sub.status}
                   </div>
                 </div>

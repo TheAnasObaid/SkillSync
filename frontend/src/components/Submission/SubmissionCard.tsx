@@ -22,12 +22,10 @@ interface SubmissionCardProps {
 
 const SubmissionCard = ({ submission }: SubmissionCardProps) => {
   return (
-    <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all duration-300 hover:border-primary/50">
+    <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
       <div className="card-body p-6">
         <div className="flex items-center gap-3">
-          <div>
-            <UserAvatar name={submission.developerId.profile.firstName} />
-          </div>{" "}
+          <UserAvatar name={submission.developerId.profile.firstName} />
           <div>
             <div className="font-bold">
               {submission.developerId.profile.firstName || "Anonymous"}
@@ -39,10 +37,8 @@ const SubmissionCard = ({ submission }: SubmissionCardProps) => {
           </div>
         </div>
 
-        {/* Description */}
         <p className="text-base-content/80 my-4">{submission.description}</p>
 
-        {/* Links */}
         <div className="card-actions justify-start gap-2">
           <Link
             href={submission.githubRepo}

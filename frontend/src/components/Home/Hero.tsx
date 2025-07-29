@@ -13,8 +13,8 @@ const spaceMono = Space_Mono({
 
 const Hero = () => {
   return (
-    <section className="grid md:grid-cols-2 gap-12 items-center min-h-[70vh] border-b border-base-300/100 pb-20">
-      <div className="space-y-6 text-center md:text-left">
+    <section className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center min-h-[70vh] border-b border-base-300/100 pb-20">
+      <div className="text-center lg:text-left grid gap-7">
         <h1
           className={`${spaceMono.variable} ${spaceMono.className} text-4xl md:text-7xl font-bold leading-none`}
         >
@@ -28,13 +28,13 @@ const Hero = () => {
           deliver the best solutions. It's where talent is proven, not just
           promised.
         </p>
-        <Link href="/register" className="btn btn-primary">
+        <Link href="/register" className="btn btn-primary w-fit">
           Start Creating <FiArrowRight />
         </Link>
       </div>
-      <div className="space-y-6">
-        <SubmissionPreview />
+      <div className="space-y-8">
         <ChallengePreview />
+        <SubmissionPreview />
       </div>
     </section>
   );

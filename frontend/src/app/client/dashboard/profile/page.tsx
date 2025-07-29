@@ -3,6 +3,7 @@
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
+import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
 import apiClient from "@/services/apiClient";
 import { User } from "@/store/authStore";
@@ -128,71 +129,57 @@ const ClientProfilePage = () => {
       {error && <div className="alert alert-error mb-6">{error}</div>}
 
       {isEditMode ? (
-        <div className="card bg-base-200/50 border border-base-300 p-8">
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <fieldset className="fieldset">
-                  <legend className="fieldset-legend">First Name</legend>
-                  <input
-                    type="text"
-                    className="input w-full bg-transparent focus:outline-none"
-                    {...register("name", {
-                      required: "First name is required",
-                    })}
-                  />
-                </fieldset>
-                {errors.name && (
-                  <p className="text-error text-xs mt-1">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <fieldset className="fieldset">
-                  <legend className="fieldset-legend">Last Name</legend>
-                  <input
-                    type="text"
-                    className="input w-full bg-transparent focus:outline-none"
-                    {...register("profile.lastName")}
-                  />
-                </fieldset>
-              </div>
-            </div>
+        // UPDATE: Use the new component here
+        <ProfileEditForm
+          onSubmit={handleSubmit(handleFormSubmit)}
+          isSubmitting={isSubmitting}
+        >
+          {/* These are the specific fields for the CLIENT role */}
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">Company Name</legend>
+                <legend className="fieldset-legend">First Name</legend>
                 <input
                   type="text"
                   className="input w-full bg-transparent focus:outline-none"
-                  {...register("profile.companyName")}
+                  {...register("name", { required: "First name is required" })}
                 />
               </fieldset>
+              {errors.name && (
+                <p className="text-error text-xs mt-1">{errors.name.message}</p>
+              )}
             </div>
             <div>
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">Bio</legend>
-                <textarea
-                  className="textarea w-full bg-transparent focus:outline-none h-24"
-                  {...register("profile.bio")}
-                ></textarea>
+                <legend className="fieldset-legend">Last Name</legend>
+                <input
+                  type="text"
+                  className="input w-full bg-transparent focus:outline-none"
+                  {...register("profile.lastName")}
+                />
               </fieldset>
             </div>
-            <div className="pt-4 flex justify-end">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <span className="loading loading-spinner"></span>
-                ) : (
-                  "Save Changes"
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
+          <div>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Company Name</legend>
+              <input
+                type="text"
+                className="input w-full bg-transparent focus:outline-none"
+                {...register("profile.companyName")}
+              />
+            </fieldset>
+          </div>
+          <div>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Bio</legend>
+              <textarea
+                className="textarea w-full bg-transparent focus:outline-none h-24"
+                {...register("profile.bio")}
+              ></textarea>
+            </fieldset>
+          </div>
+        </ProfileEditForm>
       ) : (
         <ProfileView user={user} />
       )}

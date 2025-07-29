@@ -215,10 +215,10 @@ const ChallengeDetailsPage = () => {
               </div>
             </div>
 
-            <CtaBlock
-              role={user!.role}
+            {/* <CtaBlock
+              role={user?.role}
               onOpenModal={() => setIsModalOpen(true)}
-            />
+            /> */}
           </aside>
         </div>
       </div>
