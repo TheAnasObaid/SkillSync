@@ -4,8 +4,8 @@ import {
   getAllChallenges,
   getChallengesByClient,
   getSingleChallenge,
+  submitSolution,
 } from "../controllers/challengeController";
-import { submitSolution } from "../controllers/submissionController";
 import { authenticate, authorize } from "../middleware/auth";
 
 const challengesRouter = express.Router();

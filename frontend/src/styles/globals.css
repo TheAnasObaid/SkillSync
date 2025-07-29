@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
 @plugin "daisyui/theme" {
   name: "skillsync-pro";
   default: true;
@@ -41,7 +42,6 @@
 
 @plugin "daisyui/theme" {
   name: "skillsync-lol";
-  default: true;
   prefersdark: false;
   color-scheme: "light";
   --color-base-100: oklch(98% 0 0); /* White background */

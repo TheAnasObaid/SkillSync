@@ -229,7 +229,7 @@ const ChallengeDetailsPage = () => {
         id="submission_modal"
         className={`modal ${isModalOpen ? "modal-open" : ""}`}
       >
-        <div className="modal-box relative">
+        <div className="modal-box relative border border-base-300">
           <button
             className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
             onClick={handleModalClose}

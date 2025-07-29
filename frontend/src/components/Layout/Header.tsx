@@ -44,10 +44,17 @@ const Header = () => {
               href="/"
               className={`${spaceMono.variable} ${spaceMono.className} font-bold text-lg`}
             >
-              Skill<span className="text-primary">Sync.</span>
+              Skill<span className="text-primary">Sync</span>
             </Link>
           </div>
-          <div className="navbar-end">
+
+          <div className="navbar-end flex gap-5">
+            <Link
+              href="/challenges"
+              className="link link-hover text-base-content text-sm w-fit"
+            >
+              Challenges
+            </Link>
             {isClient && (
               <>
                 {token && user ? (

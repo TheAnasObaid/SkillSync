@@ -1,21 +1,18 @@
 "use client";
-
 import { useForm } from "react-hook-form";
 import apiClient from "@/services/apiClient";
 import { useState } from "react";
 import { AxiosError } from "axios";
-
 interface SubmissionFormData {
   githubRepo: string;
   liveDemo?: string;
   description: string;
+  file: FileList; // <-- ADD THIS to handle the file input
 }
-
 interface SubmissionFormProps {
   challengeId: string;
   onSuccess: () => void;
 }
-
 const SubmissionForm = ({ challengeId, onSuccess }: SubmissionFormProps) => {
   const {
     register,
@@ -23,11 +20,34 @@ const SubmissionForm = ({ challengeId, onSuccess }: SubmissionFormProps) => {
     formState: { errors, isSubmitting },
   } = useForm<SubmissionFormData>();
   const [apiError, setApiError] = useState("");
-
+  // THIS FUNCTION MUST BE MODIFIED TO USE FormData
   const onSubmit = async (data: SubmissionFormData) => {
     setApiError("");
+
+    // 1. Create a FormData object. This is required for sending files.
+    const formData = new FormData();
+
+    // 2. Append all the text fields
+    formData.append("githubRepo", data.githubRepo);
+    formData.append("description", data.description);
+    if (data.liveDemo) {
+      formData.append("liveDemo", data.liveDemo);
+    }
+
+    // 3. Append the file if it exists
+    if (data.file && data.file.length > 0) {
+      formData.append("file", data.file[0]); // 'file' matches the name in our multer config
+    }
+
     try {
-      await apiClient.post(`/challenges/${challengeId}/submit`, data);
+      // 4. Send the FormData object instead of a JSON object
+      await apiClient.post(`/challenges/${challengeId}/submit`, formData, {
+        headers: {
+          // This header is set automatically by the browser when sending FormData,
+          // so we don't explicitly set it, but it's important to know it's happening.
+          "Content-Type": "multipart/form-data",
+        },
+      });
       onSuccess();
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -71,6 +91,19 @@ const SubmissionForm = ({ challengeId, onSuccess }: SubmissionFormProps) => {
           <p className="text-error text-sm">{errors.description.message}</p>
         )}
       </div>
+
+      <div>
+        <label className="label">Submission File (Optional)</label>
+        <input
+          type="file"
+          className="file-input file-input-bordered w-full"
+          {...register("file")}
+        />
+        <p className="label-text-alt mt-1">
+          You can upload a .zip, .pdf, or image file.
+        </p>
+      </div>
+
       <button
         type="submit"
         className="btn btn-primary w-full mt-4"
