@@ -134,6 +134,55 @@ export const verifyEmail = async (req: Request, res: Response) => {
   }
 };
 
+export const resendVerificationEmail = async (req: Request, res: Response) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    // Important: We only proceed if the user exists AND is not already verified.
+    if (!user || user.isVerified) {
+      res.status(200).json({
+        message:
+          "If an account with that email exists and is unverified, a new verification link has been sent.",
+      });
+      return;
+    }
+
+    // Generate a new verification token
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    user.verificationToken = crypto
+      .createHash("sha256")
+      .update(verificationToken)
+      .digest("hex");
+    await user.save({ validateBeforeSave: false });
+
+    // Send the new verification email using our template
+    const verificationURL = `${process.env.CLIENT_URL}/verify-email/${verificationToken}`;
+    const message = createStyledEmail(
+      "Resend Verification Email",
+      "Verify your email to get started.",
+      user.profile!.firstName,
+      "We received a request to resend your verification email. Please click the button below to activate your account.",
+      verificationURL,
+      "Verify Your Email"
+    );
+
+    await sendEmail({
+      email: user.email,
+      subject: "SkillSync - Resend Verification Email",
+      message,
+    });
+
+    res.status(200).json({
+      message: "A new verification link has been sent to your email.",
+    });
+  } catch (err) {
+    console.error("Resend verification email error:", err);
+    res.status(500).json({ message: "Failed to resend verification email." });
+  }
+};
+
 export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email }).select("+password");

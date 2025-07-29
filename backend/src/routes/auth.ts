@@ -3,6 +3,7 @@ import {
   forgotPassword,
   loginUser,
   registerUser,
+  resendVerificationEmail,
   resetPassword,
   verifyEmail,
 } from "../controllers/authController";
@@ -16,5 +17,6 @@ authRouter.post("/login", validate(loginSchema), loginUser);
 authRouter.post("/forgot-password", forgotPassword);
 authRouter.patch("/reset-password/:token", resetPassword);
 authRouter.get("/verify-email/:token", verifyEmail);
+authRouter.post("/resend-verification", resendVerificationEmail);
 
 export default authRouter;

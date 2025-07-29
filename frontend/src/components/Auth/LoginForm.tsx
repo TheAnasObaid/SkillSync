@@ -29,10 +29,13 @@ const LoginForm = () => {
   const router = useRouter();
   const { setToken, setUser } = useAuthStore();
   const [error, setError] = useState("");
+  const [isUnverified, setIsUnverified] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors, isSubmitting },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
@@ -40,6 +43,7 @@ const LoginForm = () => {
 
   const onSubmit = async (data: LoginFormData) => {
     setError("");
+    setIsUnverified(false);
     try {
       const response = await apiClient.post("/auth/login", data);
       const { token, user } = response.data;
@@ -53,19 +57,70 @@ const LoginForm = () => {
       router.refresh();
     } catch (error) {
       if (error instanceof AxiosError) {
-        console.error(error.response?.data.error || "Login failed.");
+        const errorMessage =
+          error.response?.data?.message || "Invalid credentials.";
+        if (errorMessage.includes("Please verify your email")) {
+          setIsUnverified(true);
+        }
       } else {
-        console.error("An unexpected error occurred.");
+        setError("An unexpected error occurred.");
       }
+    }
+  };
+
+  const handleResendVerification = async () => {
+    const email = getValues("email"); // Get the email from the form
+    if (!email) {
+      setError("Please enter your email address first.");
+      return;
+    }
+
+    setIsResending(true);
+    setError("");
+    try {
+      await apiClient.post("/auth/resend-verification", { email });
+      // On success, we don't need to stay in the "unverified" state
+      setIsUnverified(false);
+      // Give the user positive feedback
+      alert(
+        "A new verification email has been sent to your inbox. Please check it to continue."
+      );
+    } catch (err) {
+      setError("Failed to resend the email. Please try again.");
+    } finally {
+      setIsResending(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
-      {error && (
-        <div className="toast">
-          <p className="alert alert-error">{error}</p>
+      {isUnverified ? (
+        <div className="alert alert-warning alert-vertical alert-soft">
+          <div className="flex flex-col items-center gap-3 text-center">
+            <div>
+              <p className="font-bold">Account Not Verified</p>
+              <p className="text-sm">{error}</p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-sm btn-warning"
+              onClick={handleResendVerification}
+              disabled={isResending}
+            >
+              {isResending ? (
+                <span className="loading loading-spinner loading-xs"></span>
+              ) : (
+                "Resend Verification Email"
+              )}
+            </button>
+          </div>
         </div>
+      ) : (
+        error && (
+          <div className="toast">
+            <p className="alert alert-error">{error}</p>
+          </div>
+        )
       )}
 
       <div className="grid gap-2">
