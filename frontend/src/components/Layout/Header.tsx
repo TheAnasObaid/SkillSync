@@ -34,7 +34,7 @@ const Header = () => {
   };
 
   const dashboardHref = user ? getDashboardPath(user.role) : "/";
-  console.log(user);
+
   return (
     <>
       <header className="p-3 bg-base-100/80 backdrop-blur-sm border-b border-base-300/100">
@@ -53,7 +53,10 @@ const Header = () => {
                 {token && user ? (
                   <div className="dropdown dropdown-end">
                     <button tabIndex={0} className="btn btn-ghost btn-circle">
-                      <UserAvatar name={user.profile?.firstName} />
+                      <UserAvatar
+                        name={user.profile?.firstName}
+                        avatarUrl={user.profile?.avatar}
+                      />
                     </button>
                     <ul
                       tabIndex={0}

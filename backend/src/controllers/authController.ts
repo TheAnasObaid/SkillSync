@@ -52,7 +52,6 @@ export const loginUser = async (req: Request, res: Response) => {
   // Send the entire user object, which already has the correct structure.
   // We can manually remove the password to be safe, although .select('-password') on a new query would also work.
   const userPayload = user.toObject();
-  console.log(userPayload);
 
   res.status(200).json({
     status: "success",

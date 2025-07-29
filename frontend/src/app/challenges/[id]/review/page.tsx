@@ -30,6 +30,7 @@ interface Submission {
     _id: string;
     profile: {
       firstName: string;
+      avatar: string;
     };
     email: string;
   };
@@ -289,6 +290,7 @@ const ReviewSubmissionsPage = () => {
                           <div className="flex items-center gap-3">
                             <UserAvatar
                               name={sub.developerId.profile.firstName}
+                              avatarUrl={sub.developerId.profile.avatar}
                             />
                             <div>
                               <div className="font-bold">
@@ -345,7 +347,7 @@ const ReviewSubmissionsPage = () => {
                           )}
                         </td>
                       </tr>
-                      {/* EXPANDED ROW */}
+
                       {expandedId === sub._id && (
                         <tr
                           className={

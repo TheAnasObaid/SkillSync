@@ -1,5 +1,7 @@
 "use client";
 
+import Image from "next/image";
+
 const avatarColors = [
   "bg-primary/20 text-primary",
   "bg-secondary/20 text-secondary-content",
@@ -12,41 +14,53 @@ const avatarColors = [
 
 interface UserAvatarProps {
   name?: string;
+  avatarUrl?: string | null;
   className?: string;
 }
 
-const UserAvatar = ({ name, className = "w-10 h-10" }: UserAvatarProps) => {
+const UserAvatar = ({
+  name,
+  avatarUrl,
+  className = "w-10 h-10",
+}: UserAvatarProps) => {
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+
+  if (avatarUrl) {
+    return (
+      <div className={`avatar ${className}`}>
+        <div className="w-full h-full rounded-full relative overflow-hidden">
+          <img
+            src={`${API_BASE_URL}/${avatarUrl.replace(/\\/g, "/")}`}
+            alt={name || "User Avatar"}
+            className="object-cover"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Fallback logic for initials (this is already correct)
   const getInitials = (nameStr?: string): string => {
-    if (!nameStr) {
-      return "?";
-    }
-
+    if (!nameStr) return "?";
     const parts = nameStr.trim().split(" ").filter(Boolean);
-
-    if (parts.length === 0) {
-      return "?";
-    }
-
-    if (parts.length > 1) {
-      return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
-    }
-
-    return parts[0].substring(0, 2).toUpperCase();
+    if (parts.length === 0) return "?";
+    return parts.length > 1
+      ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+      : parts[0].substring(0, 2).toUpperCase();
   };
 
   const initials = getInitials(name);
-
   const charCodeSum =
     (initials.charCodeAt(0) || 0) + (initials.charCodeAt(1) || 0);
   const colorIndex = charCodeSum % avatarColors.length;
   const colorClasses = avatarColors[colorIndex];
 
   return (
-    <div>
+    <div className={`placeholder ${className}`}>
       <div
-        className={`rounded-full w-12 h-12 flex items-center justify-center text-base-content bg-base-content/10 avatar placeholder ${colorClasses} ${className}`}
+        className={`w-full h-full rounded-full bg-base-content/10 text-base-content flex items-center justify-center ${colorClasses}`}
       >
-        <span>{initials}</span>
+        {initials}
       </div>
     </div>
   );

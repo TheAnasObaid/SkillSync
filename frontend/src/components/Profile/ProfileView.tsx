@@ -18,7 +18,7 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
     return null;
   }
 
-  const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   return (
     <div className="space-y-6">
@@ -28,29 +28,17 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
             className="relative group cursor-pointer"
             onClick={onAvatarClick}
           >
-            {/* Check if the user has a custom avatar from our uploads */}
-            {user.profile?.avatar ? (
-              <div className="avatar">
-                <div className="w-24 h-24 rounded-full">
-                  {/* Construct the full URL to the backend */}
-                  <img
-                    src={`${API_URL}/${user.profile.avatar.replace(
-                      /\\/g,
-                      "/"
-                    )}`}
-                  />
-                </div>
-              </div>
-            ) : (
-              <UserAvatar
-                name={user.profile?.firstName}
-                className="w-24 h-24 text-4xl"
-              />
-            )}
+            <UserAvatar
+              name={user.profile?.firstName}
+              avatarUrl={user.profile?.avatar}
+              className="w-24 h-24 text-4xl"
+            />
+            {/* The hover overlay remains */}
             <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
               <FiCamera className="text-white text-2xl" />
             </div>
           </div>
+
           <div className="text-center md:text-left">
             <h2 className="text-3xl font-bold">
               {user.profile?.firstName} {user.profile?.lastName}

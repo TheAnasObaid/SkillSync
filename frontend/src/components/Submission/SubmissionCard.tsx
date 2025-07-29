@@ -11,6 +11,7 @@ export interface PublicSubmission {
     _id: string;
     profile: {
       firstName: string;
+      avatar: string;
     };
   };
   createdAt: string;
@@ -25,7 +26,10 @@ const SubmissionCard = ({ submission }: SubmissionCardProps) => {
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
       <div className="card-body p-6">
         <div className="flex items-center gap-3">
-          <UserAvatar name={submission.developerId.profile.firstName} />
+          <UserAvatar
+            name={submission.developerId.profile.firstName}
+            avatarUrl={submission.developerId.profile.avatar}
+          />
           <div>
             <div className="font-bold">
               {submission.developerId.profile.firstName || "Anonymous"}

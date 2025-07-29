@@ -214,12 +214,10 @@ const DeveloperProfilePage = () => {
         {error && <div className="alert alert-error mb-6">{error}</div>}
 
         {isEditMode ? (
-          // Use the new reusable form and pass the unique fields as children
           <ProfileEditForm
             onSubmit={handleSubmit(handleFormSubmit)}
             isSubmitting={isSubmitting}
           >
-            {/* These fields are specific to the Developer */}
             <div className="grid md:grid-cols-2 gap-6">
               <div>
                 <fieldset className="fieldset">
@@ -290,12 +288,11 @@ const DeveloperProfilePage = () => {
           </ProfileEditForm>
         ) : (
           <>
-            {/* Pass down the click handler */}
             <ProfileView
               user={user}
               onAvatarClick={() => avatarInputRef.current?.click()}
             />
-            {/* The hidden file input that gets triggered */}
+
             <input
               type="file"
               ref={avatarInputRef}

@@ -60,7 +60,7 @@ export const getPublicSubmissionsByChallenge = async (
     const { challengeId } = req.params;
     const submissions = await Submission.find({ challengeId: challengeId })
       .select("developerId description githubRepo liveDemo createdAt")
-      .populate("developerId", "profile.firstName");
+      .populate("developerId", "profile.firstName profile.avatar");
 
     res.status(200).json(submissions);
   } catch (error) {
@@ -91,7 +91,7 @@ export const getSubmissionsByChallenge = async (
 
     const submissions = await Submission.find({
       challengeId,
-    }).populate("developerId", "profile.firstName email");
+    }).populate("developerId", "profile.firstName email profile.avatar");
 
     res.status(200).json(submissions);
   } catch (error) {
@@ -179,11 +179,10 @@ export const rateSubmission = async (
       return;
     }
 
-    // Update the submission with the new data
     submission.ratings = ratings;
     submission.feedback = feedback;
     if (submission.status === "pending") {
-      submission.status = "reviewed"; // Mark as reviewed
+      submission.status = "reviewed";
     }
 
     await submission.save();
