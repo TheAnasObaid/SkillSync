@@ -50,12 +50,18 @@ In order for this to work, you should create two `.env` files. One in your `fron
 **Frontend:**
 
 1. NEXT_PUBLIC_API_URL
+2. NEXT_PUBLIC_API_BASE_URL
 
 **Backend:**
 
-1. PORT
-2. MONGO_URI
+1. MONGO_URI
+2. PORT=5000
 3. JWT_SECRET
+4. EMAIL_HOST
+5. EMAIL_PORT
+6. EMAIL_USERNAME
+7. EMAIL_PASSWORD
+8. EMAIL_FROM
 
 ### In separate terminals
 

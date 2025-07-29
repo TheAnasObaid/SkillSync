@@ -1,8 +1,8 @@
+import crypto from "crypto";
 import { Request, Response } from "express";
 import User from "../models/User";
+import sendEmail from "../utils/email";
 import generateToken from "../utils/generateToken";
-import crypto from "crypto";
-import { AuthenticatedRequest } from "../middleware/auth";
 
 export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password, role } = req.body;
@@ -60,49 +60,65 @@ export const loginUser = async (req: Request, res: Response) => {
   });
 };
 
-// 1. FORGOT PASSWORD
 export const forgotPassword = async (req: Request, res: Response) => {
   // 1) Get user based on POSTed email
   const user = await User.findOne({ email: req.body.email });
   if (!user) {
-    res.status(404).json({ message: "No user found with that email address." });
+    // We send a generic success message even if the user isn't found
+    // This prevents attackers from guessing which emails are registered.
+    res.status(200).json({
+      status: "success",
+      message:
+        "If an account with that email exists, a password reset link has been sent.",
+    });
     return;
   }
 
-  // 2) Generate the random reset token using the method we just created
+  // 2) Generate the random reset token
   const resetToken = user.createPasswordResetToken();
-  await user.save({ validateBeforeSave: false }); // Save the user with the new reset fields
+  await user.save({ validateBeforeSave: false });
 
-  // 3) "Send" it to the user's email (for now, we'll send it back in the response for testing)
-  // In a real app, this is where you would call your email service.
+  // 3) Send it to user's email
   try {
-    // THIS IS OUR DUMMY IMPLEMENTATION
     const resetURL = `${req.protocol}://${req.get(
       "host"
     )}/reset-password/${resetToken}`;
-    console.log("DUMMY PASSWORD RESET LINK:", resetURL);
+
+    // Create the email message
+    const message = `
+      <h1>Password Reset Request</h1>
+      <p>Hi ${user.profile?.firstName},</p>
+      <p>We received a request to reset your password for your SkillSync account. Please click the link below to set a new password:</p>
+      <a href="${resetURL}" target="_blank" style="padding: 10px 20px; background-color: #34d399; color: black; text-decoration: none; border-radius: 5px;">Reset Your Password</a>
+      <p>This link is valid for 10 minutes. If you did not request this, please ignore this email.</p>
+    `;
+
+    // Use our email service to send the email
+    await sendEmail({
+      email: user.email,
+      subject: "Your SkillSync Password Reset Link (Valid for 10 min)",
+      message,
+    });
 
     res.status(200).json({
       status: "success",
-      message: "Token sent! (Check console for the dummy link)",
-      // We send the token back directly for easy testing without an email client.
-      // In production, you would remove this line.
-      resetTokenForTesting: resetToken,
+      message: "A password reset link has been sent to your email.",
     });
   } catch (err) {
+    // If the email fails to send, we must reset the token fields in the DB
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
     await user.save({ validateBeforeSave: false });
+
+    console.error("EMAIL ERROR:", err);
     res.status(500).json({
       message:
-        "There was an error sending the reset link. Please try again later.",
+        "There was an error sending the password reset link. Please try again later.",
     });
   }
 };
 
-// 2. RESET PASSWORD
 export const resetPassword = async (req: Request, res: Response) => {
-  // 1) Get user based on the token from the URL
   const hashedToken = crypto
     .createHash("sha256")
     .update(req.params.token)
