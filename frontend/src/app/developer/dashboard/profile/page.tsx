@@ -1,5 +1,6 @@
 "use client";
 
+import ConfirmationModal from "@/components/Common/ConfirmationModal";
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
@@ -47,6 +48,13 @@ const DeveloperProfilePage = () => {
   const [portfolio, setPortfolio] = useState<PortfolioItem[]>([]);
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({ isOpen: false, title: "", message: "" });
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const {
     register,
@@ -122,19 +130,34 @@ const DeveloperProfilePage = () => {
     }
   };
 
-  const handleDeletePortfolioItem = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
-    try {
-      await apiClient.delete(`/users/profile/portfolio/${id}`);
-      const updatedPortfolio = portfolio.filter((p) => p._id !== id);
-      setPortfolio(updatedPortfolio);
-      setUser({
-        ...user!,
-        profile: { ...user!.profile!, portfolio: updatedPortfolio },
-      });
-    } catch (err) {
-      alert("Failed to delete project.");
-    }
+  const handleDeletePortfolioItem = (item: PortfolioItem) => {
+    setModalState({
+      isOpen: true,
+      title: "Delete Project",
+      message: `Are you sure you want to permanently delete your project "${item.title}"? This action cannot be undone.`,
+      // The onConfirm function will now contain the API call
+      onConfirm: async () => {
+        setIsDeleting(true);
+        try {
+          await apiClient.delete(`/users/profile/portfolio/${item._id}`);
+          const updatedPortfolio = portfolio.filter((p) => p._id !== item._id);
+          setPortfolio(updatedPortfolio);
+          setUser({
+            ...user!,
+            profile: { ...user!.profile!, portfolio: updatedPortfolio },
+          });
+        } catch (err) {
+          alert("Failed to delete project.");
+        } finally {
+          setIsDeleting(false);
+          setModalState({ isOpen: false, title: "", message: "" }); // Close modal
+        }
+      },
+    });
+  };
+
+  const handleCancelModal = () => {
+    setModalState({ isOpen: false, title: "", message: "" });
   };
 
   const handleFormSubmit = async (data: ProfileFormData) => {
@@ -176,18 +199,14 @@ const DeveloperProfilePage = () => {
         profile: {
           lastName: user.profile?.lastName || "",
           bio: user.profile?.bio || "",
-          skills: (user.profile?.skills || []).join(", "), // Convert array to string
+          skills: (user.profile?.skills || []).join(", "),
         },
       });
     }
   }, [isEditMode, user, reset]);
 
   if (!hasMounted || !user) {
-    return (
-      <div className="text-center p-10">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
+    return <span className="loading loading-spinner loading-lg" />;
   }
 
   return (
@@ -319,7 +338,7 @@ const DeveloperProfilePage = () => {
                 <PortfolioCard
                   key={item._id}
                   item={item}
-                  onDelete={handleDeletePortfolioItem}
+                  onDelete={() => handleDeletePortfolioItem(item)} // Pass the item to the handler
                   isOwner={true}
                 />
               ))}
@@ -333,6 +352,18 @@ const DeveloperProfilePage = () => {
           )}
         </div>
       </DashboardLayout>
+
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        title={modalState.title}
+        message={modalState.message}
+        onConfirm={modalState.onConfirm!}
+        onCancel={handleCancelModal}
+        confirmText="Yes, Delete"
+        confirmButtonClass="btn-error"
+        isActionInProgress={isDeleting}
+      />
+
       <dialog className={`modal ${isPortfolioModalOpen ? "modal-open" : ""}`}>
         <div className="modal-box border border-base-300">
           <button
