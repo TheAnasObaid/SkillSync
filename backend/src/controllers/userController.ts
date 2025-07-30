@@ -3,6 +3,7 @@ import { AuthenticatedRequest } from "../middleware/auth";
 import User, { PortfolioItem } from "../models/User";
 import upload from "../middleware/upload";
 import Submission from "../models/Submission";
+import Challenge from "../models/Challenge";
 
 export const getUserProfile = async (
   req: AuthenticatedRequest,
@@ -180,5 +181,41 @@ export const getDeveloperStats = async (
     });
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch developer stats" });
+  }
+};
+
+export const getClientStats = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const clientId = req.userId;
+
+    const totalChallengesPosted = await Challenge.countDocuments({
+      createdBy: clientId,
+    });
+
+    const activeChallenges = await Challenge.countDocuments({
+      createdBy: clientId,
+      status: "active", // or 'published' if that's your active state
+    });
+
+    // This is a more complex query: we need to find all challenges by this client,
+    // then count the total submissions for those challenges.
+    const clientChallenges = await Challenge.find({
+      createdBy: clientId,
+    }).select("_id");
+    const challengeIds = clientChallenges.map((c) => c._id);
+    const totalSubmissionsReceived = await Submission.countDocuments({
+      challengeId: { $in: challengeIds },
+    });
+
+    res.status(200).json({
+      totalChallengesPosted,
+      activeChallenges,
+      totalSubmissionsReceived,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch client stats" });
   }
 };

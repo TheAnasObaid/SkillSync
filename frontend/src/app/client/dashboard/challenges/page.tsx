@@ -1,9 +1,9 @@
-import ChallengeForm from "@/components/Challenge/ChallengeForm";
+"use client";
+import ClientChallengeList from "@/components/Challenge/ClientChallengeList";
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
 import { BsGrid } from "react-icons/bs";
-
 import { FiArchive, FiUser } from "react-icons/fi";
 import { GoPlusCircle } from "react-icons/go";
 
@@ -22,15 +22,11 @@ const clientSidebarLinks: DashboardLink[] = [
   { href: "/client/dashboard/profile", label: "My Profile", icon: <FiUser /> },
 ];
 
-const CreateChallengePage = () => {
+const ClientChallengesPage = () => {
   return (
     <DashboardLayout sidebarLinks={clientSidebarLinks}>
-      <div>
-        <h2 className="text-3xl font-bold mb-6">Create a New Challenge</h2>
-        <ChallengeForm />
-      </div>
+      <ClientChallengeList />
     </DashboardLayout>
   );
 };
-
-export default CreateChallengePage;
+export default ClientChallengesPage;

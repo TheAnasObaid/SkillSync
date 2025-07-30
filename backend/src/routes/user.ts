@@ -2,6 +2,7 @@ import { Router } from "express";
 import {
   addPortfolioItem,
   deletePortfolioItem,
+  getClientStats,
   getDeveloperStats,
   getUserProfile,
   updateUserProfile,
@@ -32,4 +33,11 @@ userRouter.delete(
   authorize("developer"),
   deletePortfolioItem
 );
+userRouter.get(
+  "/profile/stats/client",
+  authenticate,
+  authorize("client"),
+  getClientStats
+);
+
 export default userRouter;

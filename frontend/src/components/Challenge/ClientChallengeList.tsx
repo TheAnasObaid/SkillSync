@@ -40,14 +40,12 @@ const ClientChallengeList = () => {
   if (loading)
     return (
       <div className="w-full">
-        <h2 className="text-3xl font-bold mb-6">My Posted Challenges</h2>
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
 
   return (
     <div className="w-full">
-      <h2 className="text-3xl font-bold mb-6">My Posted Challenges</h2>
       <div className="grid gap-4">
         {challenges.length > 0 ? (
           challenges.map((challenge) => (
