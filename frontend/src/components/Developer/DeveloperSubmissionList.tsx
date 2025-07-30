@@ -55,8 +55,6 @@ const DeveloperSubmissionList = () => {
 
   return (
     <div className="w-full">
-      <h2 className="text-3xl font-bold mb-6">My Submission History</h2>
-
       {submissions.length > 0 ? (
         <div className="space-y-4">
           {submissions.map((sub) => (

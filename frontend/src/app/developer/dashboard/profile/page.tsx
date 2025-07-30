@@ -14,7 +14,7 @@ import { User, useAuthStore } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FiEdit, FiPlus, FiUser, FiX } from "react-icons/fi";
+import { FiClipboard, FiEdit, FiPlus, FiUser, FiX } from "react-icons/fi";
 import { TbBriefcase2 } from "react-icons/tb";
 
 export interface ProfileFormData {
@@ -23,13 +23,19 @@ export interface ProfileFormData {
   profile: {
     lastName: string;
     bio: string;
-    skills: string; // Use a string for the input field
+    skills: string;
+    experience: string;
   };
 }
 
+interface PortfolioFormData extends PortfolioItem {
+  portfolioImage: FileList;
+}
+
 const developerSidebarLinks: DashboardLink[] = [
+  { href: "/developer/dashboard", label: "Dashboard", icon: <FiClipboard /> },
   {
-    href: "/developer/dashboard",
+    href: "/developer/dashboard/submissions",
     label: "My Submissions",
     icon: <TbBriefcase2 />,
   },
@@ -68,7 +74,7 @@ const DeveloperProfilePage = () => {
     handleSubmit: handlePortfolioSubmit,
     reset: resetPortfolio,
     formState: { errors: portfolioErrors, isSubmitting: isPortfolioSubmitting },
-  } = useForm<PortfolioItem>();
+  } = useForm<PortfolioFormData>();
 
   useEffect(() => {
     // When the user data is loaded, set the portfolio state
@@ -107,16 +113,36 @@ const DeveloperProfilePage = () => {
     }
   };
 
-  const handleAddPortfolioItem = async (data: PortfolioItem) => {
-    const newItem = {
-      ...data,
-      imageUrl: "https://placehold.co/600x400/1a1a1a/ffffff?text=Project",
-    };
+  const handleAddPortfolioItem = async (data: PortfolioFormData) => {
+    // 1. Create a FormData object
+    const formData = new FormData();
+
+    // 2. Append text fields
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    if (data.liveUrl) formData.append("liveUrl", data.liveUrl);
+    if (data.githubUrl) formData.append("githubUrl", data.githubUrl);
+
+    // 3. Append the image file
+    if (data.portfolioImage && data.portfolioImage.length > 0) {
+      formData.append("portfolioImage", data.portfolioImage[0]);
+    } else {
+      alert("Please select a project image.");
+      return;
+    }
+
     try {
+      // 4. Send the FormData
       const response = await apiClient.post<PortfolioItem[]>(
         "/users/profile/portfolio",
-        newItem
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+
       const updatedPortfolio = response.data;
       setPortfolio(updatedPortfolio);
       setUser({
@@ -126,7 +152,7 @@ const DeveloperProfilePage = () => {
       setIsPortfolioModalOpen(false);
       resetPortfolio();
     } catch (err) {
-      alert("Failed to add project.");
+      alert("Failed to add project. Check file type and size.");
     }
   };
 
@@ -200,6 +226,7 @@ const DeveloperProfilePage = () => {
           lastName: user.profile?.lastName || "",
           bio: user.profile?.bio || "",
           skills: (user.profile?.skills || []).join(", "),
+          experience: user.profile?.experience || "",
         },
       });
     }
@@ -304,6 +331,21 @@ const DeveloperProfilePage = () => {
                 Enter skills separated by commas.
               </p>
             </div>
+            <div>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Experience Level</legend>
+                <select
+                  className="select select-bordered w-full bg-transparent focus:outline-none"
+                  {...register("profile.experience")}
+                >
+                  <option value="">Select Level</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                  <option value="Expert">Expert</option>
+                </select>
+              </fieldset>
+            </div>
           </ProfileEditForm>
         ) : (
           <>
@@ -406,6 +448,14 @@ const DeveloperProfilePage = () => {
                 type="url"
                 className="input input-bordered w-full"
                 {...registerPortfolio("githubUrl")}
+              />
+            </div>
+            <div>
+              <label className="label">Project Image</label>
+              <input
+                type="file"
+                className="file-input file-input-bordered w-full"
+                {...registerPortfolio("portfolioImage", { required: true })}
               />
             </div>
             <div className="modal-action">

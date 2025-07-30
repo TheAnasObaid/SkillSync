@@ -11,7 +11,7 @@ import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { BsGrid } from "react-icons/bs";
-import { FiEdit, FiUser, FiX } from "react-icons/fi";
+import { FiArchive, FiEdit, FiUser, FiX } from "react-icons/fi";
 import { GoPlusCircle } from "react-icons/go";
 
 interface ClientProfileFormData {
@@ -24,7 +24,12 @@ interface ClientProfileFormData {
 }
 
 const clientSidebarLinks: DashboardLink[] = [
-  { href: "/client/dashboard", label: "My Challenges", icon: <BsGrid /> },
+  { href: "/client/dashboard", label: "Dashboard", icon: <BsGrid /> },
+  {
+    href: "/client/dashboard/challenges",
+    label: "My Challenges",
+    icon: <FiArchive />,
+  },
   {
     href: "/client/dashboard/create",
     label: "Create Challenge",
@@ -33,7 +38,7 @@ const clientSidebarLinks: DashboardLink[] = [
   { href: "/client/dashboard/profile", label: "My Profile", icon: <FiUser /> },
 ];
 
-const ClientProfilePage = () => {
+function ClientProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -222,6 +227,6 @@ const ClientProfilePage = () => {
       )}
     </DashboardLayout>
   );
-};
+}
 
 export default ClientProfilePage;
