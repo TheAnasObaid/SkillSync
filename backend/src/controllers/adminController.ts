@@ -54,3 +54,52 @@ export const getAllSubmissions = async (
     res.status(500).json({ message: "Failed to fetch submissions" });
   }
 };
+
+// Update a user's details (role, verification status, etc.)
+export const updateUserByAdmin = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { userId } = req.params;
+    const { role, isVerified } = req.body;
+
+    // Find the user and update only the specified fields
+    const user = await User.findById(userId);
+    if (!user) {
+      res.status(404).json({ message: "User not found" });
+      return;
+    }
+
+    if (role) user.role = role;
+    if (isVerified !== undefined) user.isVerified = isVerified;
+
+    await user.save({ validateBeforeSave: false }); // Bypass certain validations if needed
+
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update user" });
+  }
+};
+
+// Delete any challenge on the platform
+export const deleteChallengeByAdmin = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const { challengeId } = req.params;
+    const challenge = await Challenge.findByIdAndDelete(challengeId);
+    if (!challenge) {
+      res.status(404).json({ message: "Challenge not found" });
+      return;
+    }
+    // Optional: Also delete all related submissions
+    await Submission.deleteMany({ challengeId: challengeId });
+    res.status(200).json({
+      message: "Challenge and associated submissions deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to delete challenge" });
+  }
+};

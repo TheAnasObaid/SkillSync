@@ -7,7 +7,13 @@ import UserAvatar from "@/components/Profile/UserAvatar";
 import apiClient from "@/services/apiClient";
 import { User } from "@/store/authStore";
 import { useEffect, useState } from "react";
-import { FiGrid, FiUsers, FiClipboard, FiUser } from "react-icons/fi";
+import {
+  FiClipboard,
+  FiGrid,
+  FiMoreVertical,
+  FiUser,
+  FiUsers,
+} from "react-icons/fi";
 
 const adminSidebarLinks: DashboardLink[] = [
   { href: "/admin/panel", label: "Dashboard", icon: <FiGrid /> },
@@ -19,14 +25,30 @@ const adminSidebarLinks: DashboardLink[] = [
 const ManageUsersPage = () => {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  useEffect(() => {
+  const fetchUsers = () => {
     apiClient
       .get("/admin/users")
       .then((res) => setUsers(res.data))
-      .catch((err) => console.error("Failed to fetch users", err))
+      .catch((err) => setError("Failed to fetch users"))
       .finally(() => setLoading(false));
+  };
+
+  useEffect(() => {
+    fetchUsers();
   }, []);
+
+  const handleUpdateUser = async (userId: string, updates: Partial<User>) => {
+    if (!confirm(`Are you sure you want to update this user!`)) return;
+
+    try {
+      await apiClient.patch(`/admin/users/${userId}`, updates);
+      fetchUsers();
+    } catch (err) {
+      setError("Failed to update user!.");
+    }
+  };
 
   if (loading)
     return (
@@ -38,61 +60,129 @@ const ManageUsersPage = () => {
   return (
     <DashboardLayout sidebarLinks={adminSidebarLinks}>
       <h1 className="text-3xl font-bold mb-6">Manage Users</h1>
-      {users.length > 0 ? (
-        <div className="card bg-base-200/50 border border-base-300">
-          <div className="overflow-x-auto">
-            <table className="table">
-              <thead>
-                <tr>
-                  <th>User</th>
-                  <th>Role</th>
-                  <th>Verified</th>
-                  <th>Joined</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((user) => (
-                  <tr key={user?._id} className="hover">
-                    <td>
-                      <div className="flex items-center gap-3">
-                        <UserAvatar
-                          name={user?.profile?.firstName}
-                          avatarUrl={user?.profile?.avatar}
-                        />
-                        <div>
-                          <div className="font-bold">
-                            {user?.profile?.firstName} {user?.profile?.lastName}
-                          </div>
-                          <div className="text-sm opacity-50">
-                            {user?.email}
-                          </div>
+      {error && <div className="alert alert-error my-4">{error}</div>}
+      <div className="card bg-base-200/50 border border-base-300">
+        <div className="overflow-x-auto">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Role</th>
+                <th>Status</th>
+                <th>Joined</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map((user) => (
+                <tr key={user!._id} className="hover">
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <UserAvatar
+                        name={user!.profile?.firstName}
+                        avatarUrl={user!.profile?.avatar}
+                      />
+                      <div>
+                        <div className="font-bold">
+                          {user!.profile?.firstName} {user!.profile?.lastName}
                         </div>
+                        <div className="text-sm opacity-50">{user!.email}</div>
                       </div>
-                    </td>
-                    <td>
-                      <span className="badge badge-soft badge-sm">
-                        {user?.role}
+                    </div>
+                  </td>
+                  <td>
+                    <span className="badge badge-ghost badge-sm">
+                      {user!.role}
+                    </span>
+                  </td>
+                  <td>
+                    {user!.isVerified ? (
+                      <span className="badge badge-success badge-soft">
+                        Verified
                       </span>
-                    </td>
-                    <td>
-                      {user?.isVerified ? (
-                        <span className="badge badge-success badge-soft">
-                          Yes
-                        </span>
-                      ) : (
-                        <span className="badge badge-error badge-soft">No</span>
-                      )}
-                    </td>
-                    <td>{new Date(user!.createdAt).toLocaleDateString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    ) : (
+                      <span className="badge badge-warning badge-soft">
+                        Not Verified
+                      </span>
+                    )}
+                  </td>
+                  <td>{new Date(user!.createdAt).toLocaleDateString()}</td>
+
+                  <th>
+                    <div className="dropdown dropdown-end">
+                      <button tabIndex={0} className="btn btn-ghost btn-xs">
+                        <FiMoreVertical />
+                      </button>
+                      <ul
+                        tabIndex={0}
+                        className="dropdown-content z-[1] menu p-2 shadow bg-base-100 font-normal border border-base-300 rounded-box w-52"
+                      >
+                        {!user!.isVerified && (
+                          <li>
+                            <a
+                              onClick={() =>
+                                handleUpdateUser(user!._id, {
+                                  isVerified: true,
+                                })
+                              }
+                            >
+                              Mark as Verified
+                            </a>
+                          </li>
+                        )}
+                        {user!.role !== "admin" && (
+                          <>
+                            <li>
+                              <a
+                                onClick={() =>
+                                  handleUpdateUser(user!._id, {
+                                    role: "admin",
+                                  })
+                                }
+                              >
+                                Promote to Admin
+                              </a>
+                            </li>
+                            {user!.role === "client" && (
+                              <li>
+                                <a
+                                  onClick={() =>
+                                    handleUpdateUser(user!._id, {
+                                      role: "developer",
+                                    })
+                                  }
+                                >
+                                  Change to Developer
+                                </a>
+                              </li>
+                            )}
+                            {user!.role === "developer" && (
+                              <li>
+                                <a
+                                  onClick={() =>
+                                    handleUpdateUser(user!._id, {
+                                      role: "client",
+                                    })
+                                  }
+                                >
+                                  Change to Client
+                                </a>
+                              </li>
+                            )}
+                          </>
+                        )}
+                        {/* In a real app, a "ban" would be a status change, not a delete */}
+                        <li>
+                          <a className="text-error">Ban User</a>
+                        </li>
+                      </ul>
+                    </div>
+                  </th>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
-      ) : (
-        <p>We currently don't have any users on our platform</p>
-      )}
+      </div>
     </DashboardLayout>
   );
 };
