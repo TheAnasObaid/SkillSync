@@ -1,7 +1,7 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import User, { PortfolioItem } from "../models/User";
-import upload from "../middleware/upload";
+import upload, { uploadPortfolioImage } from "../middleware/upload";
 import Submission from "../models/Submission";
 import Challenge from "../models/Challenge";
 
@@ -59,36 +59,47 @@ export const addPortfolioItem = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
-  try {
-    const user = await User.findById(req.userId);
-    if (!user) {
-      res.status(404).json({ message: "User not found." });
-      return;
+  // 1. Wrap the logic in our new upload middleware
+  uploadPortfolioImage(req, res, async (err) => {
+    if (err) {
+      return res.status(400).json({ message: err.message });
     }
 
-    const { title, description, imageUrl, liveUrl, githubUrl } = req.body;
-    if (!title || !description || !imageUrl) {
-      res
-        .status(400)
-        .json({ message: "Title, description, and image URL are required." });
-      return;
+    // 2. Check if a file was uploaded
+    if (!req.file) {
+      return res.status(400).json({ message: "A project image is required." });
     }
 
-    const newItem: PortfolioItem = {
-      title,
-      description,
-      imageUrl,
-      liveUrl,
-      githubUrl,
-    };
+    try {
+      const user = await User.findById(req.userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found." });
+      }
 
-    user.profile?.portfolio.push(newItem);
-    await user.save();
+      // 3. Get the text fields from the body, which Multer has parsed
+      const { title, description, liveUrl, githubUrl } = req.body;
+      if (!title || !description) {
+        return res
+          .status(400)
+          .json({ message: "Title and description are required." });
+      }
 
-    res.status(201).json(user.profile?.portfolio);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to add portfolio item." });
-  }
+      const newItem: PortfolioItem = {
+        title,
+        description,
+        imageUrl: req.file.path,
+        liveUrl,
+        githubUrl,
+      };
+
+      user.profile?.portfolio.push(newItem);
+      await user.save();
+
+      res.status(201).json(user.profile?.portfolio);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to add portfolio item." });
+    }
+  });
 };
 
 export const deletePortfolioItem = async (

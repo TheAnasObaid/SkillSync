@@ -21,12 +21,7 @@ userRouter.get(
   authorize("developer"),
   getDeveloperStats
 );
-userRouter.post(
-  "/profile/portfolio",
-  authenticate,
-  authorize("developer"),
-  addPortfolioItem
-);
+userRouter.post("/profile/portfolio", authenticate, addPortfolioItem);
 userRouter.delete(
   "/profile/portfolio/:itemId",
   authenticate,

@@ -28,6 +28,10 @@ export interface ProfileFormData {
   };
 }
 
+interface PortfolioFormData extends PortfolioItem {
+  portfolioImage: FileList;
+}
+
 const developerSidebarLinks: DashboardLink[] = [
   { href: "/developer/dashboard", label: "Dashboard", icon: <FiClipboard /> },
   {
@@ -70,7 +74,7 @@ const DeveloperProfilePage = () => {
     handleSubmit: handlePortfolioSubmit,
     reset: resetPortfolio,
     formState: { errors: portfolioErrors, isSubmitting: isPortfolioSubmitting },
-  } = useForm<PortfolioItem>();
+  } = useForm<PortfolioFormData>();
 
   useEffect(() => {
     // When the user data is loaded, set the portfolio state
@@ -109,16 +113,36 @@ const DeveloperProfilePage = () => {
     }
   };
 
-  const handleAddPortfolioItem = async (data: PortfolioItem) => {
-    const newItem = {
-      ...data,
-      imageUrl: "https://placehold.co/600x400/1a1a1a/ffffff?text=Project",
-    };
+  const handleAddPortfolioItem = async (data: PortfolioFormData) => {
+    // 1. Create a FormData object
+    const formData = new FormData();
+
+    // 2. Append text fields
+    formData.append("title", data.title);
+    formData.append("description", data.description);
+    if (data.liveUrl) formData.append("liveUrl", data.liveUrl);
+    if (data.githubUrl) formData.append("githubUrl", data.githubUrl);
+
+    // 3. Append the image file
+    if (data.portfolioImage && data.portfolioImage.length > 0) {
+      formData.append("portfolioImage", data.portfolioImage[0]);
+    } else {
+      alert("Please select a project image.");
+      return;
+    }
+
     try {
+      // 4. Send the FormData
       const response = await apiClient.post<PortfolioItem[]>(
         "/users/profile/portfolio",
-        newItem
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+
       const updatedPortfolio = response.data;
       setPortfolio(updatedPortfolio);
       setUser({
@@ -128,7 +152,7 @@ const DeveloperProfilePage = () => {
       setIsPortfolioModalOpen(false);
       resetPortfolio();
     } catch (err) {
-      alert("Failed to add project.");
+      alert("Failed to add project. Check file type and size.");
     }
   };
 
@@ -424,6 +448,14 @@ const DeveloperProfilePage = () => {
                 type="url"
                 className="input input-bordered w-full"
                 {...registerPortfolio("githubUrl")}
+              />
+            </div>
+            <div>
+              <label className="label">Project Image</label>
+              <input
+                type="file"
+                className="file-input file-input-bordered w-full"
+                {...registerPortfolio("portfolioImage", { required: true })}
               />
             </div>
             <div className="modal-action">

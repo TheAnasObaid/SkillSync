@@ -37,3 +37,24 @@ function checkFileType(
   }
 }
 export default upload;
+
+const imageFileFilter = function (
+  req: any,
+  file: Express.Multer.File,
+  cb: multer.FileFilterCallback
+) {
+  const filetypes = /jpeg|jpg|png|gif/;
+  const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+  const mimetype = filetypes.test(file.mimetype);
+  if (mimetype && extname) {
+    return cb(null, true);
+  } else {
+    cb(new Error("Error: Images only!"));
+  }
+};
+
+export const uploadPortfolioImage = multer({
+  storage: storage, // We can reuse the same storage engine
+  limits: { fileSize: 5000000 }, // A smaller limit for images, e.g., 5MB
+  fileFilter: imageFileFilter,
+}).single("portfolioImage"); // Use a specific field name
