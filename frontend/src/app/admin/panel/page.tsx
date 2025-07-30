@@ -25,8 +25,8 @@ interface PlatformStats {
 
 const adminSidebarLinks: DashboardLink[] = [
   { href: "/admin/panel", label: "Dashboard", icon: <FiGrid /> },
+  { href: "/admin/users", label: "Manage Users", icon: <FiUsers /> },
   { href: "/admin/submissions", label: "Submissions", icon: <FiClipboard /> },
-  { href: "/admin/users", label: "Users", icon: <FiUsers /> },
   { href: "/admin/panel/profile", label: "My Profile", icon: <FiUser /> },
 ];
 
