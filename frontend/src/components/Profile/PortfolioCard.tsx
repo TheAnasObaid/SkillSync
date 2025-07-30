@@ -1,3 +1,4 @@
+import useImageFallback from "@/hookes/useImageFallback";
 import Link from "next/link";
 import { FiExternalLink, FiGithub, FiTrash } from "react-icons/fi";
 
@@ -19,13 +20,18 @@ interface PortfolioCardProps {
 const PortfolioCard = ({ item, onDelete, isOwner }: PortfolioCardProps) => {
   const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
-  const imageUrl = `${API_URL}/${item.imageUrl.replace(/\\/g, "/")}`;
+  const primaryImageUrl = `${API_URL}/${item.imageUrl.replace(/\\/g, "/")}`;
+  const placeholderImageUrl =
+    "https://placehold.co/600x400/1a1a1a/ffffff?text=Project"; // <-- Your consistent placeholder
+
+  // === 2. USE THE HOOK ===
+  const imageProps = useImageFallback(primaryImageUrl, placeholderImageUrl);
 
   return (
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50 group">
       <figure className="relative h-48">
         <img
-          src={imageUrl}
+          {...imageProps}
           alt={item.title}
           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
