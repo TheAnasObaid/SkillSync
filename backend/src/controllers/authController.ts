@@ -1,9 +1,10 @@
 import crypto from "crypto";
 import { Request, Response } from "express";
 import User from "../models/User";
-import sendEmail from "../utils/email";
-import generateToken from "../utils/generateToken";
+import sendEmail from "../services/emailService";
+import { generateToken } from "../services/tokenService";
 import { LoginDto, RegisterDto } from "../utils/validationSchemas";
+import asyncHandler from "../utils/asyncHandler";
 
 const createStyledEmail = (
   title: string,
@@ -184,7 +185,7 @@ export const resendVerificationEmail = async (req: Request, res: Response) => {
   }
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = asyncHandler(async (req: Request, res: Response) => {
   const { email, password }: LoginDto = req.body;
   const user = await User.findOne({ email }).select("+password");
 
@@ -208,25 +209,22 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 
   const isMatch = await user.comparePassword(password);
-
   if (!isMatch) {
-    res.status(400).json({ status: "failed", error: "Invalid credentials" });
+    res.status(401).json({ error: "Invalid credentials" });
     return;
   }
 
-  // --- START OF CHANGE ---
+  const token = generateToken(user.id);
 
-  // Instead of creating a simplified object like { name: user.profile.firstName, ... }
-  // Send the entire user object, which already has the correct structure.
-  // We can manually remove the password to be safe, although .select('-password') on a new query would also work.
   const userPayload = user.toObject();
+  delete userPayload.password;
 
   res.status(200).json({
     status: "success",
-    user: userPayload, // Send the correctly structured user object
-    token: generateToken(user.id),
+    user: userPayload,
+    token,
   });
-};
+});
 
 export const forgotPassword = async (req: Request, res: Response) => {
   // 1) Get user based on POSTed email
