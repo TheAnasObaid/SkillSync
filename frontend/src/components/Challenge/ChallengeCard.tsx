@@ -9,6 +9,7 @@ export interface Challenge {
   prize: number;
   difficulty: "beginner" | "intermediate" | "advanced";
   tags: string[];
+  files: { name: string; path: string }[];
   deadline: string;
 }
 

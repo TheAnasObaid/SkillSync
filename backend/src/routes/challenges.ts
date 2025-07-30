@@ -24,7 +24,7 @@ challengesRouter.post(
   "/",
   authenticate,
   authorize("client"),
-  validate(challengeSchema),
+  // validate(challengeSchema),
   createChallenge
 );
 challengesRouter.post(

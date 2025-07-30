@@ -15,7 +15,7 @@ export const loginSchema = z.object({
 export const challengeSchema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
   description: z.string().min(20, "Description must be at least 20 characters"),
-  prize: z.number().positive("Prize must be a positive number"),
+  prize: z.string("Prize must be a positive number"),
   category: z.string().min(3, "Category must be at least 3 characters"),
   requirements: z
     .string()
@@ -25,6 +25,7 @@ export const challengeSchema = z.object({
     .string()
     .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
   tags: z.string().min(1, "At least one tag is required"),
+  file: z.any().optional(),
 });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;

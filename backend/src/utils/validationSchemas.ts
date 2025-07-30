@@ -19,11 +19,11 @@ export const loginSchema = z.object({
 export const challengeSchema = z.object({
   title: z.string().min(5, "Title is too short"),
   description: z.string().min(20, "Description must be at least 20 characters"),
-  prize: z.number().min(1, "Prize must be a positive number"),
+  prize: z.string("Prize must be a positive number"),
   requirements: z
     .string()
     .min(20, "Requirements must be at least 20 characters"),
   difficulty: z.enum(["beginner", "intermediate", "advanced"]),
-  deadline: z.date(),
+  deadline: z.string(),
   tags: z.string().optional(),
 });

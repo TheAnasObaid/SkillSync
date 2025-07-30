@@ -18,12 +18,17 @@ export interface ChallengeDocument extends Document {
     creativity: number;
     documentation: number;
   };
-  files: Array<Object>;
+  files: Array<{ name: string; path: string }>;
   tags: Array<string>;
   viewCount: number;
   participantCount: number;
   createdAt: Date;
 }
+
+const FileSchema = new Schema({
+  name: { type: String, required: true },
+  path: { type: String, required: true },
+});
 
 const ChallengeSchema = new Schema<ChallengeDocument>(
   {
@@ -60,7 +65,7 @@ const ChallengeSchema = new Schema<ChallengeDocument>(
       creativity: { type: Number },
       documentation: { type: Number },
     },
-    files: [Object],
+    files: [FileSchema],
     tags: [String],
     viewCount: Number,
     participantCount: Number,
