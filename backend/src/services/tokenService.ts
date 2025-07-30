@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
 import { Types } from "mongoose";
+import appConfig from "../config/config";
 
-const JWT_SECRET = process.env.JWT_SECRET!;
+const JWT_SECRET = appConfig.jwtSecret!;
 const JWT_EXPIRES_IN = "7d";
 
 /**
