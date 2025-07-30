@@ -35,11 +35,9 @@ const events = [
 const SubmissionPreview = () => (
   // The 'group' class is essential for the hover-to-pause effect
   <div className="mockup-window card bg-base-200/50 shadow-lg border border-base-300 text-left group">
-    <div className="card-body">
-      <h3 className="font-semibold text-base-content/70">Live Platform Feed</h3>
-
+    <div className="card-body m-0">
       {/* This container acts as the viewport for the animation */}
-      <div className="relative mt-4 h-48 overflow-hidden">
+      <div className="relative h-48 overflow-hidden">
         {/* The inner div contains two copies of the list for a seamless loop */}
         <div className="absolute top-0 left-0 w-full animate-[scroll-vertical_20s_linear_infinite] group-hover:[animation-play-state:paused]">
           {/* List #1 */}
