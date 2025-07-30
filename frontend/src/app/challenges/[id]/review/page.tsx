@@ -1,5 +1,6 @@
 "use client";
 
+import ConfirmationModal from "@/components/Common/ConfirmationModal";
 import StarRating from "@/components/Common/StarRating";
 import UserAvatar from "@/components/Profile/UserAvatar";
 import apiClient from "@/services/apiClient";
@@ -68,6 +69,13 @@ const ReviewSubmissionsPage = () => {
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("desc");
 
+  const [modalState, setModalState] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm?: () => void;
+  }>({ isOpen: false, title: "", message: "" });
+
   const { register, handleSubmit, setValue, reset, watch } =
     useForm<RatingFormData>({
       defaultValues: { rating: 0, feedback: "" },
@@ -112,28 +120,37 @@ const ReviewSubmissionsPage = () => {
 
   const isChallengeCompleted = submissions.some((s) => s.status === "winner");
 
-  // Handlers for Modals and API calls
-  const handleSelectWinner = async () => {
-    if (!selectedSubmission) return;
-    setIsUpdating(true);
-    try {
-      await apiClient.patch(`/submissions/${selectedSubmission._id}/winner`);
-      setSubmissions((prev) =>
-        prev.map((sub) => ({
-          ...sub,
-          status: sub._id === selectedSubmission._id ? "winner" : "rejected",
-        }))
-      );
-      setIsWinnerModalOpen(false);
-    } catch (err) {
-      setError(
-        err instanceof AxiosError
-          ? err.response?.data.message
-          : "Failed to select winner."
-      );
-    } finally {
-      setIsUpdating(false);
-    }
+  const handleSelectWinner = (submission: Submission) => {
+    setModalState({
+      isOpen: true,
+      title: "Confirm Winner Selection",
+      message: `Are you sure you want to select the submission by ${submission.developerId.profile.firstName} as the winner? This will complete the challenge and cannot be undone.`,
+      onConfirm: async () => {
+        setIsUpdating(true);
+        try {
+          await apiClient.patch(`/submissions/${submission._id}/winner`);
+          setSubmissions((prev) =>
+            prev.map((sub) => ({
+              ...sub,
+              status: sub._id === submission._id ? "winner" : "rejected",
+            }))
+          );
+        } catch (err) {
+          setError(
+            err instanceof AxiosError
+              ? err.response?.data.message
+              : "Failed to select winner."
+          );
+        } finally {
+          setIsUpdating(false);
+          setModalState({ isOpen: false, title: "", message: "" });
+        }
+      },
+    });
+  };
+
+  const handleCancelModal = () => {
+    setModalState({ isOpen: false, title: "", message: "" });
   };
 
   const handleRateSubmission = async (data: RatingFormData) => {
@@ -340,7 +357,7 @@ const ReviewSubmissionsPage = () => {
                               className="btn btn-primary btn-sm"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                openWinnerModal(sub);
+                                handleSelectWinner(sub); // <-- Call the new handler
                               }}
                             >
                               <FiAward /> Select Winner
@@ -431,42 +448,15 @@ const ReviewSubmissionsPage = () => {
         </div>
       </div>
 
-      {/* Winner Confirmation Modal */}
-      <dialog className={`modal ${isWinnerModalOpen ? "modal-open" : ""}`}>
-        <div className="modal-box">
-          <h3 className="font-bold text-lg">Confirm Winner Selection</h3>
-          <p className="py-4">
-            Are you sure you want to select the submission by{" "}
-            <strong className="text-primary">
-              {selectedSubmission?.developerId.profile.firstName}
-            </strong>{" "}
-            as the winner? This action cannot be undone.
-          </p>
-          <div className="modal-action">
-            <button
-              className="btn btn-ghost"
-              onClick={() => setIsWinnerModalOpen(false)}
-              disabled={isUpdating}
-            >
-              Cancel
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={handleSelectWinner}
-              disabled={isUpdating}
-            >
-              {isUpdating ? (
-                <span className="loading loading-spinner"></span>
-              ) : (
-                "Confirm & Select"
-              )}
-            </button>
-          </div>
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button onClick={() => setIsWinnerModalOpen(false)}>close</button>
-        </form>
-      </dialog>
+      <ConfirmationModal
+        isOpen={modalState.isOpen}
+        title={modalState.title}
+        message={modalState.message}
+        onConfirm={modalState.onConfirm!}
+        onCancel={handleCancelModal}
+        confirmText="Confirm & Select"
+        isActionInProgress={isUpdating}
+      />
 
       {/* Rating & Feedback Modal */}
       <dialog className={`modal ${isRatingModalOpen ? "modal-open" : ""}`}>

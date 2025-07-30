@@ -1,13 +1,15 @@
 import { PortfolioItem } from "@/components/Profile/PortfolioCard";
 import { create } from "zustand";
 
-export type Role = "developer" | "client" | "admin" | null;
+export type Role = "developer" | "client" | "admin";
+export type AccountStatus = "active" | "banned";
 
 export type User = {
+  _id: string;
   email: string;
-  // This password field is likely incorrect in a user store, but we'll leave it for now
   password: string;
   role: Role;
+  accountStatus: AccountStatus;
   profile?: {
     firstName: string;
     lastName: string;
@@ -16,7 +18,7 @@ export type User = {
     bio: string;
     skills: Array<string>;
     experience: string;
-    portfolio: PortfolioItem[]; // <-- 2. UPDATE THIS LINE from Array<Object> to PortfolioItem[]
+    portfolio: PortfolioItem[];
     socialLinks: Object;
   };
   reputation?: {
@@ -26,7 +28,7 @@ export type User = {
   };
   isVerified: boolean;
   lastLogin: Date;
-  createdAt: Date;
+  createdAt: Date | string | number;
   updatedAt: Date;
   comparePassword: (candidate: string) => Promise<boolean>;
 } | null;

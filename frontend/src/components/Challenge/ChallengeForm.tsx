@@ -1,12 +1,12 @@
 "use client";
 
+import { ChallengeFormData, challengeSchema } from "@/lib/validationSchemas";
 import apiClient from "@/services/apiClient";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { challengeSchema, ChallengeFormData } from "@/lib/validationSchemas";
 
 const ChallengeForm = () => {
   const router = useRouter();
@@ -20,10 +20,32 @@ const ChallengeForm = () => {
     resolver: zodResolver(challengeSchema),
   });
 
-  const onSubmit = async (formData: ChallengeFormData) => {
+  const onSubmit = async (challengeFormData: ChallengeFormData) => {
     setError("");
+
+    // 1. Create a FormData object for file uploads
+    const formData = new FormData();
+
+    // 2. Append all text fields from the form data
+    Object.entries(challengeFormData).forEach(([key, value]) => {
+      // We handle the file separately, so skip it here
+      if (key !== "file" && value) {
+        formData.append(key, value);
+      }
+    });
+
+    // 3. Append the file if one was selected
+    const fileList = challengeFormData.file as FileList;
+    if (fileList && fileList.length > 0) {
+      formData.append("file", fileList[0]);
+    }
+
     try {
-      await apiClient.post("/challenges", formData);
+      await apiClient.post("/challenges", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       router.push("/client/dashboard");
     } catch (error) {
       if (error instanceof AxiosError) {
@@ -177,6 +199,21 @@ const ChallengeForm = () => {
         {errors.tags && (
           <p className="text-error text-xs">{errors.tags.message}</p>
         )}
+      </div>
+
+      <div className="grid gap-2">
+        <fieldset className="fieldset">
+          <legend className="fieldset-legend">Resource File (Optional)</legend>
+          <input
+            type="file"
+            className="file-input file-input-bordered w-full"
+            {...register("file")}
+          />
+          <p className="label">
+            Attach any relevant documents, mockups, or datasets (.zip, .pdf,
+            .png, etc.).
+          </p>
+        </fieldset>
       </div>
 
       <button

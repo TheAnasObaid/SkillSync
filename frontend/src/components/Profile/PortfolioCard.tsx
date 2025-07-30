@@ -12,7 +12,7 @@ export interface PortfolioItem {
 
 interface PortfolioCardProps {
   item: PortfolioItem;
-  onDelete: (id: string) => void;
+  onDelete: (item: PortfolioItem) => void;
   isOwner: boolean; // To show/hide the delete button
 }
 
@@ -28,7 +28,7 @@ const PortfolioCard = ({ item, onDelete, isOwner }: PortfolioCardProps) => {
         />
         {isOwner && (
           <button
-            onClick={() => onDelete(item._id!)}
+            onClick={() => onDelete(item)}
             className="btn btn-sm btn-circle btn-error absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
           >
             <FiTrash />

@@ -14,6 +14,7 @@ import {
   FiGitBranch,
   FiLogIn,
   FiCheckCircle,
+  FiDownload,
 } from "react-icons/fi";
 import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
 
@@ -214,6 +215,30 @@ const ChallengeDetailsPage = () => {
                 </div>
               </div>
             </div>
+
+            {challenge.files && challenge.files.length > 0 && (
+              <div className="card bg-base-200/50 border border-base-300">
+                <div className="card-body">
+                  <h3 className="card-title">Attached Resources</h3>
+                  <div className="space-y-2 mt-2">
+                    {challenge.files.map((file, index) => (
+                      <a
+                        key={index}
+                        href={`${
+                          process.env.NEXT_PUBLIC_API_BASE_URL
+                        }/${file.path.replace(/\\/g, "/")}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-outline btn-block"
+                        download={file.name}
+                      >
+                        <FiDownload className="mr-2" /> {file.name}
+                      </a>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
 
             {user && (
               <CtaBlock

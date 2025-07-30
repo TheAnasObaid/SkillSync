@@ -13,18 +13,47 @@ export const loginSchema = z.object({
 });
 
 export const challengeSchema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().min(20, "Description must be at least 20 characters"),
-  prize: z.number().positive("Prize must be a positive number"),
-  category: z.string().min(3, "Category must be at least 3 characters"),
-  requirements: z
+  title: z.string().min(5, { message: "Title must be at least 5 characters" }),
+  description: z.string().min(20, { message: "Description is too short" }),
+  requirements: z.string().min(20, { message: "Requirements are too short" }),
+  category: z.string().min(3, { message: "Category is too short" }),
+  tags: z.string().min(1, { message: "At least one tag is required" }),
+  difficulty: z.enum(["beginner", "intermediate", "advanced"], {
+    error: () => ({ message: "Please select a valid difficulty" }),
+  }),
+  file: z.any().optional(), // On the frontend, this will be a FileList
+
+  // --- Fields requiring transformation and coercion (the powerful part) ---
+
+  // Prize:
+  // 1. Starts as a string.
+  // 2. transform() attempts to convert it to a number.
+  // 3. The inner z.number() chain validates the result.
+  prize: z
     .string()
-    .min(20, "Requirements must be at least 20 characters"),
-  difficulty: z.enum(["beginner", "intermediate", "advanced"]),
+    .transform((val, ctx) => {
+      const parsed = parseInt(val, 10);
+      if (isNaN(parsed)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: "Prize must be a number",
+        });
+        return z.NEVER;
+      }
+      return parsed;
+    })
+    .pipe(z.number().positive({ message: "Prize must be greater than 0" })),
+
+  // Deadline:
+  // 1. Starts as a string.
+  // 2. refine() checks if it's a valid date string.
+  // 3. transform() converts the valid string into a proper Date object.
   deadline: z
     .string()
-    .refine((val) => !isNaN(Date.parse(val)), { message: "Invalid date" }),
-  tags: z.string().min(1, "At least one tag is required"),
+    .refine((val) => val && !isNaN(Date.parse(val)), {
+      message: "Please enter a valid date",
+    })
+    .transform((val) => new Date(val)),
 });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;

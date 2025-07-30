@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import User from "../models/User";
 import sendEmail from "../utils/email";
 import generateToken from "../utils/generateToken";
+import { LoginDto, RegisterDto } from "../utils/validationSchemas";
 
 const createStyledEmail = (
   title: string,
@@ -49,7 +50,7 @@ const createStyledEmail = (
 };
 
 export const registerUser = async (req: Request, res: Response) => {
-  const { name, email, password, role } = req.body;
+  const { name, email, password, role }: RegisterDto = req.body;
   try {
     const user = await User.create({
       "profile.firstName": name,
@@ -184,7 +185,7 @@ export const resendVerificationEmail = async (req: Request, res: Response) => {
 };
 
 export const loginUser = async (req: Request, res: Response) => {
-  const { email, password } = req.body;
+  const { email, password }: LoginDto = req.body;
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
@@ -196,6 +197,13 @@ export const loginUser = async (req: Request, res: Response) => {
     res
       .status(403)
       .json({ message: "Please verify your email before logging in." });
+    return;
+  }
+
+  if (user.accountStatus === "banned") {
+    res
+      .status(403)
+      .json({ status: "failed", error: "Your account has been suspended." });
     return;
   }
 

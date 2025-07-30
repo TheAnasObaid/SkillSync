@@ -1,55 +1,70 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
-
+import upload from "../middleware/upload";
 import Challenge from "../models/Challenge";
 import Submission from "../models/Submission";
-import upload from "../middleware/upload";
+import { ChallengeDto, challengeSchema } from "../utils/validationSchemas";
 
 export const createChallenge = async (
   req: AuthenticatedRequest,
   res: Response
 ) => {
-  try {
-    const {
-      title,
-      description,
-      prize,
-      requirements,
-      category,
-      difficulty,
-      deadline,
-      tags,
-    } = req.body;
-
-    if (
-      !title ||
-      !description ||
-      !prize ||
-      !requirements ||
-      !difficulty ||
-      !deadline
-    ) {
-      res.status(400).json({ message: "Please provide all required fields." });
+  upload(req, res, async (err) => {
+    // Handle any file upload errors first
+    if (err) {
+      return res.status(400).json({ message: err.message });
     }
 
-    const challenge = await Challenge.create({
-      title,
-      description,
-      prize,
-      requirements,
-      category,
-      difficulty,
-      deadline,
-      tags: tags ? tags.split(",").map((tag: string) => tag.trim()) : [],
-      createdBy: req.userId,
-      status: "published",
-    });
+    try {
+      const parsedBody = challengeSchema.safeParse(req.body);
 
-    res.status(201).json(challenge);
-  } catch (error) {
-    console.error("Error creating challenge:", error);
-    res.status(500).json({ message: "Failed to create challenge" });
-  }
+      if (!parsedBody.success) {
+        // If validation fails, return the Zod error issues.
+        res.status(400).json({ issues: parsedBody.error.issues });
+        return;
+      }
+
+      const {
+        title,
+        description,
+        prize,
+        requirements,
+        difficulty,
+        deadline,
+        tags,
+        category,
+      }: ChallengeDto = parsedBody.data;
+
+      const newChallenge = new Challenge({
+        title,
+        description,
+        prize,
+        requirements,
+        difficulty,
+        category,
+        deadline,
+        tags: tags ? tags.split(",").map((tag: string) => tag.trim()) : [],
+        createdBy: req.userId,
+        status: "published",
+        // 2. If a file was uploaded, add it to the 'files' array
+        files: req.file
+          ? [{ name: req.file.originalname, path: req.file.path }]
+          : [],
+      });
+
+      await newChallenge.save();
+      res.status(201).json(newChallenge);
+    } catch (error: any) {
+      // Handle Mongoose validation errors
+      if (error.name === "ValidationError") {
+        return res
+          .status(400)
+          .json({ message: "Validation Error", errors: error.errors });
+      }
+      console.error("Error creating challenge:", error);
+      res.status(500).json({ message: "Failed to create challenge" });
+    }
+  });
 };
 
 export const getChallengesByClient = async (
