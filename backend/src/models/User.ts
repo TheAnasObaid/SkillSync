@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import crypto from "crypto";
 
 export type Role = "developer" | "client" | "admin";
+export type AccountStatus = "active" | "banned";
 
 export interface PortfolioItem {
   _id?: string;
@@ -17,6 +18,7 @@ export interface UserDocument extends Document {
   email: string;
   password: string;
   role: Role;
+  accountStatus: AccountStatus;
   profile?: {
     firstName: string;
     lastName: string;
@@ -71,6 +73,11 @@ const UserSchema = new Schema<UserDocument>(
       type: String,
       enum: ["developer", "client", "admin"],
       default: "developer",
+    },
+    accountStatus: {
+      type: String,
+      enum: ["active", "banned"],
+      default: "active",
     },
     profile: {
       firstName: {

@@ -62,7 +62,7 @@ export const updateUserByAdmin = async (
 ) => {
   try {
     const { userId } = req.params;
-    const { role, isVerified } = req.body;
+    const { role, isVerified, accountStatus } = req.body;
 
     // Find the user and update only the specified fields
     const user = await User.findById(userId);
@@ -73,6 +73,7 @@ export const updateUserByAdmin = async (
 
     if (role) user.role = role;
     if (isVerified !== undefined) user.isVerified = isVerified;
+    if (accountStatus) user.accountStatus = accountStatus;
 
     await user.save({ validateBeforeSave: false }); // Bypass certain validations if needed
 

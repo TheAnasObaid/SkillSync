@@ -1,13 +1,15 @@
 import { PortfolioItem } from "@/components/Profile/PortfolioCard";
 import { create } from "zustand";
 
-export type Role = "developer" | "client" | "admin" | null;
+export type Role = "developer" | "client" | "admin";
+export type AccountStatus = "active" | "banned";
 
 export type User = {
   _id: string;
   email: string;
   password: string;
   role: Role;
+  accountStatus: AccountStatus;
   profile?: {
     firstName: string;
     lastName: string;

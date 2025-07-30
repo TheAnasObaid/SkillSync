@@ -200,6 +200,13 @@ export const loginUser = async (req: Request, res: Response) => {
     return;
   }
 
+  if (user.accountStatus === "banned") {
+    res
+      .status(403)
+      .json({ status: "failed", error: "Your account has been suspended." });
+    return;
+  }
+
   const isMatch = await user.comparePassword(password);
 
   if (!isMatch) {
