@@ -5,6 +5,11 @@ import Submission from "../models/Submission";
 import User from "../models/User";
 import asyncHandler from "../utils/asyncHandler";
 
+/**
+ * @desc    Get high-level platform statistics
+ * @route   GET /api/admin/stats
+ * @access  Private (Admin)
+ */
 export const getPlatformStats = asyncHandler(
   async (_: AuthenticatedRequest, res: Response) => {
     const totalUsers = await User.countDocuments();
@@ -25,6 +30,11 @@ export const getPlatformStats = asyncHandler(
   }
 );
 
+/**
+ * @desc    Get a list of all users on the platform
+ * @route   GET /api/admin/users
+ * @access  Private (Admin)
+ */
 export const getAllUsers = asyncHandler(
   async (_: AuthenticatedRequest, res: Response) => {
     const users = await User.find({})
@@ -34,6 +44,11 @@ export const getAllUsers = asyncHandler(
   }
 );
 
+/**
+ * @desc    Get a list of all submissions on the platform
+ * @route   GET /api/admin/submissions
+ * @access  Private (Admin)
+ */
 export const getAllSubmissions = asyncHandler(
   async (_: AuthenticatedRequest, res: Response) => {
     const submissions = await Submission.find({})
@@ -44,6 +59,11 @@ export const getAllSubmissions = asyncHandler(
   }
 );
 
+/**
+ * @desc    Update a user's details by their ID
+ * @route   PATCH /api/admin/users/:userId
+ * @access  Private (Admin)
+ */
 export const updateUserByAdmin = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { userId } = req.params;
@@ -64,6 +84,11 @@ export const updateUserByAdmin = asyncHandler(
   }
 );
 
+/**
+ * @desc    Delete a challenge by its ID
+ * @route   DELETE /api/admin/challenges/:challengeId
+ * @access  Private (Admin)
+ */
 export const deleteChallengeByAdmin = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { challengeId } = req.params;

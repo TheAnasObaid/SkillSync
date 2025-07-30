@@ -50,6 +50,11 @@ const createStyledEmail = (
     `;
 };
 
+/**
+ * @desc    Register a new user (developer or client)
+ * @route   POST /api/auth/register
+ * @access  Public
+ */
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
     const { name, email, password, role }: RegisterDto = req.body;
@@ -93,6 +98,56 @@ export const registerUser = asyncHandler(
   }
 );
 
+/**
+ * @desc    Authenticate a user and get a token
+ * @route   POST /api/auth/login
+ * @access  Public
+ */
+export const loginUser = asyncHandler(async (req: Request, res: Response) => {
+  const { email, password }: LoginDto = req.body;
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    res.status(400).json({ status: "failed", error: "User not found" });
+    return;
+  }
+
+  if (!user.isVerified) {
+    res
+      .status(403)
+      .json({ message: "Please verify your email before logging in." });
+    return;
+  }
+
+  if (user.accountStatus === "banned") {
+    res
+      .status(403)
+      .json({ status: "failed", error: "Your account has been suspended." });
+    return;
+  }
+
+  const isMatch = await user.comparePassword(password);
+  if (!isMatch) {
+    res.status(401).json({ error: "Invalid credentials" });
+    return;
+  }
+
+  const token = generateToken(user.id);
+  const userPayload = user.toObject();
+  delete userPayload.password;
+
+  res.status(200).json({
+    status: "success",
+    user: userPayload,
+    token,
+  });
+});
+
+/**
+ * @desc    Verify a new user's email address
+ * @route   GET /api/auth/verify-email/:token
+ * @access  Public
+ */
 export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
   const hashedToken = crypto
     .createHash("sha256")
@@ -114,6 +169,11 @@ export const verifyEmail = asyncHandler(async (req: Request, res: Response) => {
     .json({ status: "success", message: "Email verified successfully." });
 });
 
+/**
+ * @desc    Verify a new user's email address
+ * @route   GET /api/auth/verify-email/:token
+ * @access  Public
+ */
 export const resendVerificationEmail = asyncHandler(
   async (req: Request, res: Response) => {
     const { email } = req.body;
@@ -156,46 +216,11 @@ export const resendVerificationEmail = asyncHandler(
   }
 );
 
-export const loginUser = asyncHandler(async (req: Request, res: Response) => {
-  const { email, password }: LoginDto = req.body;
-  const user = await User.findOne({ email }).select("+password");
-
-  if (!user) {
-    res.status(400).json({ status: "failed", error: "User not found" });
-    return;
-  }
-
-  if (!user.isVerified) {
-    res
-      .status(403)
-      .json({ message: "Please verify your email before logging in." });
-    return;
-  }
-
-  if (user.accountStatus === "banned") {
-    res
-      .status(403)
-      .json({ status: "failed", error: "Your account has been suspended." });
-    return;
-  }
-
-  const isMatch = await user.comparePassword(password);
-  if (!isMatch) {
-    res.status(401).json({ error: "Invalid credentials" });
-    return;
-  }
-
-  const token = generateToken(user.id);
-  const userPayload = user.toObject();
-  delete userPayload.password;
-
-  res.status(200).json({
-    status: "success",
-    user: userPayload,
-    token,
-  });
-});
-
+/**
+ * @desc    Initiate the password reset process
+ * @route   POST /api/auth/forgot-password
+ * @access  Public
+ */
 export const forgotPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const user = await User.findOne({ email: req.body.email });
@@ -233,6 +258,11 @@ export const forgotPassword = asyncHandler(
   }
 );
 
+/**
+ * @desc    Reset a user's password using a token
+ * @route   PATCH /api/auth/reset-password/:token
+ * @access  Public
+ */
 export const resetPassword = asyncHandler(
   async (req: Request, res: Response) => {
     const hashedToken = crypto

@@ -7,6 +7,11 @@ import User from "../models/User";
 import { PortfolioItem } from "../types";
 import asyncHandler from "../utils/asyncHandler";
 
+/**
+ * @desc    Get the profile of the currently logged-in user
+ * @route   GET /api/users/me
+ * @access  Private
+ */
 export const getMe = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const user = await User.findById(req.userId).select("-password");
@@ -18,6 +23,11 @@ export const getMe = asyncHandler(
   }
 );
 
+/**
+ * @desc    Update the profile of the currently logged-in user
+ * @route   PUT /api/users/me
+ * @access  Private
+ */
 export const updateMyProfile = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
@@ -46,6 +56,42 @@ export const updateMyProfile = asyncHandler(
   }
 );
 
+/**
+ * @desc    Upload an avatar for the currently logged-in user
+ * @route   POST /api/users/me/avatar
+ * @access  Private
+ */
+export const uploadMyAvatar = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    upload(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      if (req.file == undefined) {
+        return res.status(400).json({ message: "Error: No File Selected!" });
+      }
+
+      const user = await User.findById(req.userId);
+      if (!user || !user.profile) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      user.profile.avatar = req.file.path;
+      await user.save();
+
+      res.status(200).json({
+        message: "Avatar uploaded successfully!",
+        avatarUrl: req.file.path,
+      });
+    });
+  }
+);
+
+/**
+ * @desc    Add a portfolio item for the logged-in developer
+ * @route   POST /api/users/me/portfolio
+ * @access  Private (Developer)
+ */
 export const addMyPortfolioItem = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     uploadPortfolioImage(req, res, async (err) => {
@@ -86,6 +132,11 @@ export const addMyPortfolioItem = asyncHandler(
   }
 );
 
+/**
+ * @desc    Delete a portfolio item for the logged-in developer
+ * @route   DELETE /api/users/me/portfolio/:itemId
+ * @access  Private (Developer)
+ */
 export const deleteMyPortfolioItem = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { itemId } = req.params;
@@ -112,32 +163,11 @@ export const deleteMyPortfolioItem = asyncHandler(
   }
 );
 
-export const uploadMyAvatar = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    upload(req, res, async (err) => {
-      if (err) {
-        return res.status(400).json({ message: err.message });
-      }
-      if (req.file == undefined) {
-        return res.status(400).json({ message: "Error: No File Selected!" });
-      }
-
-      const user = await User.findById(req.userId);
-      if (!user || !user.profile) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      user.profile.avatar = req.file.path;
-      await user.save();
-
-      res.status(200).json({
-        message: "Avatar uploaded successfully!",
-        avatarUrl: req.file.path,
-      });
-    });
-  }
-);
-
+/**
+ * @desc    Delete a portfolio item for the logged-in developer
+ * @route   DELETE /api/users/me/portfolio/:itemId
+ * @access  Private (Developer)
+ */
 export const getMyDeveloperStats = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const developerId = req.userId;
@@ -162,6 +192,11 @@ export const getMyDeveloperStats = asyncHandler(
   }
 );
 
+/**
+ * @desc    Delete a portfolio item for the logged-in developer
+ * @route   DELETE /api/users/me/portfolio/:itemId
+ * @access  Private (Developer)
+ */
 export const getMyClientStats = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const clientId = req.userId;

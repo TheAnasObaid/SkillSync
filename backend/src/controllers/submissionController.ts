@@ -6,6 +6,11 @@ import Challenge from "../models/Challenge";
 import Submission from "../models/Submission";
 import asyncHandler from "../utils/asyncHandler";
 
+/**
+ * @desc    Submit a solution to a specific challenge
+ * @route   POST /api/submissions/challenge/:challengeId
+ * @access  Private (Developer)
+ */
 export const submitSolution = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     upload(req, res, async (err) => {
@@ -44,16 +49,11 @@ export const submitSolution = asyncHandler(
   }
 );
 
-export const getMySubmissions = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const developerId = req.userId;
-    const submissions = await Submission.find({ developerId })
-      .populate("challengeId", "title status prize")
-      .sort({ createdAt: -1 });
-    res.status(200).json(submissions);
-  }
-);
-
+/**
+ * @desc    Get all public submissions for a specific challenge
+ * @route   GET /api/submissions/challenge/:challengeId
+ * @access  Public
+ */
 export const getPublicSubmissions = asyncHandler(
   async (req: Request, res: Response) => {
     const { challengeId } = req.params;
@@ -65,6 +65,11 @@ export const getPublicSubmissions = asyncHandler(
   }
 );
 
+/**
+ * @desc    Get all submissions for a challenge (for the client who owns it)
+ * @route   GET /api/submissions/challenge/:challengeId/review
+ * @access  Private (Client)
+ */
 export const getSubmissionsForChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { challengeId } = req.params;
@@ -87,6 +92,26 @@ export const getSubmissionsForChallenge = asyncHandler(
   }
 );
 
+/**
+ * @desc    Get all submissions made by the logged-in developer
+ * @route   GET /api/submissions/me
+ * @access  Private (Developer)
+ */
+export const getMySubmissions = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const developerId = req.userId;
+    const submissions = await Submission.find({ developerId })
+      .populate("challengeId", "title status prize")
+      .sort({ createdAt: -1 });
+    res.status(200).json(submissions);
+  }
+);
+
+/**
+ * @desc    Select a submission as the winner of a challenge
+ * @route   PATCH /api/submissions/:submissionId/winner
+ * @access  Private (Client)
+ */
 export const selectWinner = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { submissionId } = req.params;
@@ -134,6 +159,11 @@ export const selectWinner = asyncHandler(
   }
 );
 
+/**
+ * @desc    Rate a submission and provide feedback
+ * @route   POST /api/submissions/:submissionId/rate
+ * @access  Private (Client)
+ */
 export const rateSubmission = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { submissionId } = req.params;

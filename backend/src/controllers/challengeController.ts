@@ -6,10 +6,14 @@ import Submission from "../models/Submission";
 import asyncHandler from "../utils/asyncHandler";
 import { ChallengeDto, challengeSchema } from "../utils/validationSchemas";
 
+/**
+ * @desc    Create a new challenge
+ * @route   POST /api/challenges
+ * @access  Private (Client)
+ */
 export const createChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     upload(req, res, async (err) => {
-      // Handle any file upload errors first
       if (err) {
         return res.status(400).json({ message: err.message });
       }
@@ -17,7 +21,6 @@ export const createChallenge = asyncHandler(
       const parsedBody = challengeSchema.safeParse(req.body);
 
       if (!parsedBody.success) {
-        // If validation fails, return the Zod error issues.
         res.status(400).json({ issues: parsedBody.error.issues });
         return;
       }
@@ -44,7 +47,6 @@ export const createChallenge = asyncHandler(
         tags: tags ? tags.split(",").map((tag: string) => tag.trim()) : [],
         createdBy: req.userId,
         status: "published",
-        // 2. If a file was uploaded, add it to the 'files' array
         files: req.file
           ? [{ name: req.file.originalname, path: req.file.path }]
           : [],
@@ -56,15 +58,23 @@ export const createChallenge = asyncHandler(
   }
 );
 
-export const getMyChallenges = asyncHandler(
+/**
+ * @desc    Get a list of all public, published challenges
+ * @route   GET /api/challenges
+ * @access  Public
+ */
+export const getAllChallenges = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const allChallenges = await Challenge.find({ createdBy: req.userId }).sort({
-      createdAt: -1,
-    });
+    const allChallenges = await Challenge.find();
     res.status(200).json(allChallenges);
   }
 );
 
+/**
+ * @desc    Get a single challenge by its ID
+ * @route   GET /api/challenges/:id
+ * @access  Public
+ */
 export const getChallengeById = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const challenge = await Challenge.findById(req.params.id).populate(
@@ -79,13 +89,25 @@ export const getChallengeById = asyncHandler(
   }
 );
 
-export const getAllChallenges = asyncHandler(
+/**
+ * @desc    Get challenges created by the logged-in client
+ * @route   GET /api/challenges/me
+ * @access  Private (Client)
+ */
+export const getMyChallenges = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const allChallenges = await Challenge.find();
+    const allChallenges = await Challenge.find({ createdBy: req.userId }).sort({
+      createdAt: -1,
+    });
     res.status(200).json(allChallenges);
   }
 );
 
+/**
+ * @desc    Update a challenge owned by the logged-in client
+ * @route   PUT /api/challenges/:id/me
+ * @access  Private (Client)
+ */
 export const updateMyChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const challenge = await Challenge.findOne({
@@ -113,6 +135,11 @@ export const updateMyChallenge = asyncHandler(
   }
 );
 
+/**
+ * @desc    Delete a challenge owned by the logged-in client
+ * @route   DELETE /api/challenges/:id/me
+ * @access  Private (Client)
+ */
 export const deleteMyChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const challenge = await Challenge.findOneAndDelete({
