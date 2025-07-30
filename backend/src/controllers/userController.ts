@@ -1,9 +1,10 @@
 import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
-import User, { PortfolioItem } from "../models/User";
 import upload, { uploadPortfolioImage } from "../middleware/upload";
-import Submission from "../models/Submission";
 import Challenge from "../models/Challenge";
+import Submission from "../models/Submission";
+import User from "../models/User";
+import { PortfolioItem } from "../types";
 
 export const getUserProfile = async (
   req: AuthenticatedRequest,

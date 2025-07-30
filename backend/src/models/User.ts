@@ -1,52 +1,9 @@
-import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
+import mongoose, { Schema } from "mongoose";
+import { IUser } from "../types";
 
-export type Role = "developer" | "client" | "admin";
-export type AccountStatus = "active" | "banned";
-
-export interface PortfolioItem {
-  _id?: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  liveUrl?: string;
-  githubUrl?: string;
-}
-
-export interface UserDocument extends Document {
-  email: string;
-  password?: string;
-  role: Role;
-  accountStatus: AccountStatus;
-  profile?: {
-    firstName: string;
-    lastName: string;
-    companyName: string;
-    avatar: string;
-    bio: string;
-    skills: Array<string>;
-    experience: string;
-    portfolio: PortfolioItem[];
-    socialLinks: Object;
-  };
-  reputation?: {
-    rating: number;
-    totalRatings: number;
-    completedChallenges: number;
-  };
-  isVerified: boolean;
-  lastLogin: Date;
-  createdAt: Date;
-  updatedAt: Date;
-  verificationToken?: string;
-  passwordResetToken?: string;
-  passwordResetExpires?: Date;
-  comparePassword: (candidate: string) => Promise<boolean>;
-  createPasswordResetToken(): string;
-}
-
-const PortfolioItemSchema = new Schema<PortfolioItem>({
+const PortfolioItemSchema = new Schema({
   title: { type: String, required: true, trim: true },
   description: { type: String, required: true, trim: true },
   imageUrl: { type: String, required: true },
@@ -54,7 +11,7 @@ const PortfolioItemSchema = new Schema<PortfolioItem>({
   githubUrl: { type: String, trim: true },
 });
 
-const UserSchema = new Schema<UserDocument>(
+const UserSchema = new Schema<IUser>(
   {
     email: {
       type: String,
@@ -63,12 +20,7 @@ const UserSchema = new Schema<UserDocument>(
       lowercase: true,
       trim: true,
     },
-    password: {
-      type: String,
-      required: true,
-      minlength: 6,
-      select: false,
-    },
+    password: { type: String, required: true, minlength: 6, select: false },
     role: {
       type: String,
       enum: ["developer", "client", "admin"],
@@ -80,64 +32,53 @@ const UserSchema = new Schema<UserDocument>(
       default: "active",
     },
     profile: {
-      firstName: {
-        type: String,
-        required: true,
-        trim: true,
-        minlength: 2,
-      },
-      lastName: { type: String },
-      companyName: { type: String },
-      avatar: { type: String },
-      bio: { type: String },
-      skills: { type: [String] },
-      experience: { type: String },
-      portfolio: { type: [PortfolioItemSchema] },
-      socialLinks: { type: Object },
+      firstName: { type: String, required: true, trim: true, minlength: 2 },
+      lastName: String,
+      companyName: String,
+      avatar: String,
+      bio: String,
+      skills: [String],
+      experience: String,
+      portfolio: [PortfolioItemSchema],
+      socialLinks: Object,
     },
     reputation: {
-      rating: { type: Number },
-      totalRatings: { type: Number },
-      completedChallenges: { type: Number },
+      rating: { type: Number, default: 0 },
+      totalRatings: { type: Number, default: 0 },
+      completedChallenges: { type: Number, default: 0 },
     },
-    lastLogin: { type: Date },
     isVerified: { type: Boolean, default: false },
+    lastLogin: Date,
     verificationToken: String,
     passwordResetToken: String,
     passwordResetExpires: Date,
   },
-  {
-    timestamps: true,
-  }
+  { timestamps: true }
 );
 
+// --- MIDDLEWARE & METHODS ---
 UserSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
-
   const salt = await bcrypt.genSalt(10);
   this.password = await bcrypt.hash(this.password!, salt);
   next();
 });
 
-UserSchema.methods.comparePassword = async function (candidate: string) {
+UserSchema.methods.comparePassword = function (
+  candidate: string
+): Promise<boolean> {
   return bcrypt.compare(candidate, this.password);
 };
 
-UserSchema.methods.createPasswordResetToken = function () {
+UserSchema.methods.createPasswordResetToken = function (): string {
   const resetToken = crypto.randomBytes(32).toString("hex");
-
   this.passwordResetToken = crypto
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
-
-  // Token is valid for 10 minutes
-  this.passwordResetExpires = Date.now() + 10 * 60 * 1000;
-
-  // Return the unhashed token to be "sent" to the user
+  this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000);
   return resetToken;
 };
 
-const User = mongoose.model<UserDocument>("User", UserSchema);
-
+const User = mongoose.model<IUser>("User", UserSchema);
 export default User;

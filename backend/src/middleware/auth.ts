@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import User, { Role, UserDocument } from "../models/User";
+import User from "../models/User";
 import { verifyToken } from "../services/tokenService";
+import { IUser, Role } from "../types";
 import asyncHandler from "../utils/asyncHandler";
 
 export interface AuthenticatedRequest extends Request {
-  user?: UserDocument;
+  user?: IUser;
   userId?: string;
 }
 
