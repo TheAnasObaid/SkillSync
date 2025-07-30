@@ -4,11 +4,11 @@ import express from "express";
 import path from "path";
 import connectDB from "./config/database";
 import errorHandler from "./middleware/errorHandler";
-import adminRoute from "./routes/admin";
-import authRoute from "./routes/auth";
-import challengesRoute from "./routes/challenges";
-import submissionsRoute from "./routes/submissions";
-import userRoute from "./routes/user";
+import adminRoute from "./routes/adminRoutes";
+import authRoute from "./routes/authRoutes";
+import challengesRoute from "./routes/challengeRoutes";
+import submissionsRoute from "./routes/submissionRoutes";
+import userRoute from "./routes/userRoutes";
 
 const app = express();
 

@@ -5,8 +5,6 @@ import Submission from "../models/Submission";
 import User from "../models/User";
 import asyncHandler from "../utils/asyncHandler";
 
-// We wrap all the original functions with asyncHandler and get rid of try..catch
-
 export const getPlatformStats = asyncHandler(
   async (_: AuthenticatedRequest, res: Response) => {
     const totalUsers = await User.countDocuments();
