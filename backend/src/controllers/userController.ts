@@ -1,31 +1,35 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
-import User, { PortfolioItem } from "../models/User";
 import upload, { uploadPortfolioImage } from "../middleware/upload";
-import Submission from "../models/Submission";
 import Challenge from "../models/Challenge";
+import Submission from "../models/Submission";
+import User from "../models/User";
+import { PortfolioItem } from "../types";
+import asyncHandler from "../utils/asyncHandler";
 
-export const getUserProfile = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
+/**
+ * @desc    Get the profile of the currently logged-in user
+ * @route   GET /api/users/me
+ * @access  Private
+ */
+export const getMe = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
     const user = await User.findById(req.userId).select("-password");
     if (!user) {
       res.status(404).json({ message: "User not found" });
       return;
     }
     res.status(200).json(user);
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch user profile" });
   }
-};
+);
 
-export const updateUserProfile = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
+/**
+ * @desc    Update the profile of the currently logged-in user
+ * @route   PUT /api/users/me
+ * @access  Private
+ */
+export const updateMyProfile = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
     const userId = req.userId;
     const { profile, email, name } = req.body;
 
@@ -49,34 +53,63 @@ export const updateUserProfile = async (
     }
 
     res.status(200).json(updatedUser);
-  } catch (error) {
-    console.error("Profile Update Error:", error);
-    res.status(500).json({ message: "Failed to update user profile" });
   }
-};
+);
 
-export const addPortfolioItem = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  // 1. Wrap the logic in our new upload middleware
-  uploadPortfolioImage(req, res, async (err) => {
-    if (err) {
-      return res.status(400).json({ message: err.message });
-    }
+/**
+ * @desc    Upload an avatar for the currently logged-in user
+ * @route   POST /api/users/me/avatar
+ * @access  Private
+ */
+export const uploadMyAvatar = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    upload(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+      if (req.file == undefined) {
+        return res.status(400).json({ message: "Error: No File Selected!" });
+      }
 
-    // 2. Check if a file was uploaded
-    if (!req.file) {
-      return res.status(400).json({ message: "A project image is required." });
-    }
+      const user = await User.findById(req.userId);
+      if (!user || !user.profile) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-    try {
+      user.profile.avatar = req.file.path;
+      await user.save();
+
+      res.status(200).json({
+        message: "Avatar uploaded successfully!",
+        avatarUrl: req.file.path,
+      });
+    });
+  }
+);
+
+/**
+ * @desc    Add a portfolio item for the logged-in developer
+ * @route   POST /api/users/me/portfolio
+ * @access  Private (Developer)
+ */
+export const addMyPortfolioItem = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    uploadPortfolioImage(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
+
+      if (!req.file) {
+        return res
+          .status(400)
+          .json({ message: "A project image is required." });
+      }
+
       const user = await User.findById(req.userId);
       if (!user) {
         return res.status(404).json({ message: "User not found." });
       }
 
-      // 3. Get the text fields from the body, which Multer has parsed
       const { title, description, liveUrl, githubUrl } = req.body;
       if (!title || !description) {
         return res
@@ -91,22 +124,21 @@ export const addPortfolioItem = async (
         liveUrl,
         githubUrl,
       };
-
       user.profile?.portfolio.push(newItem);
+
       await user.save();
-
       res.status(201).json(user.profile?.portfolio);
-    } catch (error) {
-      res.status(500).json({ message: "Failed to add portfolio item." });
-    }
-  });
-};
+    });
+  }
+);
 
-export const deletePortfolioItem = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
+/**
+ * @desc    Delete a portfolio item for the logged-in developer
+ * @route   DELETE /api/users/me/portfolio/:itemId
+ * @access  Private (Developer)
+ */
+export const deleteMyPortfolioItem = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
     const { itemId } = req.params;
     const user = await User.findById(req.userId);
     if (!user) {
@@ -114,7 +146,6 @@ export const deletePortfolioItem = async (
       return;
     }
 
-    // Pull the item from the portfolio array
     const itemIndex = user.profile?.portfolio.findIndex(
       (p) => p._id?.toString() === itemId
     );
@@ -129,48 +160,16 @@ export const deletePortfolioItem = async (
     await user.save();
 
     res.status(200).json({ message: "Portfolio item deleted successfully." });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to delete portfolio item." });
   }
-};
+);
 
-export const uploadAvatar = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  upload(req, res, async (err) => {
-    if (err) {
-      return res.status(400).json({ message: err.message });
-    }
-    if (req.file == undefined) {
-      return res.status(400).json({ message: "Error: No File Selected!" });
-    }
-
-    try {
-      const user = await User.findById(req.userId);
-      if (!user || !user.profile) {
-        return res.status(404).json({ message: "User not found" });
-      }
-
-      // Save the file path to the user's profile
-      user.profile.avatar = req.file.path;
-      await user.save();
-
-      res.status(200).json({
-        message: "Avatar uploaded successfully!",
-        avatarUrl: req.file.path,
-      });
-    } catch (error) {
-      res.status(500).json({ message: "Server error while updating profile." });
-    }
-  });
-};
-
-export const getDeveloperStats = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
+/**
+ * @desc    Delete a portfolio item for the logged-in developer
+ * @route   DELETE /api/users/me/portfolio/:itemId
+ * @access  Private (Developer)
+ */
+export const getMyDeveloperStats = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
     const developerId = req.userId;
     const totalSubmissions = await Submission.countDocuments({ developerId });
     const winningSubmissions = await Submission.countDocuments({
@@ -190,16 +189,16 @@ export const getDeveloperStats = async (
       winningSubmissions,
       pendingReviews,
     });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch developer stats" });
   }
-};
+);
 
-export const getClientStats = async (
-  req: AuthenticatedRequest,
-  res: Response
-) => {
-  try {
+/**
+ * @desc    Delete a portfolio item for the logged-in developer
+ * @route   DELETE /api/users/me/portfolio/:itemId
+ * @access  Private (Developer)
+ */
+export const getMyClientStats = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
     const clientId = req.userId;
 
     const totalChallengesPosted = await Challenge.countDocuments({
@@ -211,12 +210,12 @@ export const getClientStats = async (
       status: "active", // or 'published' if that's your active state
     });
 
-    // This is a more complex query: we need to find all challenges by this client,
-    // then count the total submissions for those challenges.
     const clientChallenges = await Challenge.find({
       createdBy: clientId,
     }).select("_id");
+
     const challengeIds = clientChallenges.map((c) => c._id);
+
     const totalSubmissionsReceived = await Submission.countDocuments({
       challengeId: { $in: challengeIds },
     });
@@ -226,7 +225,31 @@ export const getClientStats = async (
       activeChallenges,
       totalSubmissionsReceived,
     });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to fetch client stats" });
   }
-};
+);
+
+/**
+ * @desc    Get a user's public profile by their ID
+ * @route   GET /api/users/:id
+ * @access  Public
+ */
+export const getUserById = asyncHandler(async (req: Request, res: Response) => {
+  // We only select fields that are safe for public display.
+  // We explicitly EXCLUDE sensitive info like email.
+  const user = await User.findById(req.params.id).select(
+    "profile reputation role"
+  );
+
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+
+  // We can also decide to only return profiles for developers
+  if (user.role !== "developer") {
+    res.status(404).json({ message: "This user profile is not public." });
+    return;
+  }
+
+  res.status(200).json(user);
+});

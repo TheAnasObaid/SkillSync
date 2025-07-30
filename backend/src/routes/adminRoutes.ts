@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { authenticate, authorize } from "../middleware/auth";
 import {
   deleteChallengeByAdmin,
   getAllSubmissions,
@@ -7,6 +6,7 @@ import {
   getPlatformStats,
   updateUserByAdmin,
 } from "../controllers/adminController";
+import { authenticate, authorize } from "../middleware/auth";
 
 const router = Router();
 
