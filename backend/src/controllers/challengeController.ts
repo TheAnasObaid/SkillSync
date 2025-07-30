@@ -3,7 +3,7 @@ import { AuthenticatedRequest } from "../middleware/auth";
 import upload from "../middleware/upload";
 import Challenge from "../models/Challenge";
 import Submission from "../models/Submission";
-import { challengeSchema } from "../utils/validationSchemas";
+import { ChallengeDto, challengeSchema } from "../utils/validationSchemas";
 
 export const createChallenge = async (
   req: AuthenticatedRequest,
@@ -33,7 +33,7 @@ export const createChallenge = async (
         deadline,
         tags,
         category,
-      } = req.body;
+      }: ChallengeDto = parsedBody.data;
 
       const newChallenge = new Challenge({
         title,
