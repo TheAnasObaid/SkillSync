@@ -5,6 +5,7 @@ import {
   FiCamera,
   FiMail,
   FiShield,
+  FiStar,
 } from "react-icons/fi";
 import UserAvatar from "./UserAvatar";
 
@@ -17,8 +18,6 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
   if (!user) {
     return null;
   }
-
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   return (
     <div className="space-y-6">
@@ -43,6 +42,12 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
             <h2 className="text-3xl font-bold">
               {user.profile?.firstName} {user.profile?.lastName}
             </h2>
+
+            {user.role === "developer" && user.profile?.experience && (
+              <p className="text-info flex items-center justify-center md:justify-start gap-2 mt-1">
+                <FiStar /> {user.profile.experience}
+              </p>
+            )}
 
             {user.role === "client" && user.profile?.companyName && (
               <p className="text-primary flex items-center justify-center md:justify-start gap-2 mt-1">

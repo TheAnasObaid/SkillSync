@@ -2,6 +2,7 @@ import { Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import User, { PortfolioItem } from "../models/User";
 import upload from "../middleware/upload";
+import Submission from "../models/Submission";
 
 export const getUserProfile = async (
   req: AuthenticatedRequest,
@@ -64,8 +65,6 @@ export const addPortfolioItem = async (
       return;
     }
 
-    // You would typically get the imageUrl from a file upload service.
-    // For now, we'll assume it's sent in the body.
     const { title, description, imageUrl, liveUrl, githubUrl } = req.body;
     if (!title || !description || !imageUrl) {
       res
@@ -153,4 +152,33 @@ export const uploadAvatar = async (
       res.status(500).json({ message: "Server error while updating profile." });
     }
   });
+};
+
+export const getDeveloperStats = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const developerId = req.userId;
+    const totalSubmissions = await Submission.countDocuments({ developerId });
+    const winningSubmissions = await Submission.countDocuments({
+      developerId,
+      status: "winner",
+    });
+    const pendingReviews = await Submission.countDocuments({
+      developerId,
+      status: "pending",
+    });
+
+    // In a real app, you might also calculate earnings from challenge prizes
+    // const totalEarnings = await ...
+
+    res.status(200).json({
+      totalSubmissions,
+      winningSubmissions,
+      pendingReviews,
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch developer stats" });
+  }
 };

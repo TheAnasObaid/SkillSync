@@ -14,7 +14,7 @@ import { User, useAuthStore } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FiEdit, FiPlus, FiUser, FiX } from "react-icons/fi";
+import { FiClipboard, FiEdit, FiPlus, FiUser, FiX } from "react-icons/fi";
 import { TbBriefcase2 } from "react-icons/tb";
 
 export interface ProfileFormData {
@@ -23,13 +23,15 @@ export interface ProfileFormData {
   profile: {
     lastName: string;
     bio: string;
-    skills: string; // Use a string for the input field
+    skills: string;
+    experience: string;
   };
 }
 
 const developerSidebarLinks: DashboardLink[] = [
+  { href: "/developer/dashboard", label: "Dashboard", icon: <FiClipboard /> },
   {
-    href: "/developer/dashboard",
+    href: "/developer/dashboard/submissions",
     label: "My Submissions",
     icon: <TbBriefcase2 />,
   },
@@ -200,6 +202,7 @@ const DeveloperProfilePage = () => {
           lastName: user.profile?.lastName || "",
           bio: user.profile?.bio || "",
           skills: (user.profile?.skills || []).join(", "),
+          experience: user.profile?.experience || "",
         },
       });
     }
@@ -303,6 +306,21 @@ const DeveloperProfilePage = () => {
               <p className="text-xs text-base-content/60 mt-2">
                 Enter skills separated by commas.
               </p>
+            </div>
+            <div>
+              <fieldset className="fieldset">
+                <legend className="fieldset-legend">Experience Level</legend>
+                <select
+                  className="select select-bordered w-full bg-transparent focus:outline-none"
+                  {...register("profile.experience")}
+                >
+                  <option value="">Select Level</option>
+                  <option value="Beginner">Beginner</option>
+                  <option value="Intermediate">Intermediate</option>
+                  <option value="Advanced">Advanced</option>
+                  <option value="Expert">Expert</option>
+                </select>
+              </fieldset>
             </div>
           </ProfileEditForm>
         ) : (
