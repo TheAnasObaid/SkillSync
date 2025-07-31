@@ -67,7 +67,7 @@ const Header = () => {
                     </button>
                     <ul
                       tabIndex={0}
-                      className="menu dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52"
+                      className="menu border border-base-300 dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52"
                     >
                       <li>
                         <Link href={dashboardHref} className="justify-between">

@@ -140,7 +140,7 @@ const UserManagementTable = ({ initialUsers }: UserManagementTableProps) => {
                       <td>{new Date(user.createdAt).toLocaleDateString()}</td>
 
                       <th>
-                        <div className="dropdown dropdown-end">
+                        <div className="dropdown  dropdown-left dropdown-center">
                           <button
                             tabIndex={0}
                             className="btn btn-ghost btn-xs"
@@ -151,7 +151,7 @@ const UserManagementTable = ({ initialUsers }: UserManagementTableProps) => {
                           {!isCurrentUser && (
                             <ul
                               tabIndex={0}
-                              className="dropdown-content z-[1] menu p-2 shadow bg-base-100 rounded-box w-52"
+                              className="menu border border-base-300 dropdown-content mt-3 z-[1] p-2 shadow bg-base-200 rounded-box w-52"
                             >
                               {!user.isVerified && (
                                 <li>
