@@ -1,6 +1,7 @@
 import AuthLayout from "@/components/Layout/AuthLayout";
 import Footer from "@/components/Layout/Footer";
 import Header from "@/components/Layout/Header";
+import { SocketProvider } from "@/context/SocketContext";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
@@ -28,13 +29,15 @@ export default function RootLayout({
       className={`${inter.className} ${inter.variable}`}
     >
       <body className="antialiased">
-        <AuthLayout>
-          <div className="grid grid-rows-[auto_1fr_auto]">
-            <Header />
-            {children}
-            <Footer />
-          </div>
-        </AuthLayout>
+        <SocketProvider>
+          <AuthLayout>
+            <div className="grid grid-rows-[auto_1fr_auto]">
+              <Header />
+              {children}
+              <Footer />
+            </div>
+          </AuthLayout>
+        </SocketProvider>
       </body>
     </html>
   );

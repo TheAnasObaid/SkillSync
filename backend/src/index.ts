@@ -1,7 +1,10 @@
 import cors from "cors";
 import { config } from "dotenv";
 import express from "express";
+import http from "http";
 import path from "path";
+import { Server } from "socket.io";
+import appConfig from "./config/config";
 import connectDB from "./config/database";
 import errorHandler from "./middleware/errorHandler";
 import adminRoute from "./routes/adminRoutes";
@@ -25,9 +28,56 @@ app.use("/api/users", userRoute);
 app.use("/api/submissions", submissionsRoute);
 app.use("/api/challenges", challengesRoute);
 
+// --- SOCKET.IO INTEGRATION ---
+
+const httpServer = http.createServer(app);
+const io = new Server(httpServer, {
+  cors: {
+    origin: appConfig.clientUrl,
+    methods: ["GET", "POST"],
+  },
+});
+
+let onlineUsers: { userId: string; socketId: string }[] = [];
+
+const addUser = (userId: string, socketId: string) => {
+  !onlineUsers.some((user) => user.userId === userId) &&
+    onlineUsers.push({ userId, socketId });
+};
+
+const removeUser = (socketId: string) => {
+  onlineUsers = onlineUsers.filter((user) => user.socketId !== socketId);
+};
+
+const getUser = (userId: string) => {
+  return onlineUsers.find((user) => user.userId === userId);
+};
+
+io.on("connection", (socket) => {
+  console.log("A user connected.");
+
+  socket.on("addUser", (userId) => {
+    addUser(userId, socket.id);
+    console.log("Online users:", onlineUsers);
+  });
+
+  socket.on("disconnect", () => {
+    removeUser(socket.id);
+    console.log("A user disconnected.");
+  });
+});
+
+// --- EXPORT A FUNCTION TO EMIT EVENTS FROM CONTROLLERS ---
+export const emitToUser = (userId: string, eventName: string, data: any) => {
+  const user = getUser(userId);
+  if (user) {
+    io.to(user.socketId).emit(eventName, data);
+  }
+};
+
 // IMPORTANT: The error handler must be the LAST middleware added.
 app.use(errorHandler);
 
-app.listen(process.env.PORT, () =>
-  console.log("Listening on http://localhost:" + process.env.PORT)
+httpServer.listen(appConfig.port, () =>
+  console.log(`🚀 Server is running on http://localhost:${appConfig.port}`)
 );

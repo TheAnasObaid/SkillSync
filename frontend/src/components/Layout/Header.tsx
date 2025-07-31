@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getDashboardPath } from "../Auth/LoginForm";
 import UserAvatar from "../Profile/UserAvatar";
+import NotificationBell from "./NotificationBell";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -57,6 +58,9 @@ const Header = () => {
             </Link>
             {isClient && (
               <>
+                {" "}
+                {isClient && token && user && <NotificationBell />}{" "}
+                {/* <-- ADD THIS */}
                 {token && user ? (
                   <div className="dropdown dropdown-end">
                     <button tabIndex={0} className="btn btn-ghost btn-circle">
