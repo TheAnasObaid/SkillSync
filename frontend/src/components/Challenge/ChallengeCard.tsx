@@ -1,20 +1,9 @@
+import { IChallenge } from "@/types";
 import Link from "next/link";
 import { FiArrowRight, FiClock } from "react-icons/fi";
 
-export interface Challenge {
-  _id: string;
-  title: string;
-  description: string;
-  requirements: string;
-  prize: number;
-  difficulty: "beginner" | "intermediate" | "advanced";
-  tags: string[];
-  files: { name: string; path: string }[];
-  deadline: string;
-}
-
 interface ChallengeCardProps {
-  challenge: Challenge;
+  challenge: IChallenge;
 }
 
 const difficultyStyles = {

@@ -1,7 +1,7 @@
 "use client";
 
 import { RegisterFormData, registerSchema } from "@/lib/validationSchemas";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";

@@ -1,49 +1,22 @@
 import { PortfolioItem } from "@/components/Profile/PortfolioCard";
+import { IUser } from "@/types";
+import axios from "axios";
 import { create } from "zustand";
 
 export type Role = "developer" | "client" | "admin";
 export type AccountStatus = "active" | "banned";
 
-export type User = {
-  _id: string;
-  email: string;
-  password: string;
-  role: Role;
-  accountStatus: AccountStatus;
-  profile?: {
-    firstName: string;
-    lastName: string;
-    companyName: string;
-    avatar: string;
-    bio: string;
-    skills: Array<string>;
-    experience: string;
-    portfolio: PortfolioItem[];
-    socialLinks: Object;
-  };
-  reputation?: {
-    rating: number;
-    totalRatings: number;
-    completedChallenges: number;
-  };
-  isVerified: boolean;
-  lastLogin: Date;
-  createdAt: Date | string | number;
-  updatedAt: Date;
-  comparePassword: (candidate: string) => Promise<boolean>;
-} | null;
-
 type AuthState = {
   token: string | null;
-  user: User;
+  user: IUser | null;
   loading: boolean;
   setToken: (token: string | null) => void;
-  setUser: (user: User) => void;
+  setUser: (user: IUser) => void;
   setLoading: (loading: boolean) => void;
   logout: () => void;
 };
 
-const getInitialUser = (): User => {
+const getInitialUser = (): IUser | null => {
   if (typeof window === "undefined") return null;
   const storedUser = localStorage.getItem("authUser");
   return storedUser ? JSON.parse(storedUser) : null;
@@ -79,7 +52,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window !== "undefined") {
       localStorage.removeItem("authToken");
       localStorage.removeItem("authUser");
+      axios.post("/api/auth", { token: null });
     }
-    set({ token: null, user: null, loading: false });
+    set({ token: null, user: null });
   },
 }));

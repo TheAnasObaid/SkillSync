@@ -1,43 +1,15 @@
-"use client";
+"use client"; // We keep "use client" in case we add interactive buttons later
 
-import apiClient from "@/services/apiClient";
 import Link from "next/link";
-import { useEffect, useState } from "react";
-// Import the icons we'll use for a richer UI
 import { FiAward, FiClock, FiExternalLink } from "react-icons/fi";
-import NoItemFound from "./NoItem";
+import { ISubmission } from "@/types";
+import NoSubmissions from "./NoSubmissions";
 
-// The interface is correct, no changes needed
-interface Submission {
-  _id: string;
-  status: "pending" | "reviewed" | "winner" | "rejected";
-  challengeId: {
-    _id: string;
-    title: string;
-    status: string;
-    prize: number;
-  };
-  createdAt: string;
+interface Props {
+  submissions: ISubmission[];
 }
 
-const DeveloperSubmissionList = () => {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchSubmissions = async () => {
-      try {
-        const response = await apiClient.get("/submissions/my-submissions");
-        setSubmissions(response.data);
-      } catch (error) {
-        console.error("Failed to fetch developer submissions", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSubmissions();
-  }, []);
-
+const DeveloperSubmissionList = ({ submissions }: Props) => {
   const statusStyles: { [key: string]: string } = {
     pending: "badge-info",
     reviewed: "badge-ghost",
@@ -45,66 +17,61 @@ const DeveloperSubmissionList = () => {
     rejected: "badge-error",
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
+  if (submissions.length === 0) {
+    return <NoSubmissions />;
   }
 
   return (
-    <div className="w-full">
-      {submissions.length > 0 ? (
-        <div className="space-y-4">
-          {submissions.map((sub) => (
-            <div
-              key={sub._id}
-              className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50"
-            >
-              <div className="card-body p-6">
-                <div className="flex justify-between items-start gap-4">
-                  <h3 className="card-title text-xl font-bold">
-                    {sub.challengeId.title}
-                  </h3>
-                  <div
-                    className={`badge badge-soft ${statusStyles[sub.status]}`}
-                  >
-                    {sub.status}
-                  </div>
-                </div>
-
-                <div className="flex justify-between items-end mt-4">
-                  <div className="space-y-2">
-                    {/* Prize Info */}
-                    <div className="flex items-center gap-2 text-primary font-semibold">
-                      <FiAward />
-                      <span>
-                        ${sub.challengeId.prize.toLocaleString()} Prize
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-base-content/70">
-                      <FiClock />
-                      <span>
-                        Submitted on:{" "}
-                        {new Date(sub.createdAt).toLocaleDateString()}
-                      </span>
-                    </div>
-                  </div>
-                  <Link
-                    href={`/challenges/${sub.challengeId._id}`}
-                    className="btn btn-outline btn-sm"
-                  >
-                    View Original Challenge <FiExternalLink />
-                  </Link>
+    <div className="space-y-4">
+      {submissions.map((sub) => {
+        if (typeof sub.challengeId === "string") {
+          console.warn(`Submission ${sub._id} has an unpopulated challengeId.`);
+          return null;
+        }
+        return (
+          <div
+            key={sub._id}
+            className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50"
+          >
+            <div className="card-body p-6">
+              <div className="flex justify-between items-start gap-4">
+                <h3 className="card-title text-xl font-bold">
+                  {sub.challengeId.title}
+                </h3>
+                <div
+                  className={`badge badge-outline ${statusStyles[sub.status]}`}
+                >
+                  {sub.status}
                 </div>
               </div>
+
+              <div className="flex justify-between items-end mt-4">
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-primary font-semibold">
+                    <FiAward />
+                    <span>
+                      ${sub.challengeId.prize?.toLocaleString() || "N/A"} Prize
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-base-content/70">
+                    <FiClock />
+                    <span>
+                      Submitted on:{" "}
+                      {new Date(sub.createdAt).toLocaleDateString()}
+                    </span>
+                  </div>
+                </div>
+                <Link
+                  href={`/challenges/${sub.challengeId._id}`}
+                  className="btn btn-outline btn-sm"
+                >
+                  View Challenge <FiExternalLink className="ml-2" />
+                </Link>
+              </div>
             </div>
-          ))}
-        </div>
-      ) : (
-        <NoItemFound />
-      )}
+          </div>
+        );
+      })}
     </div>
   );
 };

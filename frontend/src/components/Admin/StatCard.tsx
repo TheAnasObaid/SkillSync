@@ -1,12 +1,12 @@
 import { ReactNode } from "react";
 
-export interface StatCardProps {
+export interface Props {
   icon: ReactNode;
   label: string;
   value: number | string;
 }
 
-const StatCard = ({ icon, label, value }: StatCardProps) => {
+const StatCard = ({ icon, label, value }: Props) => {
   return (
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
       <div className="card-body flex-row items-center gap-4">

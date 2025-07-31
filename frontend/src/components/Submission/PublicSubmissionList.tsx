@@ -1,48 +1,26 @@
 "use client";
 
-import apiClient from "@/services/apiClient";
+import { PublicSubmission } from "@/types";
 import { useEffect, useState } from "react";
-import SubmissionCard, { PublicSubmission } from "./SubmissionCard";
 import { FiInbox } from "react-icons/fi";
+import SubmissionCard from "./SubmissionCard";
+import { getPublicSubmissionsClient } from "@/services/client/submissionService";
 
-interface PublicSubmissionListProps {
+interface Props {
   challengeId: string;
   onCountChange: (count: number) => void;
 }
 
-const PublicSubmissionList = ({
-  challengeId,
-  onCountChange,
-}: PublicSubmissionListProps) => {
+const PublicSubmissionList = ({ challengeId, onCountChange }: Props) => {
   const [submissions, setSubmissions] = useState<PublicSubmission[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchSubmissions = async () => {
-      setLoading(true);
-      try {
-        const response = await apiClient.get(
-          `/submissions/public/challenge/${challengeId}`
-        );
-        setSubmissions(response.data);
-        onCountChange(response.data.length); // Update the count in the parent component
-      } catch (error) {
-        console.error("Failed to fetch public submissions:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
     if (challengeId) {
-      fetchSubmissions();
+      getPublicSubmissionsClient(challengeId).then((data) =>
+        setSubmissions(data)
+      );
     }
   }, [challengeId, onCountChange]);
-
-  if (loading)
-    return (
-      <div className="flex justify-center p-10">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
 
   if (submissions.length === 0) {
     return (

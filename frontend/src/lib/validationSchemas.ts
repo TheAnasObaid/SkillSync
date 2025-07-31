@@ -29,31 +29,12 @@ export const challengeSchema = z.object({
   // 1. Starts as a string.
   // 2. transform() attempts to convert it to a number.
   // 3. The inner z.number() chain validates the result.
-  prize: z
-    .string()
-    .transform((val, ctx) => {
-      const parsed = parseInt(val, 10);
-      if (isNaN(parsed)) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: "Prize must be a number",
-        });
-        return z.NEVER;
-      }
-      return parsed;
-    })
-    .pipe(z.number().positive({ message: "Prize must be greater than 0" })),
-
+  prize: z.string(),
   // Deadline:
   // 1. Starts as a string.
   // 2. refine() checks if it's a valid date string.
   // 3. transform() converts the valid string into a proper Date object.
-  deadline: z
-    .string()
-    .refine((val) => val && !isNaN(Date.parse(val)), {
-      message: "Please enter a valid date",
-    })
-    .transform((val) => new Date(val)),
+  deadline: z.string(),
 });
 
 export type RegisterFormData = z.infer<typeof registerSchema>;

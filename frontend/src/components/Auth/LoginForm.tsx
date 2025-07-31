@@ -1,10 +1,10 @@
 "use client";
 
 import { LoginFormData, loginSchema } from "@/lib/validationSchemas";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,7 +15,7 @@ export const getDashboardPath = (
 ): string => {
   switch (role) {
     case "admin":
-      return "/admin/panel";
+      return "/admin";
     case "developer":
       return "/developer/dashboard";
     case "client":
@@ -51,10 +51,10 @@ const LoginForm = () => {
       setToken(token);
       setUser(user);
 
-      const dashboardPath = getDashboardPath(user.role);
+      await axios.post("/api/auth", { token });
 
+      const dashboardPath = getDashboardPath(user.role);
       router.push(dashboardPath);
-      router.refresh();
     } catch (error) {
       if (error instanceof AxiosError) {
         const errorMessage =
@@ -69,7 +69,7 @@ const LoginForm = () => {
   };
 
   const handleResendVerification = async () => {
-    const email = getValues("email"); // Get the email from the form
+    const email = getValues("email");
     if (!email) {
       setError("Please enter your email address first.");
       return;
@@ -79,9 +79,7 @@ const LoginForm = () => {
     setError("");
     try {
       await apiClient.post("/auth/resend-verification", { email });
-      // On success, we don't need to stay in the "unverified" state
       setIsUnverified(false);
-      // Give the user positive feedback
       alert(
         "A new verification email has been sent to your inbox. Please check it to continue."
       );
