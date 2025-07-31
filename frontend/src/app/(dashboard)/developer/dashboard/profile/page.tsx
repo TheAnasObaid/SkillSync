@@ -7,15 +7,14 @@ import PortfolioCard, {
 } from "@/components/Profile/PortfolioCard";
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
-import { DashboardLink } from "@/config/dashboard";
+import { developerSidebarLinks } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
 import { IUser } from "@/types";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FiClipboard, FiEdit, FiPlus, FiUser, FiX } from "react-icons/fi";
-import { TbBriefcase2 } from "react-icons/tb";
+import { FiEdit, FiPlus, FiX } from "react-icons/fi";
 
 export interface ProfileFormData {
   name: string;
@@ -31,20 +30,6 @@ export interface ProfileFormData {
 interface PortfolioFormData extends PortfolioItem {
   portfolioImage: FileList;
 }
-
-const developerSidebarLinks: DashboardLink[] = [
-  { href: "/developer/dashboard", label: "Dashboard", icon: <FiClipboard /> },
-  {
-    href: "/developer/dashboard/submissions",
-    label: "My Submissions",
-    icon: <TbBriefcase2 />,
-  },
-  {
-    href: "/developer/dashboard/profile",
-    label: "My Profile",
-    icon: <FiUser />,
-  },
-];
 
 const DeveloperProfilePage = () => {
   const { user, setUser } = useAuthStore();
@@ -233,7 +218,11 @@ const DeveloperProfilePage = () => {
   }, [isEditMode, user, reset]);
 
   if (!hasMounted || !user) {
-    return <span className="loading loading-spinner loading-lg" />;
+    return (
+      <div className="flex justify-center p-10">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
   }
 
   return (

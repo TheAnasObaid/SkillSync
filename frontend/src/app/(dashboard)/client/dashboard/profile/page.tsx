@@ -128,13 +128,6 @@ function ClientProfilePage() {
     }
   }, [isEditMode, user, reset]);
 
-  if (loading)
-    return (
-      <div className="flex justify-center p-10">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-
   return (
     <DashboardLayout sidebarLinks={clientSidebarLinks}>
       <div className="flex justify-between items-center mb-6">
@@ -208,6 +201,10 @@ function ClientProfilePage() {
             </fieldset>
           </div>
         </ProfileEditForm>
+      ) : loading ? (
+        <div className="flex justify-center p-10">
+          <span className="loading loading-spinner loading-lg"></span>
+        </div>
       ) : (
         <>
           <ProfileView
