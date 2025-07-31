@@ -23,7 +23,7 @@ const UserAvatar = ({
   avatarUrl,
   className = "w-10 h-10",
 }: UserAvatarProps) => {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "";
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   if (avatarUrl) {
     return (

@@ -3,12 +3,11 @@ import { getChallengeById } from "@/services/server/challengeService";
 import { IChallenge } from "@/types";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-// MAKE THE COMPONENT ASYNC
 const ChallengeDetailsPage = async ({ params }: Props) => {
-  const { id } = params;
+  const { id } = await params;
   let challenge: IChallenge | null = null;
   let error: string | null = null;
 

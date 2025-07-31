@@ -12,6 +12,7 @@ export interface AuthenticatedRequest extends Request {
 export const authenticate = asyncHandler(
   async (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization;
+
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       res
         .status(401)
@@ -40,6 +41,7 @@ export const authenticate = asyncHandler(
     next();
   }
 );
+
 export const authorize =
   (...requiredRoles: Role[]) =>
   (req: AuthenticatedRequest, res: Response, next: NextFunction) => {

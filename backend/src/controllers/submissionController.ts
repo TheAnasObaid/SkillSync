@@ -5,26 +5,29 @@ import upload from "../middleware/upload";
 import Challenge from "../models/Challenge";
 import Submission from "../models/Submission";
 import asyncHandler from "../utils/asyncHandler";
+import User from "../models/User";
 
 /**
  * @desc    Submit a solution to a specific challenge
  * @route   POST /api/submissions/challenge/:challengeId
  * @access  Private (Developer)
  */
-export const submitSolution = asyncHandler(
+export const submitToChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     upload(req, res, async (err) => {
       if (err) {
-        return res.status(400).json({ message: err.message });
+        res.status(400).json({ message: err.message });
+        return;
       }
 
-      const { id: challengeId } = req.params;
+      const { challengeId } = req.params;
       const { githubRepo, liveDemo, description } = req.body;
 
       if (!githubRepo || !description) {
-        return res
+        res
           .status(400)
           .json({ message: "GitHub repository and description are required." });
+        return;
       }
 
       const submissionData = {
@@ -78,17 +81,20 @@ export const getSubmissionsForChallenge = asyncHandler(
     const challenge = await Challenge.findById(challengeId);
     if (!challenge) {
       res.status(404).json({ message: "Challenge not found" });
+      return;
     }
     if (challenge?.createdBy.toString() !== userId) {
       res
         .status(403)
         .json({ message: "Forbidden: You do not own this challenge" });
+      return;
     }
 
     const submissions = await Submission.find({
       challengeId,
     }).populate("developerId", "profile.firstName email profile.avatar");
     res.status(200).json(submissions);
+    return;
   }
 );
 
@@ -145,6 +151,15 @@ export const selectWinner = asyncHandler(
     winnerSubmission.status = "winner";
     challenge.status = "completed";
 
+    const developer = await User.findById(winnerSubmission.developerId).session(
+      session
+    );
+    if (developer && developer.reputation) {
+      developer.reputation.completedChallenges =
+        (developer.reputation.completedChallenges || 0) + 1;
+      await developer.save({ session });
+    }
+
     await winnerSubmission.save({ session });
     await challenge.save({ session });
 
@@ -163,12 +178,11 @@ export const selectWinner = asyncHandler(
  * @desc    Rate a submission and provide feedback
  * @route   POST /api/submissions/:submissionId/rate
  * @access  Private (Client)
- */
-export const rateSubmission = asyncHandler(
+ */ export const rateSubmission = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { submissionId } = req.params;
     const { ratings, feedback } = req.body;
-    const userId = req.userId;
+    const clientId = req.userId;
 
     const submission = await Submission.findById(submissionId);
     if (!submission) {
@@ -177,16 +191,33 @@ export const rateSubmission = asyncHandler(
     }
 
     const challenge = await Challenge.findById(submission.challengeId);
-    if (challenge?.createdBy.toString() !== userId) {
-      res.status(403).json({ message: "You do not own this challenge." });
+    if (!challenge || challenge.createdBy.toString() !== clientId) {
+      res.status(403).json({
+        message:
+          "You do not have permission to rate submissions for this challenge.",
+      });
       return;
     }
 
     submission.ratings = ratings;
     submission.feedback = feedback;
-
     if (submission.status === "pending") {
       submission.status = "reviewed";
+    }
+
+    const developer = await User.findById(submission.developerId);
+    if (developer && developer.reputation) {
+      const oldTotalRatingPoints =
+        (developer.reputation.rating || 0) *
+        (developer.reputation.totalRatings || 0);
+      const newTotalRatings = (developer.reputation.totalRatings || 0) + 1;
+      const newAverageRating =
+        (oldTotalRatingPoints + ratings.overall) / newTotalRatings;
+
+      developer.reputation.rating = parseFloat(newAverageRating.toFixed(2));
+      developer.reputation.totalRatings = newTotalRatings;
+
+      await developer.save({ validateBeforeSave: false });
     }
 
     await submission.save();

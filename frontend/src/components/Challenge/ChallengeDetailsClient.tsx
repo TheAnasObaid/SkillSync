@@ -2,12 +2,10 @@
 
 import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
 import SubmissionForm from "@/components/Submission/SubmissionForm";
-import { getChallengeById } from "@/services/client/challengeService";
 import { useAuthStore } from "@/store/authStore";
 import { IChallenge } from "@/types";
 import Link from "next/link";
-import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   FiAward,
   FiCheckCircle,
@@ -65,8 +63,12 @@ const ChallengeDetailsPage = ({ challenge }: Props) => {
     "description"
   );
   const [submissionCount, setSubmissionCount] = useState(0);
-
+  const [hasMounted, setHasMounted] = useState(false);
   const { user } = useAuthStore();
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   if (!challenge) return;
 
@@ -208,11 +210,17 @@ const ChallengeDetailsPage = ({ challenge }: Props) => {
               </div>
             )}
 
-            {user && (
-              <CtaBlock
-                role={user.role}
-                onOpenModal={() => setIsModalOpen(true)}
-              />
+            {hasMounted ? (
+              user ? (
+                <CtaBlock
+                  role={user.role}
+                  onOpenModal={() => setIsModalOpen(true)}
+                />
+              ) : (
+                <CtaBlock role={null} onOpenModal={() => {}} />
+              )
+            ) : (
+              <div className="skeleton h-12 w-full"></div>
             )}
           </aside>
         </div>

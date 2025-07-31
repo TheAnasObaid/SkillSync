@@ -5,10 +5,9 @@ import {
   getSubmissionsForChallenge,
   rateSubmission,
   selectWinner,
-  submitSolution,
+  submitToChallenge,
 } from "../controllers/submissionController";
 import { authenticate, authorize } from "../middleware/auth";
-import upload from "../middleware/upload";
 
 const router = Router();
 
@@ -24,8 +23,7 @@ router.post(
   "/challenge/:challengeId",
   authenticate,
   authorize("developer"),
-  upload, // Multer middleware here
-  submitSolution
+  submitToChallenge
 );
 
 // GET /api/submissions/challenge/:challengeId/review (Client's review view)
