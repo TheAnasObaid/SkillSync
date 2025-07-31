@@ -7,7 +7,7 @@ interface Props {
 
 const PublicLayout = ({ children }: Props) => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="grid min-h-screen">
       <Header />
       <main className="flex-grow">
         <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8">

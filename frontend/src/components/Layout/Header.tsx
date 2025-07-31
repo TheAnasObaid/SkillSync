@@ -58,9 +58,8 @@ const Header = () => {
             </Link>
             {isClient && (
               <>
-                {" "}
-                {isClient && token && user && <NotificationBell />}{" "}
-                {/* <-- ADD THIS */}
+                {isClient && token && user && <NotificationBell />}
+
                 {token && user ? (
                   <div className="dropdown dropdown-end">
                     <button tabIndex={0} className="btn btn-ghost btn-circle">
