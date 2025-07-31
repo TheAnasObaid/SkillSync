@@ -95,6 +95,7 @@ export interface ISubmission {
   githubRepo: string;
   liveDemo?: string;
   description: string;
+  content: string;
   status: SubmissionStatus;
   files: File[];
   ratings?: {
@@ -148,4 +149,19 @@ export interface DeveloperStats {
   totalSubmissions: number;
   winningSubmissions: number;
   pendingReviews: number;
+}
+
+export interface DashboardLink {
+  href: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+
+export interface PortfolioItem {
+  _id?: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  liveUrl?: string;
+  githubUrl?: string;
 }

@@ -9,7 +9,6 @@ const apiClient = axios.create({
 
 apiClient.interceptors.request.use(
   (config) => {
-    // We check for 'window' to be absolutely sure we're on the client.
     if (typeof window !== "undefined") {
       const token = localStorage.getItem("authToken");
       if (token) {

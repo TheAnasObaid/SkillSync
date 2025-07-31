@@ -14,11 +14,11 @@ type UserUpdateAction =
   | { isVerified: boolean }
   | { accountStatus: "active" | "banned" };
 
-interface UserManagementTableProps {
+interface Props {
   initialUsers: IUser[];
 }
 
-const UserManagementTable = ({ initialUsers }: UserManagementTableProps) => {
+const UserManagementTable = ({ initialUsers }: Props) => {
   const [users, setUsers] = useState<IUser[]>(initialUsers);
   const { user: currentUser } = useAuthStore();
   const [error, setError] = useState("");

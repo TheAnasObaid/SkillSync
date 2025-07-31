@@ -1,4 +1,3 @@
-import { User } from "@/store/authStore";
 import {
   FiAward,
   FiBriefcase,
@@ -8,9 +7,10 @@ import {
   FiStar,
 } from "react-icons/fi";
 import UserAvatar from "./UserAvatar";
+import { IUser } from "@/types";
 
 interface Props {
-  user: User | null;
+  user: IUser | null;
   onAvatarClick?: () => void;
 }
 

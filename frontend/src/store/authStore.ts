@@ -1,10 +1,6 @@
-import { PortfolioItem } from "@/components/Profile/PortfolioCard";
 import { IUser } from "@/types";
 import axios from "axios";
 import { create } from "zustand";
-
-export type Role = "developer" | "client" | "admin";
-export type AccountStatus = "active" | "banned";
 
 type AuthState = {
   token: string | null;

@@ -1,13 +1,13 @@
 "use client";
 import { IChallenge } from "@/types";
 import Link from "next/link";
-import { FiEdit, FiTrash2 } from "react-icons/fi"; // <-- Import new icons
+import { FiEdit, FiTrash2 } from "react-icons/fi";
 import { useRouter } from "next/navigation";
 import apiClient from "@/lib/apiClient";
 import { useState } from "react";
 import ConfirmationModal from "../Common/ConfirmationModal";
 
-interface ClientChallengeListProps {
+interface Props {
   challenges: IChallenge[];
 }
 
@@ -19,7 +19,7 @@ const statusStyles = {
   completed: "badge-success",
 };
 
-const ClientChallengeList = ({ challenges }: ClientChallengeListProps) => {
+const ClientChallengeList = ({ challenges }: Props) => {
   const router = useRouter();
   const [modalState, setModalState] = useState({
     isOpen: false,

@@ -1,3 +1,4 @@
+import { DashboardLink } from "@/types";
 import { ReactNode } from "react";
 import { BsGrid } from "react-icons/bs";
 import {
@@ -9,12 +10,6 @@ import {
 } from "react-icons/fi";
 import { GoPlusCircle } from "react-icons/go";
 import { TbBriefcase2 } from "react-icons/tb";
-
-export interface DashboardLink {
-  href: string;
-  label: string;
-  icon?: ReactNode;
-}
 
 export const clientSidebarLinks: DashboardLink[] = [
   { href: "/client/dashboard", label: "Dashboard", icon: <BsGrid /> },

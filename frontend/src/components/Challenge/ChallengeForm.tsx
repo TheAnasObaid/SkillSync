@@ -9,15 +9,12 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { IChallenge } from "@/types";
 
-interface ChallengeFormProps {
+interface Props {
   isEditing?: boolean;
   existingChallenge?: IChallenge;
 }
 
-const ChallengeForm = ({
-  isEditing = false,
-  existingChallenge,
-}: ChallengeFormProps) => {
+const ChallengeForm = ({ isEditing = false, existingChallenge }: Props) => {
   const router = useRouter();
   const [error, setError] = useState("");
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { FiStar } from "react-icons/fi";
 
-interface StarRatingProps {
+interface Props {
   count?: number;
   value: number;
   onChange: (rating: number) => void;
@@ -19,7 +19,7 @@ const StarRating = ({
   size = 24,
   color = "text-base-content/30",
   hoverColor = "text-warning",
-}: StarRatingProps) => {
+}: Props) => {
   const [hover, setHover] = useState(0);
 
   return (

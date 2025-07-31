@@ -3,7 +3,7 @@ import { ISubmission, PublicSubmission } from "@/types";
 
 export const getPublicSubmissionsClient = async (
   challengeId: string
-): Promise<PublicSubmission[]> => {
+): Promise<ISubmission[]> => {
   try {
     const response = await apiClient.get(
       `/submissions/challenge/${challengeId}`

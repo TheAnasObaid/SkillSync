@@ -1,7 +1,5 @@
-import { ReactNode } from "react";
-
-export interface Props {
-  icon: ReactNode;
+interface Props {
+  icon: React.ReactNode;
   label: string;
   value: number | string;
 }

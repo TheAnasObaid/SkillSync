@@ -1,6 +1,6 @@
 "use client";
 
-interface ConfirmationModalProps {
+interface Props {
   isOpen: boolean;
   title: string;
   message: string;
@@ -22,7 +22,7 @@ const ConfirmationModal = ({
   cancelText = "Cancel",
   confirmButtonClass = "btn-primary",
   isActionInProgress = false,
-}: ConfirmationModalProps) => {
+}: Props) => {
   if (!isOpen) return null;
 
   return (

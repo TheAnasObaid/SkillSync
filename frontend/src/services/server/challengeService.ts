@@ -1,8 +1,6 @@
 import { getServerApi } from "@/lib/serverApi";
 import { IChallenge } from "@/types";
 
-// --- SERVER-SIDE FUNCTIONS ---
-
 export const getAllChallenges = async (): Promise<IChallenge[]> => {
   try {
     const serverApi = await getServerApi();

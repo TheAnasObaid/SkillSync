@@ -2,7 +2,7 @@ import { IChallenge } from "@/types";
 import Link from "next/link";
 import { FiArrowRight, FiClock } from "react-icons/fi";
 
-interface ChallengeCardProps {
+interface Props {
   challenge: IChallenge;
 }
 
@@ -12,7 +12,7 @@ const difficultyStyles = {
   advanced: "badge-error",
 };
 
-const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
+const ChallengeCard = ({ challenge }: Props) => {
   const formattedDeadline = challenge.deadline
     ? new Date(challenge.deadline).toLocaleDateString()
     : "No deadline";

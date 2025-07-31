@@ -1,8 +1,6 @@
 import { getServerApi } from "@/lib/serverApi";
 import { ISubmission, IUser, PlatformStats } from "@/types";
 
-// --- SERVER-SIDE FUNCTIONS ---
-
 export const getPlatformStats = async (): Promise<PlatformStats | null> => {
   try {
     const serverApi = await getServerApi();

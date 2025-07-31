@@ -1,48 +1,66 @@
+"use client";
+"use client";
+
 import ChallengeDetailsClient from "@/components/Challenge/ChallengeDetailsClient";
-import { getChallengeById } from "@/services/server/challengeService";
-import { getPublicSubmissionsServer } from "@/services/server/submissionService";
+import { getChallengeByIdClient } from "@/services/client/challengeService";
+import { getPublicSubmissionsClient } from "@/services/client/submissionService";
 import { IChallenge, ISubmission } from "@/types";
+import { useParams } from "next/navigation";
+import { useEffect, useState, useCallback } from "react";
 
-interface ChallengePageProps {
-  params: { id: string };
-}
+const ChallengeDetailsPage = () => {
+  const { id } = useParams();
 
-const ChallengeDetailsPage = async ({ params }: ChallengePageProps) => {
-  const { id } = params;
+  const [challenge, setChallenge] = useState<IChallenge | null>(null);
+  const [submissions, setSubmissions] = useState<ISubmission[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  let initialChallenge: IChallenge | null = null;
-  let initialSubmissions: ISubmission[] = [];
-  let error: string | null = null;
+  const fetchChallengeData = useCallback(async () => {
+    if (!id) return;
 
-  try {
-    const [challengeData, submissionsData] = await Promise.all([
-      getChallengeById(id),
-      getPublicSubmissionsServer(id),
-    ]);
+    setLoading(true);
+    setError("");
+    try {
+      const [challengeData, submissionsData] = await Promise.all([
+        getChallengeByIdClient(id as string),
+        getPublicSubmissionsClient(id as string),
+      ]);
 
-    if (!challengeData) {
-      error = "Challenge not found.";
-    } else {
-      initialChallenge = challengeData;
-      initialSubmissions = submissionsData;
+      if (!challengeData) {
+        setError("Challenge not found.");
+      } else {
+        setChallenge(challengeData);
+        setSubmissions(submissionsData);
+      }
+    } catch (err) {
+      setError("Failed to load challenge details.");
+    } finally {
+      setLoading(false);
     }
-  } catch (err) {
-    console.error(`Failed to fetch data for challenge ${id}:`, err);
-    error = "Failed to load challenge details.";
-  }
+  }, [id]); // The dependency is the `id` from the URL
 
-  if (error || !initialChallenge) {
+  // Initial fetch on component mount
+  useEffect(() => {
+    fetchChallengeData();
+  }, [fetchChallengeData]);
+
+  if (loading) {
     return (
-      <div className="alert alert-error max-w-xl mx-auto my-10">
-        <p>{error || "An unexpected error occurred."}</p>
+      <div className="flex justify-center items-center min-h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
       </div>
     );
+  }
+  if (error || !challenge) {
+    return <p className="text-error">{error}</p>;
   }
 
   return (
     <ChallengeDetailsClient
-      initialChallenge={initialChallenge}
-      initialSubmissions={initialSubmissions}
+      initialChallenge={challenge}
+      initialSubmissions={submissions}
+      onSubmissionSuccess={fetchChallengeData}
     />
   );
 };

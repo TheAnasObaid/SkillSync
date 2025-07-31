@@ -1,6 +1,4 @@
-import { ReactNode } from "react";
-
-const AuthLayout = ({ children }: { children: ReactNode }) => {
+const AuthLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="grid bg-base-100 max-w-7xl mx-auto w-full">{children}</div>
   );

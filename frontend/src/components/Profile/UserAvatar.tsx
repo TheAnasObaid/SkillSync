@@ -1,7 +1,3 @@
-"use client";
-
-import Image from "next/image";
-
 const avatarColors = [
   "bg-primary/20 text-primary",
   "bg-secondary/20 text-secondary-content",
@@ -12,17 +8,13 @@ const avatarColors = [
   "bg-error/20 text-error",
 ];
 
-interface UserAvatarProps {
+interface Props {
   name?: string;
   avatarUrl?: string | null;
   className?: string;
 }
 
-const UserAvatar = ({
-  name,
-  avatarUrl,
-  className = "w-10 h-10",
-}: UserAvatarProps) => {
+const UserAvatar = ({ name, avatarUrl, className = "w-10 h-10" }: Props) => {
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
 
   if (avatarUrl) {
