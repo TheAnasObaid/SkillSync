@@ -1,22 +1,21 @@
 "use client";
 
-import apiClient from "@/lib/apiClient";
-import { useEffect, useState } from "react";
-import { useAuthStore } from "@/store/authStore";
-import { Challenge } from "@/components/Challenge/ChallengeCard";
+import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
 import SubmissionForm from "@/components/Submission/SubmissionForm";
+import { getChallengeById } from "@/services/challengeService";
+import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import {
   FiAward,
-  FiClock,
-  FiHash,
-  FiGitBranch,
-  FiLogIn,
   FiCheckCircle,
+  FiClock,
   FiDownload,
+  FiGitBranch,
+  FiHash,
+  FiLogIn,
 } from "react-icons/fi";
-import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
 
 const CtaBlock = ({
   role,
@@ -54,10 +53,7 @@ const CtaBlock = ({
   );
 };
 
-const ChallengeDetailsPage = () => {
-  const [challenge, setChallenge] = useState<Challenge | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+const ChallengeDetailsPage = async () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<"description" | "submissions">(
@@ -66,46 +62,17 @@ const ChallengeDetailsPage = () => {
   const [submissionCount, setSubmissionCount] = useState(0);
 
   const { id } = useParams() as { id: string };
+  if (!id) return;
+
   const { user } = useAuthStore();
 
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchChallenge = async () => {
-      setLoading(true);
-      try {
-        const response = await apiClient.get(`/challenges/${id}`);
-        setChallenge(response.data);
-      } catch (err) {
-        setError("Challenge not found or failed to load.");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchChallenge();
-  }, [id]);
+  const challenge = await getChallengeById(id);
+  if (!challenge) return;
 
   const handleModalClose = () => {
     setIsModalOpen(false);
     setTimeout(() => setSubmissionSuccess(false), 300);
   };
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center min-h-[50vh]">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-  }
-  if (error || !challenge) {
-    return (
-      <div className="alert alert-error max-w-xl mx-auto my-10">
-        <p>{error}</p>
-      </div>
-    );
-  }
 
   const formattedDeadline = new Date(challenge.deadline).toLocaleDateString();
   const difficultyStyles = {

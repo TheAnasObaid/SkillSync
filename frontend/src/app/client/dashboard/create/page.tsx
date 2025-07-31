@@ -25,8 +25,8 @@ const clientSidebarLinks: DashboardLink[] = [
 const CreateChallengePage = () => {
   return (
     <DashboardLayout sidebarLinks={clientSidebarLinks}>
-      <div>
-        <h2 className="text-3xl font-bold mb-6">Create a New Challenge</h2>
+      <div className="grid gap-6">
+        <h2 className="text-3xl font-bold">Create a New Challenge</h2>
         <ChallengeForm />
       </div>
     </DashboardLayout>

@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { IUser } from "@/types";
 import ConfirmationModal from "@/components/Common/ConfirmationModal";
 import UserAvatar from "@/components/Profile/UserAvatar";
 import apiClient from "@/lib/apiClient";
-import { FiMoreVertical, FiSlash } from "react-icons/fi";
+import { getAllUsersClient } from "@/services/adminService";
 import { useAuthStore } from "@/store/authStore";
+import { IUser } from "@/types";
+import { useState } from "react";
+import { FiMoreVertical, FiSlash } from "react-icons/fi";
 
 type UserUpdateAction =
   | { role: "developer" | "client" | "admin" }
@@ -68,12 +69,8 @@ const UserManagementTable = ({ initialUsers }: UserManagementTableProps) => {
   };
 
   const fetchUsers = async () => {
-    try {
-      const res = await apiClient.get("/admin/users");
-      setUsers(res.data);
-    } catch (err) {
-      setError("Failed to refresh user data.");
-    }
+    const users = await getAllUsersClient();
+    setUsers(users);
   };
 
   return (

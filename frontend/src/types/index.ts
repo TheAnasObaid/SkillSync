@@ -104,3 +104,37 @@ export interface ISubmission {
   createdAt: string;
   updatedAt: string;
 }
+
+export interface PublicSubmission {
+  _id: string;
+  githubRepo: string;
+  liveDemo?: string;
+  description: string;
+  developerId: {
+    _id: string;
+    profile: {
+      firstName: string;
+      avatar: string;
+    };
+  };
+  createdAt: string;
+}
+
+export interface PlatformStats {
+  totalUsers: number;
+  totalChallenges: number;
+  completedChallenges: number;
+  pendingSubmissions: number;
+}
+
+export interface ClientStats {
+  totalChallengesPosted: number;
+  activeChallenges: number;
+  totalSubmissionsReceived: number;
+}
+
+export interface DeveloperStats {
+  totalSubmissions: number;
+  winningSubmissions: number;
+  pendingReviews: number;
+}

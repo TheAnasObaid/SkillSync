@@ -96,7 +96,6 @@ export const getChallengeById = asyncHandler(
  */
 export const getMyChallenges = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    console.log("first");
     const allChallenges = await Challenge.find({ createdBy: req.userId }).sort({
       createdAt: -1,
     });

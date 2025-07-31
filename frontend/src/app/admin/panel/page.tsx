@@ -3,70 +3,41 @@
 import StatCard from "@/components/Admin/StatCard";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { adminSidebarLinks } from "@/config/dashboard";
-import apiClient from "@/lib/apiClient";
+import { getPlatformStats } from "@/services/adminService";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { FiArchive, FiCheckSquare, FiClipboard, FiUsers } from "react-icons/fi";
 
-interface PlatformStats {
-  totalUsers: number;
-  totalChallenges: number;
-  completedChallenges: number;
-  pendingSubmissions: number;
-}
-
-const AdminPanelPage = () => {
-  const [stats, setStats] = useState<PlatformStats | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const response = await apiClient.get("/admin/stats");
-        setStats(response.data);
-      } catch (error) {
-        console.error("Failed to fetch admin stats", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchStats();
-  }, []);
+const AdminPanelPage = async () => {
+  const stats = await getPlatformStats();
 
   return (
     <DashboardLayout sidebarLinks={adminSidebarLinks}>
       <div className="space-y-8">
         <h1 className="text-4xl font-bold">Admin Dashboard</h1>
 
-        {loading ? (
-          <div className="text-center">
-            <span className="loading loading-spinner loading-lg"></span>
+        {stats && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard
+              icon={<FiUsers size={32} />}
+              label="Total Users"
+              value={stats.totalUsers}
+            />
+            <StatCard
+              icon={<FiArchive size={32} />}
+              label="Total Challenges"
+              value={stats.totalChallenges}
+            />
+            <StatCard
+              icon={<FiCheckSquare size={32} />}
+              label="Completed Challenges"
+              value={stats.completedChallenges}
+            />
+            <StatCard
+              icon={<FiClipboard size={32} />}
+              label="Pending Submissions"
+              value={stats.pendingSubmissions}
+            />
           </div>
-        ) : (
-          stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <StatCard
-                icon={<FiUsers size={32} />}
-                label="Total Users"
-                value={stats.totalUsers}
-              />
-              <StatCard
-                icon={<FiArchive size={32} />}
-                label="Total Challenges"
-                value={stats.totalChallenges}
-              />
-              <StatCard
-                icon={<FiCheckSquare size={32} />}
-                label="Completed Challenges"
-                value={stats.completedChallenges}
-              />
-              <StatCard
-                icon={<FiClipboard size={32} />}
-                label="Pending Submissions"
-                value={stats.pendingSubmissions}
-              />
-            </div>
-          )
         )}
 
         <div className="card bg-base-200/50 border border-base-300">

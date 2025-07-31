@@ -1,27 +1,13 @@
+import { PublicSubmission } from "@/types";
 import Link from "next/link";
-import { FiGithub, FiExternalLink } from "react-icons/fi";
+import { FiExternalLink, FiGithub } from "react-icons/fi";
 import UserAvatar from "../Profile/UserAvatar";
 
-export interface PublicSubmission {
-  _id: string;
-  githubRepo: string;
-  liveDemo?: string;
-  description: string;
-  developerId: {
-    _id: string;
-    profile: {
-      firstName: string;
-      avatar: string;
-    };
-  };
-  createdAt: string;
-}
-
-interface SubmissionCardProps {
+interface Props {
   submission: PublicSubmission;
 }
 
-const SubmissionCard = ({ submission }: SubmissionCardProps) => {
+const SubmissionCard = ({ submission }: Props) => {
   return (
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
       <div className="card-body p-6">
