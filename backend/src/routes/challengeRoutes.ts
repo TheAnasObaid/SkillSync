@@ -11,8 +11,6 @@ import { authenticate, authorize } from "../middleware/auth";
 
 const challengesRouter = express.Router();
 
-// === THE FIX IS HERE: Reorder the routes ===
-
 // --- Static routes first ---
 
 // GET challenges created by the logged-in client ("me")

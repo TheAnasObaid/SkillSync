@@ -31,7 +31,6 @@ const ClientChallengeList = ({ challenges }: Props) => {
 
   return (
     <div className="space-y-4">
-      <h1 className="text-3xl font-bold mb-6">My Challenges</h1>
       {challenges.map((challenge) => (
         <div
           key={challenge._id}

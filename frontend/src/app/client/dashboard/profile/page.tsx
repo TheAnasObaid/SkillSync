@@ -57,7 +57,7 @@ function ClientProfilePage() {
     const fetchUserProfile = async () => {
       setLoading(true);
       try {
-        const response = await apiClient.get<User>("/users/profile");
+        const response = await apiClient.get<User>("/users/me");
         setUser(response.data);
       } catch (err) {
         setError("Failed to load profile data.");

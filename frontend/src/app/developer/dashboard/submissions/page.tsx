@@ -1,30 +1,31 @@
-"use client";
-
 import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionList";
-import DashboardLayout, {
-  DashboardLink,
-} from "@/components/Layout/DashboardLayout";
-import { FiClipboard, FiUser } from "react-icons/fi";
-import { TbBriefcase2 } from "react-icons/tb";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
+import { developerSidebarLinks } from "@/config/dashboard";
+import { getServerApi } from "@/lib/serverApi";
+import { ISubmission } from "@/types";
 
-const developerSidebarLinks: DashboardLink[] = [
-  { href: "/developer/dashboard", label: "Dashboard", icon: <FiClipboard /> },
-  {
-    href: "/developer/dashboard/submissions",
-    label: "My Submissions",
-    icon: <TbBriefcase2 />,
-  },
-  {
-    href: "/developer/dashboard/profile",
-    label: "My Profile",
-    icon: <FiUser />,
-  },
-];
+const SubmissionsPage = async () => {
+  let submissions: ISubmission[] = [];
+  let error: string | null = null;
 
-const SubmissionsPage = () => {
+  try {
+    const serverApi = await getServerApi();
+    const response = await serverApi.get("/submissions/me");
+    submissions = response.data;
+  } catch (err) {
+    console.error("Failed to fetch developer submissions:", err);
+    error = "Could not load your submissions. Please try again later.";
+  }
+
   return (
     <DashboardLayout sidebarLinks={developerSidebarLinks}>
-      <DeveloperSubmissionList />
+      <h1 className="text-3xl font-bold mb-6">My Submissions</h1>
+      {/* --- 5. RENDER THE COMPONENT WITH DATA OR AN ERROR MESSAGE --- */}
+      {error ? (
+        <div className="alert alert-error">{error}</div>
+      ) : (
+        <DeveloperSubmissionList submissions={submissions} />
+      )}
     </DashboardLayout>
   );
 };

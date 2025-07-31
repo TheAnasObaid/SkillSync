@@ -13,7 +13,7 @@ const ClientChallengesPage = async () => {
 
   return (
     <DashboardLayout sidebarLinks={clientSidebarLinks}>
-      {/* --- 5. RENDER THE COMPONENT WITH DATA OR ERROR --- */}
+      <h1 className="text-3xl font-bold mb-6">My Challenges</h1>
       {error ? (
         <div className="alert alert-error">{error}</div>
       ) : (

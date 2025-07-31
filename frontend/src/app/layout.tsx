@@ -24,14 +24,16 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="skillsync-pro"
+      data-theme="skillsync-lol"
       className={`${inter.className} ${inter.variable}`}
     >
-      <body className="antialiased grid grid-rows-[auto_1fr_auto] gap-y-5">
+      <body className="antialiased">
         <AuthLayout>
-          <Header />
-          {children}
-          <Footer />
+          <div className="grid grid-rows-[auto_1fr_auto]">
+            <Header />
+            {children}
+            <Footer />
+          </div>
         </AuthLayout>
       </body>
     </html>

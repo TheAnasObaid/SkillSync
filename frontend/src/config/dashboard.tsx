@@ -1,7 +1,8 @@
 import { ReactNode } from "react";
 import { BsGrid } from "react-icons/bs";
-import { FiArchive, FiUser } from "react-icons/fi";
+import { FiArchive, FiClipboard, FiUser } from "react-icons/fi";
 import { GoPlusCircle } from "react-icons/go";
+import { TbBriefcase2 } from "react-icons/tb";
 
 export interface DashboardLink {
   href: string;
@@ -24,4 +25,16 @@ export const clientSidebarLinks: DashboardLink[] = [
   { href: "/client/dashboard/profile", label: "My Profile", icon: <FiUser /> },
 ];
 
-// You can add developerSidebarLinks and adminSidebarLinks here as well.
+export const developerSidebarLinks: DashboardLink[] = [
+  { href: "/developer/dashboard", label: "Dashboard", icon: <FiClipboard /> },
+  {
+    href: "/developer/dashboard/submissions",
+    label: "My Submissions",
+    icon: <TbBriefcase2 />,
+  },
+  {
+    href: "/developer/dashboard/profile",
+    label: "My Profile",
+    icon: <FiUser />,
+  },
+];
