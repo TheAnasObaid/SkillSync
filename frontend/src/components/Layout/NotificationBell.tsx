@@ -12,19 +12,17 @@ interface Notification {
 const NotificationBell = () => {
   const socket = useSocket();
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [isOpen, setIsOpen] = useState(false);
 
   useEffect(() => {
     if (!socket) return;
 
-    // Listen for new submission events
-    socket.on("new_submission", (data) => {
+    const handleNewNotification = (data: Notification) => {
       setNotifications((prev) => [data, ...prev]);
-    });
+    };
+    socket.on("new_submission_notification", handleNewNotification);
 
-    // Clean up the listener
     return () => {
-      socket.off("new_submission");
+      socket.off("new_submission_notification", handleNewNotification);
     };
   }, [socket]);
 
@@ -32,9 +30,9 @@ const NotificationBell = () => {
     <div className="dropdown dropdown-end">
       <button tabIndex={0} className="btn btn-ghost btn-circle">
         <div className="indicator">
-          <FiBell size={20} />
+          <FiBell />
           {notifications.length > 0 && (
-            <span className="badge badge-xs badge-primary indicator-item">
+            <span className="badge badge-xs badge-info badge-soft rounded-full indicator-item">
               {notifications.length}
             </span>
           )}

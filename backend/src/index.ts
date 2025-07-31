@@ -54,20 +54,35 @@ const getUser = (userId: string) => {
 };
 
 io.on("connection", (socket) => {
-  console.log("A user connected.");
+  console.log(`New connection: ${socket.id}`);
 
   socket.on("addUser", (userId) => {
+    if (!userId) return;
     addUser(userId, socket.id);
     console.log("Online users:", onlineUsers);
   });
 
+  socket.on("join_challenge_room", (challengeId) => {
+    socket.join(challengeId);
+    console.log(`Socket ${socket.id} joined room ${challengeId}`);
+  });
+
+  socket.on("leave_challenge_room", (challengeId) => {
+    socket.leave(challengeId);
+    console.log(`Socket ${socket.id} left room ${challengeId}`);
+  });
+
   socket.on("disconnect", () => {
+    console.log(`User disconnected: ${socket.id}`);
     removeUser(socket.id);
-    console.log("A user disconnected.");
   });
 });
 
-// --- EXPORT A FUNCTION TO EMIT EVENTS FROM CONTROLLERS ---
+export const emitToRoom = (roomId: string, eventName: string, data: any) => {
+  io.to(roomId).emit(eventName, data);
+  console.log(`Emitting event "${eventName}" to room ${roomId}`);
+};
+
 export const emitToUser = (userId: string, eventName: string, data: any) => {
   const user = getUser(userId);
   if (user) {

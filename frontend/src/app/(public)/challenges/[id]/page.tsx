@@ -59,7 +59,7 @@ const ChallengeDetailsPage = () => {
   return (
     <ChallengeDetailsClient
       initialChallenge={challenge}
-      initialSubmissions={submissions}
+      initialSubmissions={submissions || []}
       onSubmissionSuccess={fetchChallengeData}
     />
   );

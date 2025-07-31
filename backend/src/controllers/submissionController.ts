@@ -6,7 +6,7 @@ import Challenge from "../models/Challenge";
 import Submission from "../models/Submission";
 import asyncHandler from "../utils/asyncHandler";
 import User from "../models/User";
-import { emitToUser } from "..";
+import { emitToRoom, emitToUser } from "..";
 
 /**
  * @desc    Submit a solution to a specific challenge
@@ -59,17 +59,30 @@ export const submitToChallenge = asyncHandler(
         });
         const newSubmission = newSubmissionArray[0];
 
+        const populatedSubmission = await Submission.findById(newSubmission._id)
+          .populate({
+            path: "developerId",
+            select: "profile.firstName profile.avatar _id",
+          })
+          .session(session);
+
+        // This emits the full submission object to everyone in the challenge room
+        emitToRoom(
+          challengeId,
+          "new_submission_for_challenge",
+          populatedSubmission
+        );
+
+        const challengeOwnerId = challenge.createdBy.toString();
+        emitToUser(challengeOwnerId, "new_submission_notification", {
+          message: `You have a new submission for your challenge: "${challenge.title}"`,
+          challengeId: challenge._id,
+        });
+
         challenge.submissions.push(newSubmission._id as Types.ObjectId);
         await challenge.save({ session });
 
         await session.commitTransaction();
-
-        // --- EMIT NOTIFICATION ---
-        const challengeOwnerId = challenge.createdBy.toString();
-        emitToUser(challengeOwnerId, "new_submission", {
-          message: `You have a new submission for your challenge: "${challenge.title}"`,
-          challengeId: challenge._id,
-        });
 
         res.status(201).json(newSubmission);
       } catch (error: any) {
