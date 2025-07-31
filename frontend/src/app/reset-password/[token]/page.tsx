@@ -1,6 +1,6 @@
 "use client";
 
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { useParams, useRouter } from "next/navigation";

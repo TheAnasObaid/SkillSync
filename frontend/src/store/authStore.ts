@@ -1,4 +1,5 @@
 import { PortfolioItem } from "@/components/Profile/PortfolioCard";
+import axios from "axios";
 import { create } from "zustand";
 
 export type Role = "developer" | "client" | "admin";
@@ -79,7 +80,10 @@ export const useAuthStore = create<AuthState>((set) => ({
     if (typeof window !== "undefined") {
       localStorage.removeItem("authToken");
       localStorage.removeItem("authUser");
+      // --- NEW ---
+      // Call our API route to clear the server-side cookie
+      axios.post("/api/auth", { token: null });
     }
-    set({ token: null, user: null, loading: false });
+    set({ token: null, user: null });
   },
 }));

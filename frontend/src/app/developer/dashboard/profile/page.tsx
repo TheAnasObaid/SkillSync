@@ -9,7 +9,7 @@ import PortfolioCard, {
 } from "@/components/Profile/PortfolioCard";
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { User, useAuthStore } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";

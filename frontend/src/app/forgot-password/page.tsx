@@ -1,6 +1,6 @@
 "use client";
 
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { AxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";

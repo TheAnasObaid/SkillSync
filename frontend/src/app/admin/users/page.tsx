@@ -5,7 +5,7 @@ import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
 import UserAvatar from "@/components/Profile/UserAvatar";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore, User } from "@/store/authStore";
 import { useEffect, useState } from "react";
 import {

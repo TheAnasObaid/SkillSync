@@ -1,10 +1,10 @@
 "use client";
 
 import { LoginFormData, loginSchema } from "@/lib/validationSchemas";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
+import axios, { AxiosError } from "axios";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -48,13 +48,16 @@ const LoginForm = () => {
       const response = await apiClient.post("/auth/login", data);
       const { token, user } = response.data;
 
-      setToken(token);
+      // This is the primary client-side auth state
+      setToken(token); // This will save to localStorage
       setUser(user);
 
-      const dashboardPath = getDashboardPath(user.role);
+      // --- NEW ---
+      // Also call our API route to set the server-side cookie
+      await axios.post("/api/auth", { token });
 
+      const dashboardPath = getDashboardPath(user.role);
       router.push(dashboardPath);
-      router.refresh();
     } catch (error) {
       if (error instanceof AxiosError) {
         const errorMessage =

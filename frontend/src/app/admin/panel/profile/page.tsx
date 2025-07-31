@@ -4,7 +4,7 @@ import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
 import ProfileView from "@/components/Profile/ProfileView";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { User } from "@/store/authStore";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";

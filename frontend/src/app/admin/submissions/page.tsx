@@ -2,7 +2,7 @@
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { useEffect, useState } from "react";
 import { FiClipboard, FiGrid, FiUser, FiUsers } from "react-icons/fi";
 

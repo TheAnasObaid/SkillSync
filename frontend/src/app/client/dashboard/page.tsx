@@ -1,16 +1,10 @@
-"use client";
-
 import StatCard from "@/components/Admin/StatCard";
 import ClientChallengeList from "@/components/Challenge/ClientChallengeList";
-import DashboardLayout, {
-  DashboardLink,
-} from "@/components/Layout/DashboardLayout";
-import apiClient from "@/services/apiClient";
-import { useAuthStore } from "@/store/authStore";
-import { useEffect, useState } from "react";
-import { BsGrid } from "react-icons/bs";
-import { FiArchive, FiCheckSquare, FiClipboard, FiUser } from "react-icons/fi";
-import { GoPlusCircle } from "react-icons/go";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
+import { clientSidebarLinks } from "@/config/dashboard";
+import { getServerApi } from "@/lib/serverApi";
+import { IChallenge } from "@/types";
+import { FiArchive, FiCheckSquare, FiClipboard } from "react-icons/fi";
 
 interface ClientStats {
   totalChallengesPosted: number;
@@ -18,76 +12,70 @@ interface ClientStats {
   totalSubmissionsReceived: number;
 }
 
-const clientSidebarLinks: DashboardLink[] = [
-  { href: "/client/dashboard", label: "Dashboard", icon: <BsGrid /> },
-  {
-    href: "/client/dashboard/challenges",
-    label: "My Challenges",
-    icon: <FiArchive />,
-  },
-  {
-    href: "/client/dashboard/create",
-    label: "Create Challenge",
-    icon: <GoPlusCircle />,
-  },
-  { href: "/client/dashboard/profile", label: "My Profile", icon: <FiUser /> },
-];
+const ClientDashboardPage = async () => {
+  const serverApi = await getServerApi();
+  let stats: ClientStats | null = null;
+  let recentChallenges: IChallenge[] = [];
+  let error: string | null = null;
 
-const ClientDashboardPage = () => {
-  const { user } = useAuthStore();
-  const [stats, setStats] = useState<ClientStats | null>(null);
-  const [loading, setLoading] = useState(true);
+  try {
+    // We can fetch multiple data points in parallel for better performance
+    const [statsResponse, challengesResponse] = await Promise.all([
+      serverApi.get("/users/me/stats/client"),
+      serverApi.get("/challenges/me"),
+    ]);
+    stats = statsResponse.data;
 
-  useEffect(() => {
-    apiClient
-      .get("/users/profile/stats/client")
-      .then((res) => setStats(res.data))
-      .catch((err) => console.error("Failed to fetch client stats", err))
-      .finally(() => setLoading(false));
-  }, []);
+    recentChallenges = challengesResponse.data.slice(0, 5);
+  } catch (err) {
+    console.error("Failed to fetch client dashboard data:", err);
+    error = "Could not load your dashboard. Please try again later.";
+  }
 
   return (
     <DashboardLayout sidebarLinks={clientSidebarLinks}>
       <div className="space-y-8">
         <div>
-          <h1 className="text-3xl font-bold">
-            Welcome back, {user?.profile?.firstName}!
-          </h1>
+          {/* We can get the user's name on the server in a future step, for now, a generic welcome */}
+          <h1 className="text-3xl font-bold">Welcome back!</h1>
           <p className="text-base-content/70 mt-1">
             Here's a summary of your posted challenges.
           </p>
         </div>
 
-        {loading ? (
-          <div className="text-center">
-            <span className="loading loading-spinner"></span>
+        {/* Conditionally render the error, the stats, or a fallback */}
+        {error ? (
+          <div className="alert alert-error">{error}</div>
+        ) : stats ? (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <StatCard
+              icon={<FiArchive size={32} />}
+              label="Total Challenges"
+              value={stats.totalChallengesPosted}
+            />
+            <StatCard
+              icon={<FiCheckSquare size={32} />}
+              label="Active Challenges"
+              value={stats.activeChallenges}
+            />
+            <StatCard
+              icon={<FiClipboard size={32} />}
+              label="Submissions Received"
+              value={stats.totalSubmissionsReceived}
+            />
           </div>
         ) : (
-          stats && (
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <StatCard
-                icon={<FiArchive size={32} />}
-                label="Total Challenges"
-                value={stats.totalChallengesPosted}
-              />
-              <StatCard
-                icon={<FiCheckSquare size={32} />}
-                label="Active Challenges"
-                value={stats.activeChallenges}
-              />
-              <StatCard
-                icon={<FiClipboard size={32} />}
-                label="Submissions Received"
-                value={stats.totalSubmissionsReceived}
-              />
-            </div>
-          )
+          <p>Could not load stats.</p>
         )}
 
         <div className="mt-8">
           <h2 className="text-2xl font-bold mb-4">Recent Challenges</h2>
-          {/* The ClientChallengeList handles its own data fetching and can be reused here */}
-          <ClientChallengeList />
+          {/* 
+            Pass the server-fetched `recentChallenges` data as a prop
+            to the ClientChallengeList, which we already refactored into
+            a "dumb" presentational component.
+          */}
+          <ClientChallengeList challenges={recentChallenges} />
         </div>
       </div>
     </DashboardLayout>

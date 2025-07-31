@@ -3,7 +3,7 @@
 import ConfirmationModal from "@/components/Common/ConfirmationModal";
 import StarRating from "@/components/Common/StarRating";
 import UserAvatar from "@/components/Profile/UserAvatar";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { AxiosError } from "axios";
 import Link from "next/link";
 import { useParams } from "next/navigation";

@@ -40,15 +40,26 @@ export const authenticate = asyncHandler(
     next();
   }
 );
-
 export const authorize =
-  (requiredRole: Role) =>
+  (...requiredRoles: Role[]) =>
   (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-    if (req.user && req.user.role === requiredRole) {
-      next();
-    } else {
-      res
-        .status(403)
-        .json({ message: `Access forbidden: Requires ${requiredRole} role` });
+    if (!req.user) {
+      res.status(401).json({ message: "Not authenticated" });
+      return;
     }
+
+    // 2. We check if the user's role is included in the list of allowed roles.
+    const hasRequiredRole = requiredRoles.includes(req.user.role);
+
+    if (!hasRequiredRole) {
+      res.status(403).json({
+        message: `Access Forbidden: Requires one of the following roles: ${requiredRoles.join(
+          ", "
+        )}`,
+      });
+      return;
+    }
+
+    // 3. If everything is okay, we proceed.
+    next();
   };

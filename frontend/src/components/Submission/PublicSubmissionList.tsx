@@ -1,6 +1,6 @@
 "use client";
 
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { useEffect, useState } from "react";
 import SubmissionCard, { PublicSubmission } from "./SubmissionCard";
 import { FiInbox } from "react-icons/fi";

@@ -1,6 +1,6 @@
 "use client";
 
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { Challenge } from "@/components/Challenge/ChallengeCard";

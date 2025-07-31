@@ -5,7 +5,7 @@ import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionL
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
 import { useState, useEffect } from "react";
 import { FiAward, FiClipboard, FiClock, FiUser } from "react-icons/fi";
@@ -38,7 +38,7 @@ const DeveloperDashboardPage = () => {
 
   useEffect(() => {
     apiClient
-      .get("/users/profile/stats")
+      .get("/users/me/stats/developer")
       .then((res) => setStats(res.data))
       .catch((err) => console.error("Failed to fetch stats", err))
       .finally(() => setLoading(false));

@@ -1,6 +1,6 @@
 "use client";
 import { useForm } from "react-hook-form";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import { useState } from "react";
 import { AxiosError } from "axios";
 interface SubmissionFormData {

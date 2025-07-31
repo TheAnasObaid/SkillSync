@@ -4,7 +4,7 @@ import StatCard from "@/components/Admin/StatCard";
 import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {

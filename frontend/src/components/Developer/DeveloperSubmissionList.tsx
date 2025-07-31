@@ -1,6 +1,6 @@
 "use client";
 
-import apiClient from "@/services/apiClient";
+import apiClient from "@/lib/apiClient";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 // Import the icons we'll use for a richer UI
@@ -27,7 +27,7 @@ const DeveloperSubmissionList = () => {
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
-        const response = await apiClient.get("/submissions/my-submissions");
+        const response = await apiClient.get("/submissions/me");
         setSubmissions(response.data);
       } catch (error) {
         console.error("Failed to fetch developer submissions", error);
