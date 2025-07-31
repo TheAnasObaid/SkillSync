@@ -20,7 +20,6 @@ const SubmissionsPage = async () => {
   return (
     <DashboardLayout sidebarLinks={developerSidebarLinks}>
       <h1 className="text-3xl font-bold mb-6">My Submissions</h1>
-      {/* --- 5. RENDER THE COMPONENT WITH DATA OR AN ERROR MESSAGE --- */}
       {error ? (
         <div className="alert alert-error">{error}</div>
       ) : (

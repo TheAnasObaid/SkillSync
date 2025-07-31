@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      data-theme="emerald"
+      data-theme="skillsync-pro"
       className={`${inter.className} ${inter.variable}`}
     >
       <body className="antialiased">

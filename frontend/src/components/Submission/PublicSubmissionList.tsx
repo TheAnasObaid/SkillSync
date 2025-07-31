@@ -1,26 +1,20 @@
-"use client";
-
-import { PublicSubmission } from "@/types";
-import { useEffect, useState } from "react";
+import { ISubmission, PublicSubmission } from "@/types";
 import { FiInbox } from "react-icons/fi";
 import SubmissionCard from "./SubmissionCard";
-import { getPublicSubmissionsClient } from "@/services/client/submissionService";
 
 interface Props {
-  challengeId: string;
-  onCountChange: (count: number) => void;
+  submissions: ISubmission[];
+  isLoading: boolean;
 }
 
-const PublicSubmissionList = ({ challengeId, onCountChange }: Props) => {
-  const [submissions, setSubmissions] = useState<PublicSubmission[]>([]);
-
-  useEffect(() => {
-    if (challengeId) {
-      getPublicSubmissionsClient(challengeId).then((data) =>
-        setSubmissions(data)
-      );
-    }
-  }, [challengeId, onCountChange]);
+const PublicSubmissionList = ({ submissions, isLoading }: Props) => {
+  if (isLoading) {
+    return (
+      <div className="flex justify-center p-10">
+        <span className="loading loading-spinner loading-lg"></span>
+      </div>
+    );
+  }
 
   if (submissions.length === 0) {
     return (
@@ -37,7 +31,7 @@ const PublicSubmissionList = ({ challengeId, onCountChange }: Props) => {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {submissions.map((sub) => (
-        <SubmissionCard key={sub._id} submission={sub} />
+        <SubmissionCard key={sub._id} submission={sub as PublicSubmission} />
       ))}
     </div>
   );

@@ -1,50 +1,80 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { AuthenticatedRequest } from "../middleware/auth";
 import upload from "../middleware/upload";
 import Challenge from "../models/Challenge";
 import Submission from "../models/Submission";
 import asyncHandler from "../utils/asyncHandler";
+import User from "../models/User";
 
 /**
  * @desc    Submit a solution to a specific challenge
  * @route   POST /api/submissions/challenge/:challengeId
  * @access  Private (Developer)
  */
-export const submitSolution = asyncHandler(
+export const submitToChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     upload(req, res, async (err) => {
       if (err) {
-        return res.status(400).json({ message: err.message });
+        res.status(400).json({ message: err.message });
+        return;
       }
 
-      const { id: challengeId } = req.params;
-      const { githubRepo, liveDemo, description } = req.body;
+      const session = await mongoose.startSession();
+      session.startTransaction();
 
-      if (!githubRepo || !description) {
-        return res
-          .status(400)
-          .json({ message: "GitHub repository and description are required." });
-      }
+      try {
+        const { challengeId } = req.params;
+        const { githubRepo, liveDemo, description } = req.body;
 
-      const submissionData = {
-        challengeId: challengeId,
-        developerId: req.userId,
-        githubRepo,
-        liveDemo,
-        description,
-        files: [] as { name: string; path: string }[],
-      };
+        if (!githubRepo || !description) {
+          throw new Error("GitHub repo and description are required.");
+        }
 
-      if (req.file) {
-        submissionData.files.push({
-          name: req.file.originalname,
-          path: req.file.path,
+        const challenge = await Challenge.findById(challengeId).session(
+          session
+        );
+        if (!challenge) {
+          throw new Error("Challenge not found.");
+        }
+
+        if (challenge.deadline < new Date()) {
+          throw new Error("The deadline for this challenge has passed.");
+        }
+
+        const submissionData = {
+          challengeId,
+          developerId: req.userId,
+          githubRepo,
+          liveDemo,
+          description,
+          files: req.file
+            ? [{ name: req.file.originalname, path: req.file.path }]
+            : [],
+        };
+
+        const newSubmissionArray = await Submission.create([submissionData], {
+          session,
         });
-      }
+        const newSubmission = newSubmissionArray[0];
 
-      const submission = await Submission.create(submissionData);
-      res.status(201).json(submission);
+        challenge.submissions.push(newSubmission._id as Types.ObjectId);
+        await challenge.save({ session });
+
+        await session.commitTransaction();
+
+        res.status(201).json(newSubmission);
+      } catch (error: any) {
+        await session.abortTransaction();
+        console.error("Submission Error:", error);
+        res.status(400).json({
+          message:
+            error.message ||
+            "An internal server error occurred during submission.",
+        });
+      } finally {
+        session.endSession();
+      }
     });
   }
 );
@@ -78,17 +108,20 @@ export const getSubmissionsForChallenge = asyncHandler(
     const challenge = await Challenge.findById(challengeId);
     if (!challenge) {
       res.status(404).json({ message: "Challenge not found" });
+      return;
     }
     if (challenge?.createdBy.toString() !== userId) {
       res
         .status(403)
         .json({ message: "Forbidden: You do not own this challenge" });
+      return;
     }
 
     const submissions = await Submission.find({
       challengeId,
     }).populate("developerId", "profile.firstName email profile.avatar");
     res.status(200).json(submissions);
+    return;
   }
 );
 
@@ -145,6 +178,15 @@ export const selectWinner = asyncHandler(
     winnerSubmission.status = "winner";
     challenge.status = "completed";
 
+    const developer = await User.findById(winnerSubmission.developerId).session(
+      session
+    );
+    if (developer && developer.reputation) {
+      developer.reputation.completedChallenges =
+        (developer.reputation.completedChallenges || 0) + 1;
+      await developer.save({ session });
+    }
+
     await winnerSubmission.save({ session });
     await challenge.save({ session });
 
@@ -163,12 +205,11 @@ export const selectWinner = asyncHandler(
  * @desc    Rate a submission and provide feedback
  * @route   POST /api/submissions/:submissionId/rate
  * @access  Private (Client)
- */
-export const rateSubmission = asyncHandler(
+ */ export const rateSubmission = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { submissionId } = req.params;
     const { ratings, feedback } = req.body;
-    const userId = req.userId;
+    const clientId = req.userId;
 
     const submission = await Submission.findById(submissionId);
     if (!submission) {
@@ -177,19 +218,131 @@ export const rateSubmission = asyncHandler(
     }
 
     const challenge = await Challenge.findById(submission.challengeId);
-    if (challenge?.createdBy.toString() !== userId) {
-      res.status(403).json({ message: "You do not own this challenge." });
+    if (!challenge || challenge.createdBy.toString() !== clientId) {
+      res.status(403).json({
+        message:
+          "You do not have permission to rate submissions for this challenge.",
+      });
       return;
     }
 
     submission.ratings = ratings;
     submission.feedback = feedback;
-
     if (submission.status === "pending") {
       submission.status = "reviewed";
     }
 
+    const developer = await User.findById(submission.developerId);
+    if (developer && developer.reputation) {
+      const oldTotalRatingPoints =
+        (developer.reputation.rating || 0) *
+        (developer.reputation.totalRatings || 0);
+      const newTotalRatings = (developer.reputation.totalRatings || 0) + 1;
+      const newAverageRating =
+        (oldTotalRatingPoints + ratings.overall) / newTotalRatings;
+
+      developer.reputation.rating = parseFloat(newAverageRating.toFixed(2));
+      developer.reputation.totalRatings = newTotalRatings;
+
+      await developer.save({ validateBeforeSave: false });
+    }
+
     await submission.save();
     res.status(200).json(submission);
+  }
+);
+
+// Add these to your existing submissionController.ts file
+
+/**
+ * @desc    Update a submission owned by the logged-in developer
+ * @route   PUT /api/submissions/:id
+ * @access  Private (Developer)
+ */
+export const updateMySubmission = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { id: submissionId } = req.params;
+    const developerId = req.userId;
+    const { githubRepo, liveDemo, description } = req.body;
+
+    const submission = await Submission.findOne({
+      _id: submissionId,
+      developerId,
+    });
+
+    if (!submission) {
+      return res.status(404).json({
+        message:
+          "Submission not found or you do not have permission to edit it.",
+      });
+    }
+
+    const challenge = await Challenge.findById(submission.challengeId);
+    if (challenge && challenge.deadline < new Date()) {
+      return res.status(400).json({
+        message:
+          "The deadline has passed; this submission can no longer be updated.",
+      });
+    }
+
+    submission.githubRepo = githubRepo || submission.githubRepo;
+    submission.liveDemo = liveDemo || submission.liveDemo;
+    submission.description = description || submission.description;
+    submission.updatedAt = new Date();
+
+    const updatedSubmission = await submission.save();
+    res.status(200).json(updatedSubmission);
+  }
+);
+
+/**
+ * @desc    Withdraw (delete) a submission owned by the logged-in developer
+ * @route   DELETE /api/submissions/:id
+ * @access  Private (Developer)
+ */
+export const withdrawMySubmission = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { id: submissionId } = req.params;
+    const developerId = req.userId;
+
+    const submission = await Submission.findOne({
+      _id: submissionId,
+      developerId,
+    });
+
+    if (!submission) {
+      return res.status(404).json({
+        message:
+          "Submission not found or you do not have permission to withdraw it.",
+      });
+    }
+
+    const challenge = await Challenge.findById(submission.challengeId);
+    if (challenge && challenge.deadline < new Date()) {
+      return res.status(400).json({
+        message:
+          "The deadline has passed; this submission cannot be withdrawn.",
+      });
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      await submission.deleteOne({ session });
+
+      await Challenge.updateOne(
+        { _id: submission.challengeId },
+        { $pull: { submissions: submissionId } },
+        { session }
+      );
+
+      await session.commitTransaction();
+      res.status(200).json({ message: "Submission withdrawn successfully." });
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
   }
 );

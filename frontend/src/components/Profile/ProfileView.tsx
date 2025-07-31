@@ -1,4 +1,3 @@
-import { User } from "@/store/authStore";
 import {
   FiAward,
   FiBriefcase,
@@ -8,9 +7,10 @@ import {
   FiStar,
 } from "react-icons/fi";
 import UserAvatar from "./UserAvatar";
+import { IUser } from "@/types";
 
 interface Props {
-  user: User | null;
+  user: IUser | null;
   onAvatarClick?: () => void;
 }
 
@@ -24,7 +24,11 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
       <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
         <div className="card-body p-8 flex flex-col md:flex-row items-center gap-6">
           <div
-            className="relative group cursor-pointer"
+            className={
+              onAvatarClick
+                ? "relative group cursor-pointer"
+                : "relative group cursor-default"
+            }
             onClick={onAvatarClick}
           >
             <UserAvatar
@@ -32,10 +36,12 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
               avatarUrl={user.profile?.avatar}
               className="w-24 h-24 text-4xl"
             />
-            {/* The hover overlay remains */}
-            <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <FiCamera className="text-white text-2xl" />
-            </div>
+
+            {onAvatarClick && (
+              <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                <FiCamera className="text-white text-2xl" />
+              </div>
+            )}
           </div>
 
           <div className="text-center md:text-left">

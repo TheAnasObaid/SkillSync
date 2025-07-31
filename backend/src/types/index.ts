@@ -59,6 +59,7 @@ export type ChallengeStatus =
   | "active"
   | "judging"
   | "completed";
+
 export type ChallengeDifficulty = "beginner" | "intermediate" | "advanced";
 
 export interface IChallenge extends Document {
@@ -97,4 +98,5 @@ export interface ISubmission extends Document {
     overall: number;
   };
   feedback?: string;
+  updatedAt: Date;
 }

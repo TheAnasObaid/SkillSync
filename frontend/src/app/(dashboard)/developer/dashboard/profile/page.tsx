@@ -2,30 +2,18 @@
 
 import ConfirmationModal from "@/components/Common/ConfirmationModal";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
-import PortfolioCard, {
-  PortfolioItem,
-} from "@/components/Profile/PortfolioCard";
+import PortfolioCard from "@/components/Profile/PortfolioCard";
+
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
 import { developerSidebarLinks } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
-import { IUser } from "@/types";
+import { IUser, PortfolioItem, ProfileFormData } from "@/types";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { FiEdit, FiPlus, FiX } from "react-icons/fi";
-
-export interface ProfileFormData {
-  name: string;
-  email: string;
-  profile: {
-    lastName: string;
-    bio: string;
-    skills: string;
-    experience: string;
-  };
-}
 
 interface PortfolioFormData extends PortfolioItem {
   portfolioImage: FileList;

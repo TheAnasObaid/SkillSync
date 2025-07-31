@@ -55,7 +55,7 @@ export interface IChallenge {
   _id: string;
   title: string;
   description: string;
-  prize: number;
+  prize: string;
   createdBy: string | IUser;
   requirements: string;
   category?: string;
@@ -95,6 +95,7 @@ export interface ISubmission {
   githubRepo: string;
   liveDemo?: string;
   description: string;
+  content: string;
   status: SubmissionStatus;
   files: File[];
   ratings?: {
@@ -110,6 +111,17 @@ export interface PublicSubmission {
   githubRepo: string;
   liveDemo?: string;
   description: string;
+  challengeId:
+    | string
+    | {
+        _id: string;
+        title: string;
+        status: string;
+        prize?: number;
+      };
+  status: SubmissionStatus;
+  files: File[];
+  updatedAt: string;
   developerId: {
     _id: string;
     profile: {
@@ -137,4 +149,30 @@ export interface DeveloperStats {
   totalSubmissions: number;
   winningSubmissions: number;
   pendingReviews: number;
+}
+
+export interface DashboardLink {
+  href: string;
+  label: string;
+  icon?: React.ReactNode;
+}
+
+export interface PortfolioItem {
+  _id?: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  liveUrl?: string;
+  githubUrl?: string;
+}
+
+export interface ProfileFormData {
+  name: string;
+  email: string;
+  profile: {
+    lastName: string;
+    bio: string;
+    skills: string;
+    experience: string;
+  };
 }

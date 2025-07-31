@@ -1,10 +1,10 @@
 import { ISubmission } from "@/types";
 
-interface AdminSubmissionListProps {
+interface Props {
   submissions: ISubmission[];
 }
 
-const AdminSubmissionList = ({ submissions }: AdminSubmissionListProps) => {
+const AdminSubmissionList = ({ submissions }: Props) => {
   if (submissions.length === 0) {
     return <p>No submissions found on the platform yet.</p>;
   }

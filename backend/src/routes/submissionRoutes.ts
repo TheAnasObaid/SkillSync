@@ -5,10 +5,11 @@ import {
   getSubmissionsForChallenge,
   rateSubmission,
   selectWinner,
-  submitSolution,
+  submitToChallenge,
+  updateMySubmission,
+  withdrawMySubmission,
 } from "../controllers/submissionController";
 import { authenticate, authorize } from "../middleware/auth";
-import upload from "../middleware/upload";
 
 const router = Router();
 
@@ -24,8 +25,7 @@ router.post(
   "/challenge/:challengeId",
   authenticate,
   authorize("developer"),
-  upload, // Multer middleware here
-  submitSolution
+  submitToChallenge
 );
 
 // GET /api/submissions/challenge/:challengeId/review (Client's review view)
@@ -53,4 +53,13 @@ router.post(
   rateSubmission
 );
 
+// --- NEW DYNAMIC ROUTES FOR A SPECIFIC SUBMISSION ---
+
+router.put("/:id", authenticate, authorize("developer"), updateMySubmission);
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("developer"),
+  withdrawMySubmission
+);
 export default router;

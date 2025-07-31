@@ -1,5 +1,6 @@
 "use client";
-import { useForm } from "react-hook-form";
+
+import { SubmitHandler, useForm } from "react-hook-form";
 import apiClient from "@/lib/apiClient";
 import { useState } from "react";
 import { AxiosError } from "axios";
@@ -15,6 +16,7 @@ interface Props {
   challengeId: string;
   onSuccess: () => void;
 }
+
 const SubmissionForm = ({ challengeId, onSuccess }: Props) => {
   const {
     register,
@@ -22,31 +24,26 @@ const SubmissionForm = ({ challengeId, onSuccess }: Props) => {
     formState: { errors, isSubmitting },
   } = useForm<SubmissionFormData>();
   const [apiError, setApiError] = useState("");
-  // THIS FUNCTION MUST BE MODIFIED TO USE FormData
-  const onSubmit = async (data: SubmissionFormData) => {
+
+  const onSubmit: SubmitHandler<SubmissionFormData> = async (data) => {
     setApiError("");
 
-    // 1. Create a FormData object. This is required for sending files.
     const formData = new FormData();
 
-    // 2. Append all the text fields
     formData.append("githubRepo", data.githubRepo);
     formData.append("description", data.description);
     if (data.liveDemo) {
       formData.append("liveDemo", data.liveDemo);
+      console.log("liveDemo", data.liveDemo);
     }
 
-    // 3. Append the file if it exists
     if (data.file && data.file.length > 0) {
-      formData.append("file", data.file[0]); // 'file' matches the name in our multer config
+      formData.append("file", data.file[0]);
     }
 
     try {
-      // 4. Send the FormData object instead of a JSON object
       await apiClient.post(`/submissions/challenge/${challengeId}`, formData, {
         headers: {
-          // This header is set automatically by the browser when sending FormData,
-          // so we don't explicitly set it, but it's important to know it's happening.
           "Content-Type": "multipart/form-data",
         },
       });

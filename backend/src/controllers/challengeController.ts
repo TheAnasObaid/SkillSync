@@ -105,47 +105,27 @@ export const getMyChallenges = asyncHandler(
 
 /**
  * @desc    Update a challenge owned by the logged-in client
- * @route   PUT /api/challenges/:id/me
+ * @route   PUT /api/challenges/:id
  * @access  Private (Client)
  */
 export const updateMyChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const challenge = await Challenge.findOne({
-      _id: req.params.id,
-      createdBy: req.userId,
-    });
-    if (!challenge) {
-      res
-        .status(404)
-        .json({ message: "Challenge not found or you are not the owner." });
-      return;
-    }
+    const { id: challengeId } = req.params;
+    const clientId = req.userId;
 
+    // We can reuse our Zod schema for validation
     const parsedBody = challengeSchema.safeParse(req.body);
     if (!parsedBody.success) {
       res.status(400).json({ issues: parsedBody.error.issues });
       return;
     }
 
-    // Update the challenge object with new values
-    Object.assign(challenge, parsedBody.data);
+    const challenge = await Challenge.findOneAndUpdate(
+      { _id: challengeId, createdBy: clientId }, // Condition: Find the challenge AND ensure ownership
+      { $set: parsedBody.data }, // Update with the validated data
+      { new: true, runValidators: true } // Options: return the new document and run schema validators
+    );
 
-    const updatedChallenge = await challenge.save();
-    res.status(200).json(updatedChallenge);
-  }
-);
-
-/**
- * @desc    Delete a challenge owned by the logged-in client
- * @route   DELETE /api/challenges/:id/me
- * @access  Private (Client)
- */
-export const deleteMyChallenge = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const challenge = await Challenge.findOneAndDelete({
-      _id: req.params.id,
-      createdBy: req.userId,
-    });
     if (!challenge) {
       res
         .status(404)
@@ -153,7 +133,37 @@ export const deleteMyChallenge = asyncHandler(
       return;
     }
 
-    await Submission.deleteMany({ challengeId: req.params.id });
-    res.status(200).json({ message: "Challenge deleted successfully." });
+    res.status(200).json(challenge);
+  }
+);
+
+/**
+ * @desc    Delete a challenge owned by the logged-in client
+ * @route   DELETE /api/challenges/:id
+ * @access  Private (Client)
+ */
+export const deleteMyChallenge = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { id: challengeId } = req.params;
+    const clientId = req.userId;
+
+    const challenge = await Challenge.findOneAndDelete({
+      _id: challengeId,
+      createdBy: clientId,
+    });
+
+    if (!challenge) {
+      res
+        .status(404)
+        .json({ message: "Challenge not found or you are not the owner." });
+      return;
+    }
+
+    // Optional but highly recommended: Delete all submissions associated with this challenge
+    await Submission.deleteMany({ challengeId: challengeId });
+
+    res.status(200).json({
+      message: "Challenge and all associated submissions have been deleted.",
+    });
   }
 );

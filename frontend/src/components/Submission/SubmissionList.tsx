@@ -1,25 +1,11 @@
-interface Submission {
-  _id: string;
-  content: string;
-  developerId: {
-    _id: string;
-    profile: {
-      firstName: string;
-    };
-    email: string;
-  };
-  files: Object[];
-  status: string;
-  createdAt: string;
-  updatedAt: string;
-}
+import { ISubmission } from "@/types";
 
 const SubmissionList = async ({ id }: { id: string }) => {
   try {
     const response = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/submissions/challenge/${id}`
     );
-    const submissions: Submission[] = await response.json();
+    const submissions: ISubmission[] = await response.json();
 
     return (
       <div className="space-y-4">
@@ -27,7 +13,8 @@ const SubmissionList = async ({ id }: { id: string }) => {
           <div key={submission._id} className="card shadow-md p-4 bg-base-100">
             <p>
               <strong>Submitted by: </strong>
-              {submission.developerId.profile.firstName}
+              {typeof submission.developerId !== "string" &&
+                submission.developerId.profile.firstName}
             </p>
             <p>
               <strong>Description:</strong> {submission.content}

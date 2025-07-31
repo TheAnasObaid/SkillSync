@@ -22,8 +22,8 @@ app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
 app.use("/api/auth", authRoute);
 app.use("/api/admin", adminRoute);
 app.use("/api/users", userRoute);
-app.use("/api/challenges", challengesRoute);
 app.use("/api/submissions", submissionsRoute);
+app.use("/api/challenges", challengesRoute);
 
 // IMPORTANT: The error handler must be the LAST middleware added.
 app.use(errorHandler);

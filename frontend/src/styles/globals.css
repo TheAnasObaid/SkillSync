@@ -1,8 +1,6 @@
 @import "tailwindcss";
-@plugin "daisyui" {
-  themes: all;
-}
-/* 
+@plugin "daisyui";
+
 @plugin "daisyui/theme" {
   name: "skillsync-pro";
   default: true;
@@ -36,7 +34,7 @@
   --border: 1px;
   --depth: 0;
   --noise: 0;
-} */
+}
 
 @keyframes scroll-vertical {
   from {

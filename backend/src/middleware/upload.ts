@@ -1,34 +1,30 @@
 import multer from "multer";
 import path from "path";
-// Set up storage engine
+
 const storage = multer.diskStorage({
-  destination: "./uploads/", // Make sure this folder exists in your backend root
+  destination: "./uploads/",
   filename: function (req, file, cb) {
-    // Create a unique filename to avoid overwrites
     cb(
       null,
       file.fieldname + "-" + Date.now() + path.extname(file.originalname)
     );
   },
 });
-// Initialize upload variable
+
 const upload = multer({
   storage: storage,
-  limits: { fileSize: 10000000 }, // Limit file size to 10MB
+  limits: { fileSize: 10000000 },
   fileFilter: function (req, file, cb) {
     checkFileType(file, cb);
   },
-}).single("file"); // 'file' is the name of the input field in the form
-// Check File Type
+}).single("file");
+
 function checkFileType(
   file: Express.Multer.File,
   cb: multer.FileFilterCallback
 ) {
-  // Allowed extensions
   const filetypes = /jpeg|jpg|png|gif|pdf|zip/;
-  // Check ext
   const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
-  // Check mime
   const mimetype = filetypes.test(file.mimetype);
   if (mimetype && extname) {
     return cb(null, true);
@@ -54,7 +50,7 @@ const imageFileFilter = function (
 };
 
 export const uploadPortfolioImage = multer({
-  storage: storage, // We can reuse the same storage engine
-  limits: { fileSize: 5000000 }, // A smaller limit for images, e.g., 5MB
+  storage: storage,
+  limits: { fileSize: 5000000 },
   fileFilter: imageFileFilter,
-}).single("portfolioImage"); // Use a specific field name
+}).single("portfolioImage");
