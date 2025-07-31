@@ -13,6 +13,7 @@ import {
   FiHash,
 } from "react-icons/fi";
 import CtaBlock from "./CtaBlock";
+import { useSocket } from "@/context/SocketContext";
 
 interface Props {
   initialChallenge: IChallenge | null;
@@ -33,7 +34,35 @@ const ChallengeDetailsClient = ({
   const [hasMounted, setHasMounted] = useState(false);
   const { user } = useAuthStore();
   const [challenge, setChallenge] = useState(initialChallenge);
-  const [submissions, setSubmissions] = useState(initialSubmissions);
+  const [submissions, setSubmissions] = useState(initialSubmissions || []);
+
+  const socket = useSocket();
+
+  // --- NEW: REAL-TIME LOGIC ---
+  useEffect(() => {
+    // Make sure the socket connection exists before proceeding
+    if (!socket) return;
+
+    const challengeId = initialChallenge?._id;
+
+    // 1. Join the room when the component mounts
+    socket.emit("join_challenge_room", challengeId);
+    console.log(`Attempting to join room: ${challengeId}`);
+
+    // 2. Listen for incoming new submissions
+    const handleNewSubmission = (newSubmission: ISubmission) => {
+      // Add the new submission to the top of the list
+      setSubmissions((prevSubmissions) => [newSubmission, ...prevSubmissions]);
+    };
+    socket.on("new_submission_for_challenge", handleNewSubmission);
+
+    // 3. Clean up when the component unmounts
+    return () => {
+      console.log(`Leaving room: ${challengeId}`);
+      socket.emit("leave_challenge_room", challengeId);
+      socket.off("new_submission_for_challenge", handleNewSubmission);
+    };
+  }, [socket, initialChallenge?._id]); // Re-run effect if socket or challenge ID changes
 
   const submissionCount = submissions?.length;
 
@@ -49,6 +78,7 @@ const ChallengeDetailsClient = ({
   const formattedDeadline = new Date(
     initialChallenge!.deadline
   ).toLocaleDateString();
+
   const difficultyStyles = {
     beginner: "badge-success",
     intermediate: "badge-warning",
@@ -105,7 +135,7 @@ const ChallengeDetailsClient = ({
               )}
               {activeTab === "submissions" && submissions && (
                 <PublicSubmissionList
-                  submissions={submissions}
+                  submissions={submissions} // This prop is now live!
                   isLoading={false}
                 />
               )}

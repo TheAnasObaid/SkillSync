@@ -6,6 +6,7 @@ import Challenge from "../models/Challenge";
 import Submission from "../models/Submission";
 import asyncHandler from "../utils/asyncHandler";
 import User from "../models/User";
+import { emitToRoom, emitToUser } from "..";
 
 /**
  * @desc    Submit a solution to a specific challenge
@@ -57,6 +58,26 @@ export const submitToChallenge = asyncHandler(
           session,
         });
         const newSubmission = newSubmissionArray[0];
+
+        const populatedSubmission = await Submission.findById(newSubmission._id)
+          .populate({
+            path: "developerId",
+            select: "profile.firstName profile.avatar _id",
+          })
+          .session(session);
+
+        // This emits the full submission object to everyone in the challenge room
+        emitToRoom(
+          challengeId,
+          "new_submission_for_challenge",
+          populatedSubmission
+        );
+
+        const challengeOwnerId = challenge.createdBy.toString();
+        emitToUser(challengeOwnerId, "new_submission_notification", {
+          message: `You have a new submission for your challenge: "${challenge.title}"`,
+          challengeId: challenge._id,
+        });
 
         challenge.submissions.push(newSubmission._id as Types.ObjectId);
         await challenge.save({ session });
@@ -196,6 +217,14 @@ export const selectWinner = asyncHandler(
       { session }
     );
 
+    // --- NEW NOTIFICATION LOGIC ---
+    const developerId = winnerSubmission.developerId.toString();
+    emitToUser(developerId, "challenge_winner", {
+      message: `Congratulations! Your submission for "${challenge.title}" has been selected as the winner!`,
+      challengeId: challenge._id,
+    });
+    // --- END ---
+
     await session.commitTransaction();
     res.status(200).json({ message: "Winner selected successfully." });
   }
@@ -248,6 +277,14 @@ export const selectWinner = asyncHandler(
     }
 
     await submission.save();
+
+    // --- NEW NOTIFICATION LOGIC ---
+    emitToUser(submission.developerId.toString(), "submission_reviewed", {
+      message: `Your submission for "${challenge.title}" has been reviewed.`,
+      challengeId: challenge._id,
+    });
+    // --- END ---
+
     res.status(200).json(submission);
   }
 );
