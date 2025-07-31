@@ -6,6 +6,8 @@ import {
   rateSubmission,
   selectWinner,
   submitToChallenge,
+  updateMySubmission,
+  withdrawMySubmission,
 } from "../controllers/submissionController";
 import { authenticate, authorize } from "../middleware/auth";
 
@@ -51,4 +53,13 @@ router.post(
   rateSubmission
 );
 
+// --- NEW DYNAMIC ROUTES FOR A SPECIFIC SUBMISSION ---
+
+router.put("/:id", authenticate, authorize("developer"), updateMySubmission);
+router.delete(
+  "/:id",
+  authenticate,
+  authorize("developer"),
+  withdrawMySubmission
+);
 export default router;

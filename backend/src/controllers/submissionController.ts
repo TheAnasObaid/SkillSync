@@ -251,3 +251,98 @@ export const selectWinner = asyncHandler(
     res.status(200).json(submission);
   }
 );
+
+// Add these to your existing submissionController.ts file
+
+/**
+ * @desc    Update a submission owned by the logged-in developer
+ * @route   PUT /api/submissions/:id
+ * @access  Private (Developer)
+ */
+export const updateMySubmission = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { id: submissionId } = req.params;
+    const developerId = req.userId;
+    const { githubRepo, liveDemo, description } = req.body;
+
+    const submission = await Submission.findOne({
+      _id: submissionId,
+      developerId,
+    });
+
+    if (!submission) {
+      return res.status(404).json({
+        message:
+          "Submission not found or you do not have permission to edit it.",
+      });
+    }
+
+    const challenge = await Challenge.findById(submission.challengeId);
+    if (challenge && challenge.deadline < new Date()) {
+      return res.status(400).json({
+        message:
+          "The deadline has passed; this submission can no longer be updated.",
+      });
+    }
+
+    submission.githubRepo = githubRepo || submission.githubRepo;
+    submission.liveDemo = liveDemo || submission.liveDemo;
+    submission.description = description || submission.description;
+    submission.updatedAt = new Date();
+
+    const updatedSubmission = await submission.save();
+    res.status(200).json(updatedSubmission);
+  }
+);
+
+/**
+ * @desc    Withdraw (delete) a submission owned by the logged-in developer
+ * @route   DELETE /api/submissions/:id
+ * @access  Private (Developer)
+ */
+export const withdrawMySubmission = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const { id: submissionId } = req.params;
+    const developerId = req.userId;
+
+    const submission = await Submission.findOne({
+      _id: submissionId,
+      developerId,
+    });
+
+    if (!submission) {
+      return res.status(404).json({
+        message:
+          "Submission not found or you do not have permission to withdraw it.",
+      });
+    }
+
+    const challenge = await Challenge.findById(submission.challengeId);
+    if (challenge && challenge.deadline < new Date()) {
+      return res.status(400).json({
+        message:
+          "The deadline has passed; this submission cannot be withdrawn.",
+      });
+    }
+
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+      await submission.deleteOne({ session });
+
+      await Challenge.updateOne(
+        { _id: submission.challengeId },
+        { $pull: { submissions: submissionId } },
+        { session }
+      );
+
+      await session.commitTransaction();
+      res.status(200).json({ message: "Submission withdrawn successfully." });
+    } catch (error) {
+      await session.abortTransaction();
+      throw error;
+    } finally {
+      session.endSession();
+    }
+  }
+);
