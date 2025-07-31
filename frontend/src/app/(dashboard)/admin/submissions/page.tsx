@@ -1,7 +1,7 @@
 import AdminSubmissionList from "@/components/Admin/AdminSubmissionList";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { adminSidebarLinks } from "@/config/dashboard";
-import { getAllSubmissions } from "@/services/adminService";
+import { getAllSubmissions } from "@/services/server/adminService";
 
 const AdminSubmissionsPage = async () => {
   const submissions = await getAllSubmissions();

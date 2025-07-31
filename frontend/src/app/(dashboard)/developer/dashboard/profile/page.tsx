@@ -1,16 +1,16 @@
 "use client";
 
 import ConfirmationModal from "@/components/Common/ConfirmationModal";
-import DashboardLayout, {
-  DashboardLink,
-} from "@/components/Layout/DashboardLayout";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
 import PortfolioCard, {
   PortfolioItem,
 } from "@/components/Profile/PortfolioCard";
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
+import { DashboardLink } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
-import { User, useAuthStore } from "@/store/authStore";
+import { useAuthStore } from "@/store/authStore";
+import { IUser } from "@/types";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
@@ -199,7 +199,7 @@ const DeveloperProfilePage = () => {
         },
       };
 
-      const response = await apiClient.put<User>(
+      const response = await apiClient.put<IUser>(
         "/users/profile",
         updatePayload
       );

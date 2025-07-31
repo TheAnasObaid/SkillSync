@@ -1,12 +1,10 @@
 "use client";
 
-import DashboardLayout, {
-  DashboardLink,
-} from "@/components/Layout/DashboardLayout";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
+import { DashboardLink } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
-import { getMyProfileClient } from "@/services/userService";
 import { IUser } from "@/types";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
@@ -55,7 +53,18 @@ function ClientProfilePage() {
   } = useForm<ClientProfileFormData>();
 
   useEffect(() => {
-    getMyProfileClient().then((data) => setUser(data));
+    const fetchUserProfile = async () => {
+      setLoading(true);
+      try {
+        const response = await apiClient.get<IUser>("/users/me");
+        setUser(response.data);
+      } catch (err) {
+        setError("Failed to load profile data.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchUserProfile();
   }, []);
 
   const handleAvatarUpload = async (event: ChangeEvent<HTMLInputElement>) => {

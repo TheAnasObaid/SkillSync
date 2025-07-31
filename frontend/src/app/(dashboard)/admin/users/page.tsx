@@ -1,7 +1,7 @@
 import UserManagementTable from "@/components/Admin/UserManagementTable";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { adminSidebarLinks } from "@/config/dashboard";
-import { getAllUsers } from "@/services/adminService";
+import { getAllUsers } from "@/services/server/adminService";
 
 const ManageUsersPage = async () => {
   const initialUsers = await getAllUsers();

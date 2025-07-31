@@ -3,7 +3,7 @@
 import ConfirmationModal from "@/components/Common/ConfirmationModal";
 import UserAvatar from "@/components/Profile/UserAvatar";
 import apiClient from "@/lib/apiClient";
-import { getAllUsersClient } from "@/services/adminService";
+import { getAllUsersClient } from "@/services/client/adminService";
 import { useAuthStore } from "@/store/authStore";
 import { IUser } from "@/types";
 import { useState } from "react";

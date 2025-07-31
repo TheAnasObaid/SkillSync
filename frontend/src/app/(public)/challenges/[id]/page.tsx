@@ -2,7 +2,7 @@
 
 import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
 import SubmissionForm from "@/components/Submission/SubmissionForm";
-import { getChallengeById } from "@/services/challengeService";
+import { getChallengeById } from "@/services/server/challengeService";
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
 import { useParams } from "next/navigation";

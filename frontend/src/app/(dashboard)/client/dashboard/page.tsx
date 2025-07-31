@@ -2,8 +2,8 @@ import StatCard from "@/components/Admin/StatCard";
 import ClientChallengeList from "@/components/Challenge/ClientChallengeList";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { clientSidebarLinks } from "@/config/dashboard";
-import { getMyChallenges } from "@/services/challengeService";
-import { getMyClientStats } from "@/services/userService";
+import { getMyChallenges } from "@/services/server/challengeService";
+import { getMyClientStats } from "@/services/server/userService";
 import { FiArchive, FiCheckSquare, FiClipboard } from "react-icons/fi";
 
 const ClientDashboardPage = async () => {

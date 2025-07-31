@@ -1,5 +1,5 @@
 import ClientChallengeList from "@/components/Challenge/ClientChallengeList";
-import { getAllChallenges } from "@/services/challengeService";
+import { getAllChallenges } from "@/services/server/challengeService";
 
 const Challenges = async () => {
   const challenges = await getAllChallenges();

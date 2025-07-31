@@ -1,5 +1,4 @@
 import { getServerApi } from "@/lib/serverApi";
-import apiClient from "@/lib/apiClient";
 import { ISubmission, IUser, PlatformStats } from "@/types";
 
 // --- SERVER-SIDE FUNCTIONS ---
@@ -33,18 +32,6 @@ export const getAllSubmissions = async (): Promise<ISubmission[]> => {
     return response.data;
   } catch (error) {
     console.error("Service Error: getAllSubmissions failed", error);
-    return [];
-  }
-};
-
-// --- CLIENT-SIDE FUNCTIONS (for re-fetching data after an action) ---
-
-export const getAllUsersClient = async (): Promise<IUser[]> => {
-  try {
-    const response = await apiClient.get("/admin/users");
-    return response.data;
-  } catch (error) {
-    console.error("Client Service Error: getAllUsersClient failed", error);
     return [];
   }
 };

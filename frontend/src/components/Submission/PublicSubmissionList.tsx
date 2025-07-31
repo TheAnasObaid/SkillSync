@@ -1,6 +1,6 @@
 "use client";
 
-import { getPublicSubmissionsClient } from "@/services/submissionService";
+import { getPublicSubmissionsClient } from "@/services/server/submissionService";
 import { PublicSubmission } from "@/types";
 import { useEffect, useState } from "react";
 import { FiInbox } from "react-icons/fi";

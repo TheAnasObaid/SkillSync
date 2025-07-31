@@ -1,27 +1,18 @@
 "use client";
 
+import { DashboardLink } from "@/config/dashboard";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ReactNode } from "react";
 import { IoReturnUpBack } from "react-icons/io5";
 
-export interface DashboardLink {
-  href: string;
-  label: string;
-  icon?: ReactNode;
-}
-
-interface DashboardLayoutProps {
+interface Props {
   children: ReactNode;
   sidebarLinks: DashboardLink[];
   homeHref?: string;
 }
 
-const DashboardLayout = ({
-  children,
-  sidebarLinks,
-  homeHref = "/",
-}: DashboardLayoutProps) => {
+const DashboardLayout = ({ children, sidebarLinks, homeHref = "/" }: Props) => {
   const pathname = usePathname();
 
   return (

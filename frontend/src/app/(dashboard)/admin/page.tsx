@@ -1,9 +1,7 @@
-"use client";
-
 import StatCard from "@/components/Admin/StatCard";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { adminSidebarLinks } from "@/config/dashboard";
-import { getPlatformStats } from "@/services/adminService";
+import { getPlatformStats } from "@/services/server/adminService";
 import Link from "next/link";
 import { FiArchive, FiCheckSquare, FiClipboard, FiUsers } from "react-icons/fi";
 

@@ -1,16 +1,14 @@
 "use client";
 
-import DashboardLayout, {
-  DashboardLink,
-} from "@/components/Layout/DashboardLayout";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
 import ProfileView from "@/components/Profile/ProfileView";
 import { adminSidebarLinks } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
-import { User } from "@/store/authStore";
+import { IUser } from "@/types";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { FiClipboard, FiEdit, FiGrid, FiUser, FiX } from "react-icons/fi";
+import { FiEdit, FiX } from "react-icons/fi";
 
 interface AdminProfileFormData {
   name: string;
@@ -20,7 +18,7 @@ interface AdminProfileFormData {
 }
 
 const AdminProfilePage = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<IUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +36,7 @@ const AdminProfilePage = () => {
     const fetchUserProfile = async () => {
       setLoading(true);
       try {
-        const response = await apiClient.get<User>("/users/me");
+        const response = await apiClient.get<IUser>("/users/me");
         setUser(response.data);
       } catch (err) {
         setError("Failed to load profile data.");
@@ -78,7 +76,7 @@ const AdminProfilePage = () => {
     setIsSubmitting(true);
     try {
       const updatePayload = { name: data.name, profile: data.profile };
-      const response = await apiClient.put<User>(
+      const response = await apiClient.put<IUser>(
         "/users/profile",
         updatePayload
       );
@@ -104,13 +102,6 @@ const AdminProfilePage = () => {
       });
     }
   }, [isEditMode, user, reset]);
-
-  if (loading)
-    return (
-      <div className="flex justify-center p-10">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
 
   return (
     <DashboardLayout sidebarLinks={adminSidebarLinks}>
@@ -180,6 +171,10 @@ const AdminProfilePage = () => {
               </button>
             </div>
           </form>
+        </div>
+      ) : loading ? (
+        <div className="flex justify-center p-10">
+          <span className="loading loading-spinner loading-lg"></span>
         </div>
       ) : (
         <>

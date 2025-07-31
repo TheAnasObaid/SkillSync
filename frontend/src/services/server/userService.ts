@@ -1,6 +1,5 @@
 import { getServerApi } from "@/lib/serverApi";
-import apiClient from "@/lib/apiClient";
-import { ClientStats, DeveloperStats, IUser } from "@/types";
+import { ClientStats, DeveloperStats } from "@/types";
 
 // --- SERVER-SIDE FUNCTIONS ---
 
@@ -22,18 +21,6 @@ export const getMyClientStats = async (): Promise<ClientStats | null> => {
     return response.data;
   } catch (error) {
     console.error("Service Error: getMyClientStats failed", error);
-    return null;
-  }
-};
-
-// --- CLIENT-SIDE FUNCTIONS ---
-
-export const getMyProfileClient = async (): Promise<IUser | null> => {
-  try {
-    const response = await apiClient.get("/users/me");
-    return response.data;
-  } catch (error) {
-    console.error("Client Service Error: getMyProfileClient failed", error);
     return null;
   }
 };

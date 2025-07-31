@@ -15,7 +15,7 @@ export const getDashboardPath = (
 ): string => {
   switch (role) {
     case "admin":
-      return "/admin/panel";
+      return "/admin";
     case "developer":
       return "/developer/dashboard";
     case "client":
@@ -48,12 +48,9 @@ const LoginForm = () => {
       const response = await apiClient.post("/auth/login", data);
       const { token, user } = response.data;
 
-      // This is the primary client-side auth state
-      setToken(token); // This will save to localStorage
+      setToken(token);
       setUser(user);
 
-      // --- NEW ---
-      // Also call our API route to set the server-side cookie
       await axios.post("/api/auth", { token });
 
       const dashboardPath = getDashboardPath(user.role);
@@ -72,7 +69,7 @@ const LoginForm = () => {
   };
 
   const handleResendVerification = async () => {
-    const email = getValues("email"); // Get the email from the form
+    const email = getValues("email");
     if (!email) {
       setError("Please enter your email address first.");
       return;
@@ -82,9 +79,7 @@ const LoginForm = () => {
     setError("");
     try {
       await apiClient.post("/auth/resend-verification", { email });
-      // On success, we don't need to stay in the "unverified" state
       setIsUnverified(false);
-      // Give the user positive feedback
       alert(
         "A new verification email has been sent to your inbox. Please check it to continue."
       );

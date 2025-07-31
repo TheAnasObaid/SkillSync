@@ -3,8 +3,8 @@ import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionL
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { FiAward, FiClipboard, FiClock } from "react-icons/fi";
 import { developerSidebarLinks } from "@/config/dashboard";
-import { getMySubmissions } from "@/services/submissionService";
-import { getMyDeveloperStats } from "@/services/userService";
+import { getMySubmissions } from "@/services/server/submissionService";
+import { getMyDeveloperStats } from "@/services/server/userService";
 import Link from "next/link";
 
 const DeveloperDashboardPage = async () => {

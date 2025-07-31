@@ -1,7 +1,7 @@
 import ClientChallengeList from "@/components/Challenge/ClientChallengeList";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import { clientSidebarLinks } from "@/config/dashboard";
-import { getMyChallenges } from "@/services/challengeService";
+import { getMyChallenges } from "@/services/server/challengeService";
 
 const ClientChallengesPage = async () => {
   const challenges = await getMyChallenges();
