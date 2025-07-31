@@ -28,7 +28,7 @@ const Hero = () => {
           deliver the best solutions. It's where talent is proven, not just
           promised.
         </p>
-        <Link href="/register" className="btn btn-primary w-fit">
+        <Link href="/register" className="btn btn-primary md:w-fit">
           Start Creating <FiArrowRight />
         </Link>
       </div>

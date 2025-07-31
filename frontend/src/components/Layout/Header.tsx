@@ -51,7 +51,7 @@ const Header = () => {
           <div className="navbar-end flex gap-5">
             <Link
               href="/challenges"
-              className="link link-hover text-base-content text-sm w-fit"
+              className="link link-hover text-base-content text-sm w-fit hidden md:flex"
             >
               Challenges
             </Link>
