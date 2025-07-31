@@ -3,7 +3,7 @@
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
-import { DashboardLink } from "@/config/dashboard";
+import { clientSidebarLinks, DashboardLink } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
 import { IUser } from "@/types";
 import { AxiosError } from "axios";
@@ -21,21 +21,6 @@ interface ClientProfileFormData {
     bio: string;
   };
 }
-
-const clientSidebarLinks: DashboardLink[] = [
-  { href: "/client/dashboard", label: "Dashboard", icon: <BsGrid /> },
-  {
-    href: "/client/dashboard/challenges",
-    label: "My Challenges",
-    icon: <FiArchive />,
-  },
-  {
-    href: "/client/dashboard/create",
-    label: "Create Challenge",
-    icon: <GoPlusCircle />,
-  },
-  { href: "/client/dashboard/profile", label: "My Profile", icon: <FiUser /> },
-];
 
 function ClientProfilePage() {
   const [user, setUser] = useState<IUser | null>(null);
@@ -75,7 +60,7 @@ function ClientProfilePage() {
     formData.append("file", file); // 'file' must match the name in the multer config
 
     try {
-      const response = await apiClient.post("/users/upload-avatar", formData, {
+      const response = await apiClient.post("/users/me/avatar", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -99,10 +84,7 @@ function ClientProfilePage() {
         name: data.name,
         profile: data.profile,
       };
-      const response = await apiClient.put<IUser>(
-        "/users/profile",
-        updatePayload
-      );
+      const response = await apiClient.put<IUser>("/users/me", updatePayload);
       setUser(response.data);
       setIsEditMode(false);
       alert("Profile updated successfully!");

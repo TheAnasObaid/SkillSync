@@ -4,6 +4,7 @@ import ConfirmationModal from "@/components/Common/ConfirmationModal";
 import StarRating from "@/components/Common/StarRating";
 import UserAvatar from "@/components/Profile/UserAvatar";
 import apiClient from "@/lib/apiClient";
+import { ISubmission } from "@/types";
 import { AxiosError } from "axios";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -21,28 +22,6 @@ import {
   FiStar,
 } from "react-icons/fi";
 
-interface Submission {
-  _id: string;
-  githubRepo: string;
-  liveDemo?: string;
-  description: string;
-  status: "pending" | "reviewed" | "winner" | "rejected";
-  developerId: {
-    _id: string;
-    profile: {
-      firstName: string;
-      avatar: string;
-    };
-    email: string;
-  };
-  files: { name: string; path: string }[];
-  ratings?: {
-    overall: number;
-  };
-  feedback?: string;
-  createdAt: string;
-}
-
 interface RatingFormData {
   rating: number;
   feedback: string;
@@ -51,21 +30,18 @@ interface RatingFormData {
 const ReviewSubmissionsPage = () => {
   const { id: challengeId } = useParams() as { id: string };
 
-  // State Management
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissions, setSubmissions] = useState<ISubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [challengeTitle, setChallengeTitle] = useState("");
 
-  // State for new features
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] =
-    useState<Submission | null>(null);
+    useState<ISubmission | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // State for filtering and sorting
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("desc");
 
@@ -120,11 +96,14 @@ const ReviewSubmissionsPage = () => {
 
   const isChallengeCompleted = submissions.some((s) => s.status === "winner");
 
-  const handleSelectWinner = (submission: Submission) => {
+  const handleSelectWinner = (submission: ISubmission) => {
     setModalState({
       isOpen: true,
       title: "Confirm Winner Selection",
-      message: `Are you sure you want to select the submission by ${submission.developerId.profile.firstName} as the winner? This will complete the challenge and cannot be undone.`,
+      message: `Are you sure you want to select the submission by ${
+        typeof submission.developerId !== "string" &&
+        submission.developerId.profile.firstName
+      } as the winner? This will complete the challenge and cannot be undone.`,
       onConfirm: async () => {
         setIsUpdating(true);
         try {
@@ -189,12 +168,12 @@ const ReviewSubmissionsPage = () => {
   };
 
   // Functions to open modals with correct context
-  const openWinnerModal = (submission: Submission) => {
+  const openWinnerModal = (submission: ISubmission) => {
     setSelectedSubmission(submission);
     setIsWinnerModalOpen(true);
   };
 
-  const openRatingModal = (submission: Submission) => {
+  const openRatingModal = (submission: ISubmission) => {
     setSelectedSubmission(submission);
     reset({
       rating: submission.ratings?.overall || 0,
@@ -287,160 +266,174 @@ const ReviewSubmissionsPage = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredAndSortedSubmissions.map((sub) => (
-                    <Fragment key={sub._id}>
-                      <tr
-                        className={`transition-colors hover:bg-base-300/40 cursor-pointer ${
-                          sub.status === "winner" ? "bg-success/10" : ""
-                        }`}
-                        onClick={() =>
-                          setExpandedId(expandedId === sub._id ? null : sub._id)
-                        }
-                      >
-                        <th>
-                          {expandedId === sub._id ? (
-                            <FiChevronUp />
-                          ) : (
-                            <FiChevronDown />
-                          )}
-                        </th>
-                        <td>
-                          <div className="flex items-center gap-3">
-                            <UserAvatar
-                              name={sub.developerId.profile.firstName}
-                              avatarUrl={sub.developerId.profile.avatar}
-                            />
-                            <div>
-                              <div className="font-bold">
-                                {sub.developerId.profile.firstName}
-                              </div>
-                              <div className="text-sm opacity-50">
-                                {sub.developerId.email}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td>
-                          <span
-                            className={`badge badge-outline ${
-                              statusStyles[sub.status]
-                            }`}
-                          >
-                            {sub.status}
-                          </span>
-                        </td>
-                        <td>
-                          {sub.ratings?.overall ? (
-                            <div className="flex items-center gap-1 text-warning">
-                              {[...Array(sub.ratings.overall)].map((_, i) => (
-                                <FiStar key={i} fill="currentColor" />
-                              ))}
-                            </div>
-                          ) : (
-                            <span className="text-base-content/50">
-                              Not Rated
-                            </span>
-                          )}
-                        </td>
-                        <td className="text-right space-x-2">
-                          <button
-                            className="btn btn-secondary btn-sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openRatingModal(sub);
-                            }}
-                          >
-                            <FiStar /> Rate & Review
-                          </button>
-                          {!isChallengeCompleted && (
-                            <button
-                              className="btn btn-primary btn-sm"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleSelectWinner(sub); // <-- Call the new handler
-                              }}
-                            >
-                              <FiAward /> Select Winner
-                            </button>
-                          )}
-                        </td>
-                      </tr>
+                  {filteredAndSortedSubmissions.map((sub) => {
+                    if (typeof sub.developerId === "string") {
+                      console.warn(
+                        `Submission ${sub._id} has an unpopulated challengeId.`
+                      );
+                      return null;
+                    }
 
-                      {expandedId === sub._id && (
+                    return (
+                      <Fragment key={sub._id}>
                         <tr
-                          className={
-                            sub.status === "winner"
-                              ? "bg-success/5"
-                              : "" + "bg-base-100/50"
+                          className={`transition-colors hover:bg-base-300/40 cursor-pointer ${
+                            sub.status === "winner" ? "bg-success/10" : ""
+                          }`}
+                          onClick={() =>
+                            setExpandedId(
+                              expandedId === sub._id ? null : sub._id
+                            )
                           }
                         >
-                          <td className="p-0"></td>
-                          <td colSpan={5} className="p-0">
-                            <div className="p-6 space-y-4">
-                              <h4 className="font-bold">Submission Details:</h4>
-                              <p className="whitespace-pre-wrap">
-                                {sub.description || "No description provided."}
-                              </p>
-                              <div className="flex items-center gap-4 pt-2">
-                                <Link
-                                  href={sub.githubRepo}
-                                  target="_blank"
-                                  className="btn btn-ghost btn-sm"
-                                >
-                                  <FiGithub /> GitHub Repo
-                                </Link>
-                                {sub.liveDemo && (
+                          <th>
+                            {expandedId === sub._id ? (
+                              <FiChevronUp />
+                            ) : (
+                              <FiChevronDown />
+                            )}
+                          </th>
+                          <td>
+                            <div className="flex items-center gap-3">
+                              <UserAvatar
+                                name={sub.developerId.profile.firstName}
+                                avatarUrl={sub.developerId.profile.avatar}
+                              />
+                              <div>
+                                <div className="font-bold">
+                                  {sub.developerId.profile.firstName}
+                                </div>
+                                <div className="text-sm opacity-50">
+                                  {sub.developerId.email}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span
+                              className={`badge badge-outline ${
+                                statusStyles[sub.status]
+                              }`}
+                            >
+                              {sub.status}
+                            </span>
+                          </td>
+                          <td>
+                            {sub.ratings?.overall ? (
+                              <div className="flex items-center gap-1 text-warning">
+                                {[...Array(sub.ratings.overall)].map((_, i) => (
+                                  <FiStar key={i} fill="currentColor" />
+                                ))}
+                              </div>
+                            ) : (
+                              <span className="text-base-content/50">
+                                Not Rated
+                              </span>
+                            )}
+                          </td>
+                          <td className="text-right space-x-2">
+                            <button
+                              className="btn btn-secondary btn-sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openRatingModal(sub);
+                              }}
+                            >
+                              <FiStar /> Rate & Review
+                            </button>
+                            {!isChallengeCompleted && (
+                              <button
+                                className="btn btn-primary btn-sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleSelectWinner(sub); // <-- Call the new handler
+                                }}
+                              >
+                                <FiAward /> Select Winner
+                              </button>
+                            )}
+                          </td>
+                        </tr>
+
+                        {expandedId === sub._id && (
+                          <tr
+                            className={
+                              sub.status === "winner"
+                                ? "bg-success/5"
+                                : "" + "bg-base-100/50"
+                            }
+                          >
+                            <td className="p-0"></td>
+                            <td colSpan={5} className="p-0">
+                              <div className="p-6 space-y-4">
+                                <h4 className="font-bold">
+                                  Submission Details:
+                                </h4>
+                                <p className="whitespace-pre-wrap">
+                                  {sub.description ||
+                                    "No description provided."}
+                                </p>
+                                <div className="flex items-center gap-4 pt-2">
                                   <Link
-                                    href={sub.liveDemo}
+                                    href={sub.githubRepo}
                                     target="_blank"
                                     className="btn btn-ghost btn-sm"
                                   >
-                                    <FiExternalLink /> Live Demo
+                                    <FiGithub /> GitHub Repo
                                   </Link>
+                                  {sub.liveDemo && (
+                                    <Link
+                                      href={sub.liveDemo}
+                                      target="_blank"
+                                      className="btn btn-ghost btn-sm"
+                                    >
+                                      <FiExternalLink /> Live Demo
+                                    </Link>
+                                  )}
+                                </div>
+
+                                {sub.files && sub.files.length > 0 && (
+                                  <div className="pt-2">
+                                    <h5 className="font-bold">
+                                      Submitted Files:
+                                    </h5>
+                                    <div className="flex flex-wrap gap-2 mt-2">
+                                      {sub.files.map((file, index) => (
+                                        <a
+                                          key={index}
+                                          href={`${
+                                            process.env.NEXT_PUBLIC_API_BASE_URL
+                                          }/${file.path.replace(/\\/g, "/")}`}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="btn btn-outline btn-success btn-sm"
+                                          download={file.name}
+                                        >
+                                          <FiDownload className="mr-2" />
+                                          {file.name}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {sub.feedback && (
+                                  <div className="pt-2">
+                                    <h5 className="font-bold flex items-center gap-2">
+                                      <FiMessageSquare /> Client Feedback:
+                                    </h5>
+                                    <p className="text-base-content/80 mt-1 pl-2 border-l-2 border-base-300">
+                                      {sub.feedback}
+                                    </p>
+                                  </div>
                                 )}
                               </div>
-
-                              {sub.files && sub.files.length > 0 && (
-                                <div className="pt-2">
-                                  <h5 className="font-bold">
-                                    Submitted Files:
-                                  </h5>
-                                  <div className="flex flex-wrap gap-2 mt-2">
-                                    {sub.files.map((file, index) => (
-                                      <a
-                                        key={index}
-                                        href={`${
-                                          process.env.NEXT_PUBLIC_API_BASE_URL
-                                        }/${file.path.replace(/\\/g, "/")}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="btn btn-outline btn-success btn-sm"
-                                        download={file.name}
-                                      >
-                                        <FiDownload className="mr-2" />
-                                        {file.name}
-                                      </a>
-                                    ))}
-                                  </div>
-                                </div>
-                              )}
-
-                              {sub.feedback && (
-                                <div className="pt-2">
-                                  <h5 className="font-bold flex items-center gap-2">
-                                    <FiMessageSquare /> Client Feedback:
-                                  </h5>
-                                  <p className="text-base-content/80 mt-1 pl-2 border-l-2 border-base-300">
-                                    {sub.feedback}
-                                  </p>
-                                </div>
-                              )}
-                            </div>
-                          </td>
-                        </tr>
-                      )}
-                    </Fragment>
-                  ))}
+                            </td>
+                          </tr>
+                        )}
+                      </Fragment>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -470,7 +463,8 @@ const ReviewSubmissionsPage = () => {
           <h3 className="font-bold text-lg">
             Review Submission from{" "}
             <span className="text-primary">
-              {selectedSubmission?.developerId.profile.firstName}
+              {typeof selectedSubmission?.developerId !== "string" &&
+                selectedSubmission?.developerId.profile.firstName}
             </span>
           </h3>
           <form

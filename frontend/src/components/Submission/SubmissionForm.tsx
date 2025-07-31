@@ -3,17 +3,19 @@ import { useForm } from "react-hook-form";
 import apiClient from "@/lib/apiClient";
 import { useState } from "react";
 import { AxiosError } from "axios";
+
 interface SubmissionFormData {
   githubRepo: string;
   liveDemo?: string;
   description: string;
-  file: FileList; // <-- ADD THIS to handle the file input
+  file: FileList;
 }
-interface SubmissionFormProps {
+
+interface Props {
   challengeId: string;
   onSuccess: () => void;
 }
-const SubmissionForm = ({ challengeId, onSuccess }: SubmissionFormProps) => {
+const SubmissionForm = ({ challengeId, onSuccess }: Props) => {
   const {
     register,
     handleSubmit,
@@ -41,7 +43,7 @@ const SubmissionForm = ({ challengeId, onSuccess }: SubmissionFormProps) => {
 
     try {
       // 4. Send the FormData object instead of a JSON object
-      await apiClient.post(`/challenges/${challengeId}/submit`, formData, {
+      await apiClient.post(`/submissions/challenge/${challengeId}`, formData, {
         headers: {
           // This header is set automatically by the browser when sending FormData,
           // so we don't explicitly set it, but it's important to know it's happening.

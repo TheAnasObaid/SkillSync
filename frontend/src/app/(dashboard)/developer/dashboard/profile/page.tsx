@@ -82,7 +82,7 @@ const DeveloperProfilePage = () => {
     formData.append("file", file); // 'file' must match the name in the multer config
 
     try {
-      const response = await apiClient.post("/users/upload-avatar", formData, {
+      const response = await apiClient.post("/users/me/avatar", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -119,7 +119,7 @@ const DeveloperProfilePage = () => {
     try {
       // 4. Send the FormData
       const response = await apiClient.post<PortfolioItem[]>(
-        "/users/profile/portfolio",
+        "/users/me/portfolio",
         formData,
         {
           headers: {
@@ -150,7 +150,7 @@ const DeveloperProfilePage = () => {
       onConfirm: async () => {
         setIsDeleting(true);
         try {
-          await apiClient.delete(`/users/profile/portfolio/${item._id}`);
+          await apiClient.delete(`/users/me/portfolio/${item._id}`);
           const updatedPortfolio = portfolio.filter((p) => p._id !== item._id);
           setPortfolio(updatedPortfolio);
           setUser({
@@ -184,10 +184,7 @@ const DeveloperProfilePage = () => {
         },
       };
 
-      const response = await apiClient.put<IUser>(
-        "/users/profile",
-        updatePayload
-      );
+      const response = await apiClient.put<IUser>("/users/me", updatePayload);
       setUser(response.data); // Update global state
       setIsEditMode(false);
     } catch (err) {

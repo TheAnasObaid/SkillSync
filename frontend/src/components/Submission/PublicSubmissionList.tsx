@@ -1,10 +1,10 @@
 "use client";
 
-import { getPublicSubmissionsClient } from "@/services/server/submissionService";
 import { PublicSubmission } from "@/types";
 import { useEffect, useState } from "react";
 import { FiInbox } from "react-icons/fi";
 import SubmissionCard from "./SubmissionCard";
+import { getPublicSubmissionsClient } from "@/services/client/submissionService";
 
 interface Props {
   challengeId: string;
