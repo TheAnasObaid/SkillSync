@@ -9,7 +9,7 @@ export type Role = "developer" | "client" | "admin";
 export type AccountStatus = "active" | "banned";
 
 export interface PortfolioItem {
-  _id?: string; // ID is a string
+  _id?: string;
   title: string;
   description: string;
   imageUrl: string;
@@ -19,7 +19,7 @@ export interface PortfolioItem {
 
 // This represents the USER data object as it exists in JSON
 export interface IUser {
-  _id: string; // ID is a string
+  _id: string;
   email: string;
   role: Role;
   accountStatus: AccountStatus;
@@ -38,7 +38,7 @@ export interface IUser {
     completedChallenges: number;
   };
   isVerified: boolean;
-  createdAt: string; // Dates are strings in JSON
+  createdAt: string;
   updatedAt: string;
 }
 
@@ -52,17 +52,17 @@ export type ChallengeStatus =
 export type ChallengeDifficulty = "beginner" | "intermediate" | "advanced";
 
 export interface IChallenge {
-  _id: string; // ID is a string
+  _id: string;
   title: string;
   description: string;
   prize: number;
-  createdBy: string | IUser; // Can be a string ID or a populated User object
+  createdBy: string | IUser;
   requirements: string;
   category?: string;
   difficulty: ChallengeDifficulty;
-  deadline: string; // Date is a string
+  deadline: string;
   status: ChallengeStatus;
-  submissions: string[]; // Array of string IDs
+  submissions: string[];
   files: File[];
   tags: string[];
   createdAt: string;
@@ -73,7 +73,7 @@ export interface IChallenge {
 export type SubmissionStatus = "pending" | "reviewed" | "winner" | "rejected";
 
 export interface ISubmission {
-  _id: string; // ID is a string
+  _id: string;
   challengeId:
     | string
     | {
@@ -85,8 +85,8 @@ export interface ISubmission {
   developerId:
     | string
     | {
-        // Can be a string ID or a populated Developer object
         _id: string;
+        email?: string;
         profile: {
           firstName: string;
           avatar?: string;

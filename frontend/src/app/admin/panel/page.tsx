@@ -1,20 +1,12 @@
 "use client";
 
 import StatCard from "@/components/Admin/StatCard";
-import DashboardLayout, {
-  DashboardLink,
-} from "@/components/Layout/DashboardLayout";
+import DashboardLayout from "@/components/Layout/DashboardLayout";
+import { adminSidebarLinks } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import {
-  FiArchive,
-  FiCheckSquare,
-  FiClipboard,
-  FiGrid,
-  FiUser,
-  FiUsers,
-} from "react-icons/fi";
+import { FiArchive, FiCheckSquare, FiClipboard, FiUsers } from "react-icons/fi";
 
 interface PlatformStats {
   totalUsers: number;
@@ -22,13 +14,6 @@ interface PlatformStats {
   completedChallenges: number;
   pendingSubmissions: number;
 }
-
-const adminSidebarLinks: DashboardLink[] = [
-  { href: "/admin/panel", label: "Dashboard", icon: <FiGrid /> },
-  { href: "/admin/users", label: "Manage Users", icon: <FiUsers /> },
-  { href: "/admin/submissions", label: "Submissions", icon: <FiClipboard /> },
-  { href: "/admin/panel/profile", label: "My Profile", icon: <FiUser /> },
-];
 
 const AdminPanelPage = () => {
   const [stats, setStats] = useState<PlatformStats | null>(null);

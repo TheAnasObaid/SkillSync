@@ -4,6 +4,7 @@ import DashboardLayout, {
   DashboardLink,
 } from "@/components/Layout/DashboardLayout";
 import ProfileView from "@/components/Profile/ProfileView";
+import { adminSidebarLinks } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
 import { User } from "@/store/authStore";
 import { AxiosError } from "axios";
@@ -17,12 +18,6 @@ interface AdminProfileFormData {
     lastName: string;
   };
 }
-
-const adminSidebarLinks: DashboardLink[] = [
-  { href: "/admin/panel", label: "Dashboard", icon: <FiGrid /> },
-  { href: "/admin/submissions", label: "Submissions", icon: <FiClipboard /> },
-  { href: "/admin/panel/profile", label: "My Profile", icon: <FiUser /> },
-];
 
 const AdminProfilePage = () => {
   const [user, setUser] = useState<User | null>(null);
@@ -43,7 +38,7 @@ const AdminProfilePage = () => {
     const fetchUserProfile = async () => {
       setLoading(true);
       try {
-        const response = await apiClient.get<User>("/users/profile");
+        const response = await apiClient.get<User>("/users/me");
         setUser(response.data);
       } catch (err) {
         setError("Failed to load profile data.");

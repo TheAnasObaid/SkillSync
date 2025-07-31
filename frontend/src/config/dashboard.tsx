@@ -1,6 +1,12 @@
 import { ReactNode } from "react";
 import { BsGrid } from "react-icons/bs";
-import { FiArchive, FiClipboard, FiUser } from "react-icons/fi";
+import {
+  FiArchive,
+  FiClipboard,
+  FiGrid,
+  FiUser,
+  FiUsers,
+} from "react-icons/fi";
 import { GoPlusCircle } from "react-icons/go";
 import { TbBriefcase2 } from "react-icons/tb";
 
@@ -37,4 +43,11 @@ export const developerSidebarLinks: DashboardLink[] = [
     label: "My Profile",
     icon: <FiUser />,
   },
+];
+
+export const adminSidebarLinks: DashboardLink[] = [
+  { href: "/admin/panel", label: "Dashboard", icon: <FiGrid /> },
+  { href: "/admin/users", label: "Manage Users", icon: <FiUsers /> },
+  { href: "/admin/submissions", label: "Submissions", icon: <FiClipboard /> },
+  { href: "/admin/panel/profile", label: "My Profile", icon: <FiUser /> },
 ];
