@@ -165,3 +165,14 @@ export interface PortfolioItem {
   liveUrl?: string;
   githubUrl?: string;
 }
+
+export interface ProfileFormData {
+  name: string;
+  email: string;
+  profile: {
+    lastName: string;
+    bio: string;
+    skills: string;
+    experience: string;
+  };
+}
