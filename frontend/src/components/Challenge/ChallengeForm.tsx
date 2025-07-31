@@ -7,8 +7,17 @@ import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { IChallenge } from "@/types";
 
-const ChallengeForm = () => {
+interface ChallengeFormProps {
+  isEditing?: boolean;
+  existingChallenge?: IChallenge;
+}
+
+const ChallengeForm = ({
+  isEditing = false,
+  existingChallenge,
+}: ChallengeFormProps) => {
   const router = useRouter();
   const [error, setError] = useState("");
 
@@ -18,35 +27,50 @@ const ChallengeForm = () => {
     formState: { errors, isSubmitting },
   } = useForm<ChallengeFormData>({
     resolver: zodResolver(challengeSchema),
+    defaultValues: isEditing
+      ? {
+          title: existingChallenge?.title || "",
+          description: existingChallenge?.description || "",
+          requirements: existingChallenge?.requirements || "",
+          category: existingChallenge?.category || "",
+          difficulty: existingChallenge?.difficulty || "beginner",
+          deadline: existingChallenge?.deadline
+            ? new Date(existingChallenge.deadline).toISOString().split("T")[0]
+            : "",
+          prize: existingChallenge?.prize || "0",
+          tags: (existingChallenge?.tags || []).join(", "),
+        }
+      : {},
   });
 
   const onSubmit = async (challengeFormData: ChallengeFormData) => {
     setError("");
-
-    // 1. Create a FormData object for file uploads
     const formData = new FormData();
 
-    // 2. Append all text fields from the form data
     Object.entries(challengeFormData).forEach(([key, value]) => {
-      // We handle the file separately, so skip it here
       if (key !== "file" && value) {
         formData.append(key, value);
       }
     });
 
-    // 3. Append the file if one was selected
     const fileList = challengeFormData.file as FileList;
     if (fileList && fileList.length > 0) {
       formData.append("file", fileList[0]);
     }
 
     try {
-      await apiClient.post("/challenges", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      router.push("/client/dashboard");
+      if (isEditing) {
+        await apiClient.put(
+          `/challenges/${existingChallenge?._id}`,
+          challengeFormData
+        );
+        alert("Challenge updated successfully!");
+        router.push("/client/dashboard/challenges");
+        router.refresh();
+      } else {
+        await apiClient.post("/challenges", formData, {});
+        router.push("/client/dashboard");
+      }
     } catch (error) {
       if (error instanceof AxiosError) {
         const zodIssues = error.response?.data?.issues;
@@ -223,6 +247,8 @@ const ChallengeForm = () => {
       >
         {isSubmitting ? (
           <span className="loading loading-spinner"></span>
+        ) : isEditing ? (
+          "Save Changes"
         ) : (
           "Create Challenge"
         )}

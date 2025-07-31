@@ -55,7 +55,7 @@ export interface IChallenge {
   _id: string;
   title: string;
   description: string;
-  prize: number;
+  prize: string;
   createdBy: string | IUser;
   requirements: string;
   category?: string;
