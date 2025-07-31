@@ -217,6 +217,14 @@ export const selectWinner = asyncHandler(
       { session }
     );
 
+    // --- NEW NOTIFICATION LOGIC ---
+    const developerId = winnerSubmission.developerId.toString();
+    emitToUser(developerId, "challenge_winner", {
+      message: `Congratulations! Your submission for "${challenge.title}" has been selected as the winner!`,
+      challengeId: challenge._id,
+    });
+    // --- END ---
+
     await session.commitTransaction();
     res.status(200).json({ message: "Winner selected successfully." });
   }
@@ -269,6 +277,14 @@ export const selectWinner = asyncHandler(
     }
 
     await submission.save();
+
+    // --- NEW NOTIFICATION LOGIC ---
+    emitToUser(submission.developerId.toString(), "submission_reviewed", {
+      message: `Your submission for "${challenge.title}" has been reviewed.`,
+      challengeId: challenge._id,
+    });
+    // --- END ---
+
     res.status(200).json(submission);
   }
 );

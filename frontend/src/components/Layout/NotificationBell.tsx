@@ -8,6 +8,7 @@ interface Notification {
   id: string;
   message: string;
   challengeId: string;
+  type: "new_submission" | "reviewed" | "winner";
 }
 
 const NotificationBell = () => {
@@ -18,21 +19,35 @@ const NotificationBell = () => {
   useEffect(() => {
     if (!socket) return;
 
-    const handleNewNotification = (data: {
-      message: string;
-      challengeId: string;
-    }) => {
+    const addNotification = (
+      data: { message: string; challengeId: string },
+      type: Notification["type"]
+    ) => {
       const newNotification: Notification = {
         id: `${Date.now()}-${Math.random()}`,
         message: data.message,
         challengeId: data.challengeId,
+        type: type,
       };
       setNotifications((prev) => [newNotification, ...prev]);
     };
-    socket.on("new_submission_notification", handleNewNotification);
 
+    // Create specific handlers for each event
+    const handleNewSubmission = (data: any) =>
+      addNotification(data, "new_submission");
+    const handleReviewed = (data: any) => addNotification(data, "reviewed");
+    const handleWinner = (data: any) => addNotification(data, "winner");
+
+    // Attach the listeners
+    socket.on("new_submission_notification", handleNewSubmission);
+    socket.on("submission_reviewed", handleReviewed);
+    socket.on("challenge_winner", handleWinner);
+
+    // Clean up all listeners on unmount
     return () => {
-      socket.off("new_submission_notification", handleNewNotification);
+      socket.off("new_submission_notification", handleNewSubmission);
+      socket.off("submission_reviewed", handleReviewed);
+      socket.off("challenge_winner", handleWinner);
     };
   }, [socket]);
 
@@ -49,7 +64,7 @@ const NotificationBell = () => {
       <button tabIndex={0} className="btn btn-ghost btn-circle">
         <div className="indicator">
           <FiBell size={20} />
-          {notificationCount >= 0 && (
+          {notificationCount > 0 && (
             <span className="badge badge-xs rounded-full badge-info indicator-item">
               {notificationCount}
             </span>
@@ -81,9 +96,17 @@ const NotificationBell = () => {
                   onClick={() => handleNotificationClick(notif.id)}
                 >
                   <Link
-                    href={`/challenges/${notif.challengeId}/review`}
-                    className="block p-2 rounded-lg font-semibold bg-base-100 hover:bg-base-300/50"
+                    href={
+                      // Winner and Reviewed notifications can link to the public challenge page
+                      // New Submission notifications should link to the review page
+                      notif.type === "new_submission"
+                        ? `/challenges/${notif.challengeId}/review`
+                        : `/challenges/${notif.challengeId}`
+                    }
+                    className="block p-2 rounded-lg bg-base-100 hover:bg-base-300/50"
                   >
+                    {notif.type === "winner" && "🏆 "}
+                    {notif.type === "reviewed" && "⭐ "}
                     {notif.message}
                   </Link>
                 </li>
