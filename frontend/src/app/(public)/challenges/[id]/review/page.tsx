@@ -7,7 +7,7 @@ import apiClient from "@/lib/apiClient";
 import { ISubmission } from "@/types";
 import { AxiosError } from "axios";
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Fragment, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import {
@@ -29,22 +29,18 @@ interface RatingFormData {
 
 const ReviewSubmissionsPage = () => {
   const { id: challengeId } = useParams() as { id: string };
-
   const [submissions, setSubmissions] = useState<ISubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [challengeTitle, setChallengeTitle] = useState("");
-
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [isWinnerModalOpen, setIsWinnerModalOpen] = useState(false);
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [selectedSubmission, setSelectedSubmission] =
     useState<ISubmission | null>(null);
+  const router = useRouter();
   const [isUpdating, setIsUpdating] = useState(false);
-
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("desc");
-
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     title: string;
@@ -58,32 +54,32 @@ const ReviewSubmissionsPage = () => {
     });
   const ratingValue = watch("rating");
 
-  // Fetch initial data
+  const fetchSubmissions = async () => {
+    setLoading(true);
+    try {
+      const [subResponse, chalResponse] = await Promise.all([
+        apiClient.get(`/submissions/challenge/${challengeId}/review`),
+        apiClient.get(`/challenges/${challengeId}`),
+      ]);
+      setSubmissions(subResponse.data);
+      setChallengeTitle(chalResponse.data.title);
+    } catch (err) {
+      setError(
+        err instanceof AxiosError
+          ? err.response?.data.message
+          : "Failed to load data."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    if (!challengeId) return;
-    const fetchSubmissions = async () => {
-      setLoading(true);
-      try {
-        const [subResponse, chalResponse] = await Promise.all([
-          apiClient.get(`/submissions/challenge/${challengeId}`),
-          apiClient.get(`/challenges/${challengeId}`),
-        ]);
-        setSubmissions(subResponse.data);
-        setChallengeTitle(chalResponse.data.title);
-      } catch (err) {
-        setError(
-          err instanceof AxiosError
-            ? err.response?.data.message
-            : "Failed to load data."
-        );
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSubmissions();
+    if (challengeId) {
+      fetchSubmissions();
+    }
   }, [challengeId]);
 
-  // Derived state for filtered and sorted submissions
   const filteredAndSortedSubmissions = useMemo(() => {
     return submissions
       .filter((sub) => statusFilter === "all" || sub.status === statusFilter)
@@ -103,23 +99,20 @@ const ReviewSubmissionsPage = () => {
       message: `Are you sure you want to select the submission by ${
         typeof submission.developerId !== "string" &&
         submission.developerId.profile.firstName
-      } as the winner? This will complete the challenge and cannot be undone.`,
+      } as the winner?`,
       onConfirm: async () => {
         setIsUpdating(true);
         try {
           await apiClient.patch(`/submissions/${submission._id}/winner`);
-          setSubmissions((prev) =>
-            prev.map((sub) => ({
-              ...sub,
-              status: sub._id === submission._id ? "winner" : "rejected",
-            }))
-          );
+          alert("Winner selected successfully!");
+          await fetchSubmissions();
         } catch (err) {
           setError(
             err instanceof AxiosError
               ? err.response?.data.message
               : "Failed to select winner."
           );
+          alert(error);
         } finally {
           setIsUpdating(false);
           setModalState({ isOpen: false, title: "", message: "" });
@@ -128,33 +121,17 @@ const ReviewSubmissionsPage = () => {
     });
   };
 
-  const handleCancelModal = () => {
-    setModalState({ isOpen: false, title: "", message: "" });
-  };
-
   const handleRateSubmission = async (data: RatingFormData) => {
     if (!selectedSubmission) return;
     setIsUpdating(true);
+
     try {
-      // Assumes a backend endpoint: POST /api/submissions/:id/rate
-      // This endpoint should save the rating and feedback.
       await apiClient.post(`/submissions/${selectedSubmission._id}/rate`, {
         ratings: { overall: data.rating },
         feedback: data.feedback,
       });
-      // Update local state to reflect the new rating
-      setSubmissions((prev) =>
-        prev.map((sub) =>
-          sub._id === selectedSubmission._id
-            ? {
-                ...sub,
-                ratings: { overall: data.rating },
-                feedback: data.feedback,
-                status: "reviewed",
-              }
-            : sub
-        )
-      );
+
+      await fetchSubmissions();
       setIsRatingModalOpen(false);
     } catch (err) {
       setError(
@@ -167,12 +144,6 @@ const ReviewSubmissionsPage = () => {
     }
   };
 
-  // Functions to open modals with correct context
-  const openWinnerModal = (submission: ISubmission) => {
-    setSelectedSubmission(submission);
-    setIsWinnerModalOpen(true);
-  };
-
   const openRatingModal = (submission: ISubmission) => {
     setSelectedSubmission(submission);
     reset({
@@ -180,6 +151,10 @@ const ReviewSubmissionsPage = () => {
       feedback: submission.feedback || "",
     });
     setIsRatingModalOpen(true);
+  };
+
+  const handleCancelModal = () => {
+    setModalState({ isOpen: false, title: "", message: "" });
   };
 
   const statusStyles: { [key: string]: string } = {
@@ -199,7 +174,6 @@ const ReviewSubmissionsPage = () => {
   return (
     <>
       <div className="max-w-6xl w-full mx-auto py-10 px-4">
-        {/* Header */}
         <div className="mb-8">
           <h1 className="text-4xl font-bold">{challengeTitle}</h1>
           <p className="text-base-content/70 mt-1">
@@ -215,7 +189,6 @@ const ReviewSubmissionsPage = () => {
           </div>
         )}
 
-        {/* Filter and Sort Controls */}
         <div className="flex justify-between items-center bg-base-200 p-4 rounded-lg mb-6">
           <div className="grid grid-cols-2 gap-4">
             <div className="grid gap-2">
@@ -246,7 +219,6 @@ const ReviewSubmissionsPage = () => {
           </div>
         </div>
 
-        {/* Submissions Table Card */}
         <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
           {filteredAndSortedSubmissions.length === 0 ? (
             <div className="p-8 text-center text-base-content/70">

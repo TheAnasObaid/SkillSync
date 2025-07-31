@@ -12,7 +12,7 @@ interface Props {
 const DeveloperSubmissionList = ({ submissions }: Props) => {
   const statusStyles: { [key: string]: string } = {
     pending: "badge-info",
-    reviewed: "badge-ghost",
+    reviewed: "badge-warning",
     winner: "badge-success",
     rejected: "badge-error",
   };
@@ -63,7 +63,7 @@ const DeveloperSubmissionList = ({ submissions }: Props) => {
                 </div>
                 <Link
                   href={`/challenges/${sub.challengeId._id}`}
-                  className="btn btn-outline btn-sm"
+                  className="btn btn-soft btn-sm"
                 >
                   View Challenge <FiExternalLink className="ml-2" />
                 </Link>
