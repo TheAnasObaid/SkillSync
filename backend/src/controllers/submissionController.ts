@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import mongoose from "mongoose";
+import mongoose, { Types } from "mongoose";
 import { AuthenticatedRequest } from "../middleware/auth";
 import upload from "../middleware/upload";
 import Challenge from "../models/Challenge";
@@ -20,34 +20,61 @@ export const submitToChallenge = asyncHandler(
         return;
       }
 
-      const { challengeId } = req.params;
-      const { githubRepo, liveDemo, description } = req.body;
+      const session = await mongoose.startSession();
+      session.startTransaction();
 
-      if (!githubRepo || !description) {
-        res
-          .status(400)
-          .json({ message: "GitHub repository and description are required." });
-        return;
-      }
+      try {
+        const { challengeId } = req.params;
+        const { githubRepo, liveDemo, description } = req.body;
 
-      const submissionData = {
-        challengeId: challengeId,
-        developerId: req.userId,
-        githubRepo,
-        liveDemo,
-        description,
-        files: [] as { name: string; path: string }[],
-      };
+        if (!githubRepo || !description) {
+          throw new Error("GitHub repo and description are required.");
+        }
 
-      if (req.file) {
-        submissionData.files.push({
-          name: req.file.originalname,
-          path: req.file.path,
+        const challenge = await Challenge.findById(challengeId).session(
+          session
+        );
+        if (!challenge) {
+          throw new Error("Challenge not found.");
+        }
+
+        if (challenge.deadline < new Date()) {
+          throw new Error("The deadline for this challenge has passed.");
+        }
+
+        const submissionData = {
+          challengeId,
+          developerId: req.userId,
+          githubRepo,
+          liveDemo,
+          description,
+          files: req.file
+            ? [{ name: req.file.originalname, path: req.file.path }]
+            : [],
+        };
+
+        const newSubmissionArray = await Submission.create([submissionData], {
+          session,
         });
-      }
+        const newSubmission = newSubmissionArray[0];
 
-      const submission = await Submission.create(submissionData);
-      res.status(201).json(submission);
+        challenge.submissions.push(newSubmission._id as Types.ObjectId);
+        await challenge.save({ session });
+
+        await session.commitTransaction();
+
+        res.status(201).json(newSubmission);
+      } catch (error: any) {
+        await session.abortTransaction();
+        console.error("Submission Error:", error);
+        res.status(400).json({
+          message:
+            error.message ||
+            "An internal server error occurred during submission.",
+        });
+      } finally {
+        session.endSession();
+      }
     });
   }
 );
