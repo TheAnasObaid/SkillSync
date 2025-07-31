@@ -212,162 +212,156 @@ const DeveloperProfilePage = () => {
 
   return (
     <>
-      <DashboardLayout sidebarLinks={developerSidebarLinks}>
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold">Developer Profile</h2>
-          <button
-            className="btn btn-ghost"
-            onClick={() => setIsEditMode(!isEditMode)}
-          >
-            {isEditMode ? (
-              <>
-                <FiX /> Cancel
-              </>
-            ) : (
-              <>
-                <FiEdit /> Edit Profile
-              </>
-            )}
-          </button>
-        </div>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-3xl font-bold">Developer Profile</h2>
+        <button
+          className="btn btn-ghost"
+          onClick={() => setIsEditMode(!isEditMode)}
+        >
+          {isEditMode ? (
+            <>
+              <FiX /> Cancel
+            </>
+          ) : (
+            <>
+              <FiEdit /> Edit Profile
+            </>
+          )}
+        </button>
+      </div>
 
-        {error && <div className="alert alert-error mb-6">{error}</div>}
+      {error && <div className="alert alert-error mb-6">{error}</div>}
 
-        {isEditMode ? (
-          <ProfileEditForm
-            onSubmit={handleSubmit(handleFormSubmit)}
-            isSubmitting={isSubmitting}
-          >
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <fieldset className="fieldset">
-                  <legend className="fieldset-legend">First Name</legend>
-                  <input
-                    type="text"
-                    className="input w-full bg-transparent focus:outline-none"
-                    {...register("name", {
-                      required: "First name is required",
-                    })}
-                  />
-                </fieldset>
-                {errors.name && (
-                  <p className="text-error text-xs mt-1">
-                    {errors.name.message}
-                  </p>
-                )}
-              </div>
-              <div>
-                <fieldset className="fieldset">
-                  <legend className="fieldset-legend">Last Name</legend>
-                  <input
-                    type="text"
-                    className="input w-full bg-transparent focus:outline-none"
-                    {...register("profile.lastName")}
-                  />
-                </fieldset>
-              </div>
-            </div>
+      {isEditMode ? (
+        <ProfileEditForm
+          onSubmit={handleSubmit(handleFormSubmit)}
+          isSubmitting={isSubmitting}
+        >
+          <div className="grid md:grid-cols-2 gap-6">
             <div>
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">Email Address</legend>
+                <legend className="fieldset-legend">First Name</legend>
                 <input
-                  type="email"
+                  type="text"
                   className="input w-full bg-transparent focus:outline-none"
-                  {...register("email", { required: "Email is required" })}
+                  {...register("name", {
+                    required: "First name is required",
+                  })}
                 />
               </fieldset>
-              {errors.email && (
-                <p className="text-error text-xs mt-1">
-                  {errors.email.message}
-                </p>
+              {errors.name && (
+                <p className="text-error text-xs mt-1">{errors.name.message}</p>
               )}
             </div>
             <div>
               <fieldset className="fieldset">
-                <legend className="fieldset-legend">Bio</legend>
-                <textarea
-                  className="textarea w-full bg-transparent focus:outline-none h-24"
-                  {...register("profile.bio")}
-                ></textarea>
-              </fieldset>
-            </div>
-            <div>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Skills</legend>
+                <legend className="fieldset-legend">Last Name</legend>
                 <input
                   type="text"
                   className="input w-full bg-transparent focus:outline-none"
-                  placeholder="React, Node.js, Python"
-                  {...register("profile.skills")}
+                  {...register("profile.lastName")}
                 />
               </fieldset>
-              <p className="text-xs text-base-content/60 mt-2">
-                Enter skills separated by commas.
-              </p>
             </div>
-            <div>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Experience Level</legend>
-                <select
-                  className="select select-bordered w-full bg-transparent focus:outline-none"
-                  {...register("profile.experience")}
-                >
-                  <option value="">Select Level</option>
-                  <option value="Beginner">Beginner</option>
-                  <option value="Intermediate">Intermediate</option>
-                  <option value="Advanced">Advanced</option>
-                  <option value="Expert">Expert</option>
-                </select>
-              </fieldset>
-            </div>
-          </ProfileEditForm>
-        ) : (
-          <>
-            <ProfileView
-              user={user}
-              onAvatarClick={() => avatarInputRef.current?.click()}
-            />
-
-            <input
-              type="file"
-              ref={avatarInputRef}
-              onChange={handleAvatarUpload}
-              className="hidden"
-              accept="image/png, image/jpeg, image/gif"
-            />
-          </>
-        )}
-
-        <div className="mt-12">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-2xl font-bold">My Portfolio</h2>
-            <button
-              className="btn btn-primary btn-sm"
-              onClick={() => setIsPortfolioModalOpen(true)}
-            >
-              <FiPlus /> Add Project
-            </button>
           </div>
-          {portfolio.length > 0 ? (
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {portfolio.map((item) => (
-                <PortfolioCard
-                  key={item._id}
-                  item={item}
-                  onDelete={() => handleDeletePortfolioItem(item)} // Pass the item to the handler
-                  isOwner={true}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center p-12 bg-base-200/50 border border-dashed border-base-300 rounded-lg">
-              <p className="text-base-content/60">
-                Your portfolio is empty. Add a project to showcase your skills!
-              </p>
-            </div>
-          )}
+          <div>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Email Address</legend>
+              <input
+                type="email"
+                className="input w-full bg-transparent focus:outline-none"
+                {...register("email", { required: "Email is required" })}
+              />
+            </fieldset>
+            {errors.email && (
+              <p className="text-error text-xs mt-1">{errors.email.message}</p>
+            )}
+          </div>
+          <div>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Bio</legend>
+              <textarea
+                className="textarea w-full bg-transparent focus:outline-none h-24"
+                {...register("profile.bio")}
+              ></textarea>
+            </fieldset>
+          </div>
+          <div>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Skills</legend>
+              <input
+                type="text"
+                className="input w-full bg-transparent focus:outline-none"
+                placeholder="React, Node.js, Python"
+                {...register("profile.skills")}
+              />
+            </fieldset>
+            <p className="text-xs text-base-content/60 mt-2">
+              Enter skills separated by commas.
+            </p>
+          </div>
+          <div>
+            <fieldset className="fieldset">
+              <legend className="fieldset-legend">Experience Level</legend>
+              <select
+                className="select select-bordered w-full bg-transparent focus:outline-none"
+                {...register("profile.experience")}
+              >
+                <option value="">Select Level</option>
+                <option value="Beginner">Beginner</option>
+                <option value="Intermediate">Intermediate</option>
+                <option value="Advanced">Advanced</option>
+                <option value="Expert">Expert</option>
+              </select>
+            </fieldset>
+          </div>
+        </ProfileEditForm>
+      ) : (
+        <>
+          <ProfileView
+            user={user}
+            onAvatarClick={() => avatarInputRef.current?.click()}
+          />
+
+          <input
+            type="file"
+            ref={avatarInputRef}
+            onChange={handleAvatarUpload}
+            className="hidden"
+            accept="image/png, image/jpeg, image/gif"
+          />
+        </>
+      )}
+
+      <div className="mt-12">
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold">My Portfolio</h2>
+          <button
+            className="btn btn-primary btn-sm"
+            onClick={() => setIsPortfolioModalOpen(true)}
+          >
+            <FiPlus /> Add Project
+          </button>
         </div>
-      </DashboardLayout>
+        {portfolio.length > 0 ? (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {portfolio.map((item) => (
+              <PortfolioCard
+                key={item._id}
+                item={item}
+                onDelete={() => handleDeletePortfolioItem(item)} // Pass the item to the handler
+                isOwner={true}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center p-12 bg-base-200/50 border border-dashed border-base-300 rounded-lg">
+            <p className="text-base-content/60">
+              Your portfolio is empty. Add a project to showcase your skills!
+            </p>
+          </div>
+        )}
+      </div>
 
       <ConfirmationModal
         isOpen={modalState.isOpen}

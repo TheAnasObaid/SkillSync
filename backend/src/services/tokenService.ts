@@ -1,6 +1,6 @@
 import jwt from "jsonwebtoken";
-import { Types } from "mongoose";
 import appConfig from "../config/config";
+import { IUser } from "../types";
 
 const JWT_SECRET = appConfig.jwtSecret!;
 const JWT_EXPIRES_IN = "7d";
@@ -10,8 +10,8 @@ const JWT_EXPIRES_IN = "7d";
  * @param userId The ID of the user.
  * @returns The generated JWT.
  */
-export const generateToken = (userId: Types.ObjectId | string): string => {
-  return jwt.sign({ id: userId.toString() }, JWT_SECRET, {
+export const generateToken = (user: IUser): string => {
+  return jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN,
   });
 };

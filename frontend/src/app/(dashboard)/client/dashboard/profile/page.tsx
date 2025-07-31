@@ -1,9 +1,7 @@
 "use client";
 
-import DashboardLayout from "@/components/Layout/DashboardLayout";
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
-import { clientSidebarLinks } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
 import { IUser } from "@/types";
 import { AxiosError } from "axios";
@@ -109,7 +107,7 @@ function ClientProfilePage() {
   }, [isEditMode, user, reset]);
 
   return (
-    <DashboardLayout sidebarLinks={clientSidebarLinks}>
+    <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold">Client Profile</h2>
         <button
@@ -201,7 +199,7 @@ function ClientProfilePage() {
           />
         </>
       )}
-    </DashboardLayout>
+    </>
   );
 }
 
