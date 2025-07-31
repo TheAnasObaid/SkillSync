@@ -5,11 +5,11 @@ import { getChallengeById } from "@/services/server/challengeService";
 import { IChallenge } from "@/types";
 
 interface EditChallengePageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const EditChallengePage = async ({ params }: EditChallengePageProps) => {
-  const { id } = params;
+  const { id } = await params;
   const challenge = await getChallengeById(id);
 
   if (!challenge) {

@@ -3,15 +3,13 @@
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
-import { clientSidebarLinks, DashboardLink } from "@/config/dashboard";
+import { clientSidebarLinks } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
 import { IUser } from "@/types";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { BsGrid } from "react-icons/bs";
-import { FiArchive, FiEdit, FiUser, FiX } from "react-icons/fi";
-import { GoPlusCircle } from "react-icons/go";
+import { FiEdit, FiX } from "react-icons/fi";
 
 interface ClientProfileFormData {
   name: string;
