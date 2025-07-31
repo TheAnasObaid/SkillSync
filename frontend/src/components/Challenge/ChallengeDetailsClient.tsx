@@ -2,8 +2,9 @@
 
 import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
 import SubmissionForm from "@/components/Submission/SubmissionForm";
+import { getPublicSubmissionsClient } from "@/services/client/submissionService";
 import { useAuthStore } from "@/store/authStore";
-import { IChallenge } from "@/types";
+import { IChallenge, ISubmission } from "@/types";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import {
@@ -17,7 +18,8 @@ import {
 } from "react-icons/fi";
 
 interface Props {
-  challenge: IChallenge;
+  initialChallenge: IChallenge;
+  initialSubmissions: ISubmission[];
 }
 
 const CtaBlock = ({
@@ -56,28 +58,34 @@ const CtaBlock = ({
   );
 };
 
-const ChallengeDetailsPage = ({ challenge }: Props) => {
+const ChallengeDetailsPage = ({
+  initialChallenge,
+  initialSubmissions,
+}: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<"description" | "submissions">(
     "description"
   );
-  const [submissionCount, setSubmissionCount] = useState(0);
   const [hasMounted, setHasMounted] = useState(false);
   const { user } = useAuthStore();
+  const [challenge, setChallenge] = useState(initialChallenge);
+  const [submissions, setSubmissions] = useState(initialSubmissions);
+
+  const submissionCount = submissions.length;
 
   useEffect(() => {
     setHasMounted(true);
   }, []);
-
-  if (!challenge) return;
 
   const handleModalClose = () => {
     setIsModalOpen(false);
     setTimeout(() => setSubmissionSuccess(false), 300);
   };
 
-  const formattedDeadline = new Date(challenge.deadline).toLocaleDateString();
+  const formattedDeadline = new Date(
+    initialChallenge.deadline
+  ).toLocaleDateString();
   const difficultyStyles = {
     beginner: "badge-success",
     intermediate: "badge-warning",
@@ -128,8 +136,8 @@ const ChallengeDetailsPage = ({ challenge }: Props) => {
             )}
             {activeTab === "submissions" && (
               <PublicSubmissionList
-                challengeId={challenge._id}
-                onCountChange={setSubmissionCount}
+                submissions={submissions}
+                isLoading={false}
               />
             )}
           </div>

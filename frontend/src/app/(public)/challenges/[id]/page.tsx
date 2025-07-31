@@ -1,29 +1,37 @@
 import ChallengeDetailsClient from "@/components/Challenge/ChallengeDetailsClient";
 import { getChallengeById } from "@/services/server/challengeService";
-import { IChallenge } from "@/types";
+import { getPublicSubmissionsServer } from "@/services/server/submissionService";
+import { IChallenge, ISubmission } from "@/types";
 
-interface Props {
-  params: Promise<{ id: string }>;
+interface ChallengePageProps {
+  params: { id: string };
 }
 
-const ChallengeDetailsPage = async ({ params }: Props) => {
-  const { id } = await params;
-  let challenge: IChallenge | null = null;
+const ChallengeDetailsPage = async ({ params }: ChallengePageProps) => {
+  const { id } = params;
+
+  let initialChallenge: IChallenge | null = null;
+  let initialSubmissions: ISubmission[] = [];
   let error: string | null = null;
 
-  // Fetch data on the server
   try {
-    challenge = await getChallengeById(id);
-    if (!challenge) {
+    const [challengeData, submissionsData] = await Promise.all([
+      getChallengeById(id),
+      getPublicSubmissionsServer(id),
+    ]);
+
+    if (!challengeData) {
       error = "Challenge not found.";
+    } else {
+      initialChallenge = challengeData;
+      initialSubmissions = submissionsData;
     }
   } catch (err) {
-    console.error(`Failed to fetch challenge ${id}:`, err);
+    console.error(`Failed to fetch data for challenge ${id}:`, err);
     error = "Failed to load challenge details.";
   }
 
-  // Handle the error state
-  if (error || !challenge) {
+  if (error || !initialChallenge) {
     return (
       <div className="alert alert-error max-w-xl mx-auto my-10">
         <p>{error || "An unexpected error occurred."}</p>
@@ -31,8 +39,12 @@ const ChallengeDetailsPage = async ({ params }: Props) => {
     );
   }
 
-  // On success, render the Client Component and pass the data to it
-  return <ChallengeDetailsClient challenge={challenge} />;
+  return (
+    <ChallengeDetailsClient
+      initialChallenge={initialChallenge}
+      initialSubmissions={initialSubmissions}
+    />
+  );
 };
 
 export default ChallengeDetailsPage;

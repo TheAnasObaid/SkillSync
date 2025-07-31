@@ -1,13 +1,10 @@
 import apiClient from "@/lib/apiClient";
 import { ISubmission, PublicSubmission } from "@/types";
 
-// --- CLIENT-SIDE FUNCTIONS ---
-
 export const getPublicSubmissionsClient = async (
   challengeId: string
 ): Promise<PublicSubmission[]> => {
   try {
-    // This uses the client-side apiClient
     const response = await apiClient.get(
       `/submissions/challenge/${challengeId}`
     );

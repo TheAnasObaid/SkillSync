@@ -110,6 +110,17 @@ export interface PublicSubmission {
   githubRepo: string;
   liveDemo?: string;
   description: string;
+  challengeId:
+    | string
+    | {
+        _id: string;
+        title: string;
+        status: string;
+        prize?: number;
+      };
+  status: SubmissionStatus;
+  files: File[];
+  updatedAt: string;
   developerId: {
     _id: string;
     profile: {
