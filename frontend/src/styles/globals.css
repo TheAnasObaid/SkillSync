@@ -1,19 +1,19 @@
 @import "tailwindcss";
-@plugin "daisyui";
-
+@plugin "daisyui" {
+  themes: all;
+}
+/* 
 @plugin "daisyui/theme" {
   name: "skillsync-pro";
   default: true;
   prefersdark: true;
   color-scheme: "dark";
-  --color-base-100: oklch(14.9% 0 0); /* Black */
+  --color-base-100: oklch(14.9% 0 0);
   --color-base-200: oklch(20% 0 0);
   --color-base-300: oklch(25% 0 0);
-  --color-base-content: oklch(95% 0 0); /* Off-White */
-  --color-primary: oklch(85.64% 0.28 153.9); /* Vibrant Green */
-  --color-primary-content: oklch(
-    14.9% 0 0
-  ); /* Black for text on green buttons */
+  --color-base-content: oklch(95% 0 0);
+  --color-primary: oklch(85.64% 0.28 153.9);
+  --color-primary-content: oklch(14.9% 0 0);
   --color-secondary: oklch(30% 0 0);
   --color-secondary-content: oklch(95% 0 0);
   --color-accent: oklch(85.64% 0.28 153.9);
@@ -36,55 +36,7 @@
   --border: 1px;
   --depth: 0;
   --noise: 0;
-}
-
-/* Remove below them */
-
-@plugin "daisyui/theme" {
-  name: "skillsync-lol";
-  prefersdark: false;
-  color-scheme: "light";
-
-  --color-base-100: oklch(97% 0.01 270);
-  --color-base-200: oklch(93% 0.01 270);
-  --color-base-300: oklch(87% 0.01 270);
-  --color-base-content: oklch(15% 0.02 270);
-
-  --color-primary: oklch(88% 0.12 260);
-  --color-primary-content: oklch(10% 0.01 270);
-
-  --color-secondary: oklch(90% 0.1 20);
-  --color-secondary-content: oklch(10% 0.01 270);
-
-  --color-accent: oklch(86% 0.13 140);
-  --color-accent-content: oklch(10% 0.01 270);
-
-  --color-neutral: oklch(94% 0.01 270);
-  --color-neutral-content: oklch(20% 0.02 270);
-
-  --color-info: oklch(88% 0.14 250);
-  --color-info-content: oklch(15% 0.02 270);
-
-  --color-success: oklch(85% 0.12 160);
-  --color-success-content: oklch(15% 0.02 270);
-
-  --color-warning: oklch(90% 0.12 90);
-  --color-warning-content: oklch(15% 0.02 270);
-
-  --color-error: oklch(80% 0.15 10);
-  --color-error-content: oklch(98% 0.01 90);
-
-  --radius-selector: 0.125rem;
-  --radius-field: 0.25rem;
-  --radius-box: 0.25rem;
-
-  --size-selector: 0.15rem;
-  --size-field: 0.25rem;
-
-  --border: 1px solid oklch(65% 0.01 270);
-  --depth: 0.05;
-  --noise: 0.02;
-}
+} */
 
 @keyframes scroll-vertical {
   from {
