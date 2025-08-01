@@ -6,16 +6,16 @@ interface Props {
 }
 
 const ChallengeList = ({ challenges }: Props) => {
-  if (challenges.length === 0) {
+  if (!challenges || challenges.length === 0) {
     return (
-      <p className="text-center text-gray-500 p-10">
+      <p className="text-center text-base-content/70 p-10">
         No challenges available at the moment. Check back soon!
       </p>
     );
   }
 
   return (
-    <div className="grid gap-8">
+    <div className="space-y-8">
       {challenges.map((challenge) => (
         <ChallengeCard key={challenge._id} challenge={challenge} />
       ))}

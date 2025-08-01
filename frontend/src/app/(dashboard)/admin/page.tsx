@@ -1,40 +1,12 @@
-import StatCard from "@/components/Admin/StatCard";
-import { getPlatformStats } from "@/services/server/adminService";
+import StatCardGrid from "@/components/Admin/StatCardGrid";
 import Link from "next/link";
-import { FiArchive, FiCheckSquare, FiClipboard, FiUsers } from "react-icons/fi";
+import { FiClipboard, FiUsers } from "react-icons/fi";
 
 const AdminPanelPage = async () => {
-  const stats = await getPlatformStats();
-
   return (
     <div className="space-y-8">
       <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-
-      {stats && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <StatCard
-            icon={<FiUsers size={32} />}
-            label="Total Users"
-            value={stats.totalUsers}
-          />
-          <StatCard
-            icon={<FiArchive size={32} />}
-            label="Total Challenges"
-            value={stats.totalChallenges}
-          />
-          <StatCard
-            icon={<FiCheckSquare size={32} />}
-            label="Completed Challenges"
-            value={stats.completedChallenges}
-          />
-          <StatCard
-            icon={<FiClipboard size={32} />}
-            label="Pending Submissions"
-            value={stats.pendingSubmissions}
-          />
-        </div>
-      )}
-
+      <StatCardGrid />
       <div className="card bg-base-200/50 border border-base-300">
         <div className="card-body">
           <h2 className="card-title text-2xl">Management Actions</h2>
