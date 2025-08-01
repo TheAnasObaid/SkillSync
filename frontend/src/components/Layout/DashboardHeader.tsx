@@ -5,10 +5,9 @@ import { useAuthStore } from "@/store/authStore";
 import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import UserAvatar from "../Profile/UserAvatar";
-import NotificationBell from "./NotificationBell";
 import ConfirmationModal from "../Common/ConfirmationModal";
+import { useEffect, useState } from "react";
 import ProfileDropdown from "../Common/ProfileDropdown";
 
 const spaceMono = Space_Mono({
@@ -18,9 +17,9 @@ const spaceMono = Space_Mono({
   variable: "--font-space-mono",
 });
 
-const Header = () => {
-  const pathname = usePathname();
+const DashboardHeader = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { token, user, logout } = useAuthStore();
   const [isClient, setIsClient] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -51,13 +50,6 @@ const Header = () => {
           </div>
 
           <div className="navbar-end flex items-center gap-4">
-            <Link
-              href="/challenges"
-              className="btn btn-ghost btn-sm hidden md:inline-flex"
-            >
-              Challenges
-            </Link>
-
             {isClient && (
               <>
                 {token && user ? (
@@ -69,12 +61,12 @@ const Header = () => {
                 ) : (
                   <nav className="flex items-center gap-2">
                     {pathname !== "/login" && (
-                      <Link href="/login" className="btn btn-secondary btn-sm">
+                      <Link href="/login" className="btn btn-primary btn-sm">
                         Sign In
                       </Link>
                     )}
                     {pathname !== "/register" && (
-                      <Link href="/register" className="btn btn-primary btn-sm">
+                      <Link href="/register" className="btn btn-ghost btn-sm">
                         Sign Up
                       </Link>
                     )}
@@ -99,4 +91,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default DashboardHeader;

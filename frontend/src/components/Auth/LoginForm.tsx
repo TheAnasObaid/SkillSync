@@ -1,6 +1,7 @@
 "use client";
 
 import apiClient from "@/lib/apiClient";
+import { getDashboardPath } from "@/lib/helper";
 import { LoginFormData, loginSchema } from "@/lib/validationSchemas";
 import { useAuthStore } from "@/store/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,21 +10,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-
-export const getDashboardPath = (
-  role: "client" | "developer" | "admin" | null
-): string => {
-  switch (role) {
-    case "admin":
-      return "/admin";
-    case "developer":
-      return "/developer/dashboard";
-    case "client":
-      return "/client/dashboard";
-    default:
-      return "/";
-  }
-};
 
 const LoginForm = () => {
   const router = useRouter();

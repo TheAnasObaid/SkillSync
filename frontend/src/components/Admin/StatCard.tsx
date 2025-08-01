@@ -4,7 +4,7 @@ interface Props {
   value: number | string;
 }
 
-const StatCard = ({ icon, label, value }: Props) => {
+const AdminStatCard = ({ icon, label, value }: Props) => {
   return (
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
       <div className="card-body flex-row items-center gap-4">
@@ -18,4 +18,4 @@ const StatCard = ({ icon, label, value }: Props) => {
   );
 };
 
-export default StatCard;
+export default AdminStatCard;

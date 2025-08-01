@@ -1,3 +1,4 @@
+import DashboardHeader from "@/components/Layout/DashboardHeader";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import {
   adminSidebarLinks,
@@ -49,7 +50,10 @@ const DashboardsLayout = async ({ children }: Props) => {
   }
 
   return (
-    <DashboardLayout sidebarLinks={sidebarLinks}>{children}</DashboardLayout>
+    <>
+      <DashboardHeader />
+      <DashboardLayout sidebarLinks={sidebarLinks}>{children}</DashboardLayout>
+    </>
   );
 };
 

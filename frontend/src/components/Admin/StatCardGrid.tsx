@@ -1,5 +1,5 @@
 import { FiArchive, FiCheckSquare, FiClipboard, FiUsers } from "react-icons/fi";
-import StatCard from "./StatCard";
+import AdminStatCard from "./StatCard";
 import { PlatformStats } from "@/types";
 
 interface Props {
@@ -20,22 +20,22 @@ const StatCardGrid = async ({ stats }: Props) => {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      <StatCard
+      <AdminStatCard
         icon={<FiUsers size={32} />}
         label="Total Users"
         value={stats.totalUsers}
       />
-      <StatCard
+      <AdminStatCard
         icon={<FiArchive size={32} />}
         label="Total Challenges"
         value={stats.totalChallenges}
       />
-      <StatCard
+      <AdminStatCard
         icon={<FiCheckSquare size={32} />}
         label="Completed Challenges"
         value={stats.completedChallenges}
       />
-      <StatCard
+      <AdminStatCard
         icon={<FiClipboard size={32} />}
         label="Pending Submissions"
         value={stats.pendingSubmissions}
