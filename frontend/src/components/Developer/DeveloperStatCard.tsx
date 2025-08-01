@@ -1,6 +1,6 @@
 import { DeveloperStats } from "@/types";
 import { FiAward, FiClipboard, FiClock } from "react-icons/fi";
-import AdminStatCard from "../Admin/StatCard";
+import AdminStatCard from "../Admin/AdminStatCard";
 
 interface Props {
   stats: DeveloperStats;

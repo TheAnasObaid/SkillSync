@@ -1,5 +1,5 @@
 import { FiArchive, FiCheckSquare, FiClipboard } from "react-icons/fi";
-import AdminStatCard from "../Admin/StatCard";
+import AdminStatCard from "../Admin/AdminStatCard";
 import { ClientStats } from "@/types";
 
 interface Props {
