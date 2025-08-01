@@ -1,7 +1,7 @@
 "use client";
 
-import { LoginFormData, loginSchema } from "@/lib/validationSchemas";
 import apiClient from "@/lib/apiClient";
+import { LoginFormData, loginSchema } from "@/lib/validationSchemas";
 import { useAuthStore } from "@/store/authStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import axios, { AxiosError } from "axios";

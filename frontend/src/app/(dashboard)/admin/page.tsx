@@ -1,12 +1,15 @@
 import StatCardGrid from "@/components/Admin/StatCardGrid";
+import { getPlatformStats } from "@/services/server/adminService";
 import Link from "next/link";
 import { FiClipboard, FiUsers } from "react-icons/fi";
 
 const AdminPanelPage = async () => {
+  const stats = await getPlatformStats();
+
   return (
     <div className="space-y-8">
       <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-      <StatCardGrid />
+      {stats && <StatCardGrid stats={stats} />}
       <div className="card bg-base-200/50 border border-base-300">
         <div className="card-body">
           <h2 className="card-title text-2xl">Management Actions</h2>

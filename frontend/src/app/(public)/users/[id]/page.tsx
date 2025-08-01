@@ -1,5 +1,6 @@
 import PortfolioList from "@/components/Profile/PortfolioList";
 import ProfileView from "@/components/Profile/ProfileView";
+import Reputation from "@/components/Profile/Reputation";
 import { getPublicUserProfile } from "@/services/server/userService";
 import { FiAward } from "react-icons/fi";
 
@@ -23,35 +24,9 @@ const UserProfilePage = async ({ params }: Props) => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-12 px-4 space-y-12">
+    <div className="max-w-4xl w-full mx-auto py-12 px-4 space-y-12">
       <ProfileView user={user} />
-
-      <div className="card bg-base-200/50 border border-base-300">
-        <div className="card-body">
-          <h3 className="card-title text-xl mb-4 flex items-center gap-2">
-            <FiAward /> Reputation
-          </h3>
-          <div className="stats stats-vertical lg:stats-horizontal shadow bg-transparent">
-            <div className="stat">
-              <div className="stat-title">Avg. Rating</div>
-              <div className="stat-value text-primary">
-                {user.reputation?.rating.toFixed(1) || "N/A"} ★
-              </div>
-              <div className="stat-desc">
-                From {user.reputation?.completedChallenges || 0} reviews
-              </div>
-            </div>
-            <div className="stat">
-              <div className="stat-title">Challenges Won</div>
-              <div className="stat-value text-secondary">
-                {user.reputation?.completedChallenges || 0}
-              </div>
-              <div className="stat-desc">Total successful projects</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
+      <Reputation user={user} />
       <PortfolioList
         initialPortfolio={user.profile?.portfolio || []}
         profileOwnerId={user._id}

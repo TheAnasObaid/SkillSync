@@ -1,10 +1,12 @@
-import { getPlatformStats } from "@/services/server/adminService";
 import { FiArchive, FiCheckSquare, FiClipboard, FiUsers } from "react-icons/fi";
 import StatCard from "./StatCard";
+import { PlatformStats } from "@/types";
 
-const StatCardGrid = async () => {
-  const stats = await getPlatformStats();
+interface Props {
+  stats: PlatformStats | null;
+}
 
+const StatCardGrid = async ({ stats }: Props) => {
   if (!stats) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">

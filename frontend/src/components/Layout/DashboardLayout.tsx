@@ -15,8 +15,11 @@ const DashboardLayout = ({ children, sidebarLinks }: Props) => {
 
   return (
     <div className="min-h-screen md:grid md:grid-cols-[250px_1fr]">
-      <aside className="hidden md:flex flex-col p-4">
-        <Link href="/" className="btn btn-ghost w-fit justify-start mb-4">
+      <aside className="hidden md:flex flex-col p-4 border-base-300">
+        <Link
+          href="/"
+          className="btn btn-ghost justify-start mb-4 w-fit text-base-content/50"
+        >
           <IoReturnUpBack size={20} />
         </Link>
         <ul className="menu menu-vertical gap-2 flex-grow">
@@ -33,6 +36,7 @@ const DashboardLayout = ({ children, sidebarLinks }: Props) => {
           ))}
         </ul>
       </aside>
+
       <main className="p-4 md:p-8">{children}</main>
 
       <nav className="dock md:hidden">

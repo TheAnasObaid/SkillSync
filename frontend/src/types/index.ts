@@ -15,6 +15,7 @@ export interface PortfolioItem {
   imageUrl: string;
   liveUrl?: string;
   githubUrl?: string;
+  portfolioImage: FileList;
 }
 
 // This represents the USER data object as it exists in JSON

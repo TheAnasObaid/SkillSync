@@ -53,7 +53,7 @@ function ClientProfilePage() {
     if (!file) return;
 
     const formData = new FormData();
-    formData.append("file", file); // 'file' must match the name in the multer config
+    formData.append("file", file);
 
     try {
       const response = await apiClient.post("/users/me/avatar", formData, {
@@ -61,7 +61,6 @@ function ClientProfilePage() {
           "Content-Type": "multipart/form-data",
         },
       });
-      // Update the user in the global store to reflect the new avatar
       setUser({
         ...user!,
         profile: { ...user!.profile!, avatar: response.data.avatarUrl },
