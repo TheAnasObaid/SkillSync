@@ -1,45 +1,55 @@
-import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
 import { IUser } from "@/types";
 import axios from "axios";
+import { create } from "zustand";
 
-interface AuthState {
+type AuthState = {
   token: string | null;
   user: IUser | null;
-}
-
-interface AuthActions {
-  setToken: (token: string) => void;
+  loading: boolean;
+  setToken: (token: string | null) => void;
   setUser: (user: IUser) => void;
+  setLoading: (loading: boolean) => void;
   logout: () => void;
-}
+};
 
-export const useAuthStore = create<AuthState & AuthActions>()(
-  persist(
-    (set, get) => ({
-      token: null,
-      user: null,
+const getInitialUser = (): IUser | null => {
+  if (typeof window === "undefined") return null;
+  const storedUser = localStorage.getItem("authUser");
+  return storedUser ? JSON.parse(storedUser) : null;
+};
 
-      setToken: (token: string) => {
-        set({ token });
-      },
+export const useAuthStore = create<AuthState>((set) => ({
+  token:
+    typeof window !== "undefined" ? localStorage.getItem("authToken") : null,
+  user: getInitialUser(),
+  loading: true,
 
-      setUser: (user: IUser) => {
-        set({ user });
-      },
-
-      logout: () => {
-        axios.post("/api/auth", { token: null });
-        set({ token: null, user: null });
-      },
-    }),
-    {
-      name: "auth-storage",
-      storage: createJSONStorage(() => localStorage),
-
-      onRehydrateStorage: (state) => {
-        console.log("Zustand store has been rehydrated from localStorage.");
-      },
+  setToken: (token) => {
+    if (typeof window !== "undefined") {
+      token
+        ? localStorage.setItem("authToken", token)
+        : localStorage.removeItem("authToken");
     }
-  )
-);
+    set({ token });
+  },
+
+  setUser: (user) => {
+    if (typeof window !== "undefined") {
+      user
+        ? localStorage.setItem("authUser", JSON.stringify(user))
+        : localStorage.removeItem("authUser");
+    }
+    set({ user });
+  },
+
+  setLoading: (loading) => set({ loading }),
+
+  logout: () => {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("authToken");
+      localStorage.removeItem("authUser");
+      axios.post("/api/auth", { token: null });
+    }
+    set({ token: null, user: null });
+  },
+}));

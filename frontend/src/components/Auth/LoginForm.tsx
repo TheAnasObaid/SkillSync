@@ -13,11 +13,10 @@ import { useForm } from "react-hook-form";
 
 const LoginForm = () => {
   const router = useRouter();
+  const { setToken, setUser } = useAuthStore();
   const [error, setError] = useState("");
   const [isUnverified, setIsUnverified] = useState(false);
   const [isResending, setIsResending] = useState(false);
-
-  const { setToken, setUser } = useAuthStore.getState();
 
   const {
     register,

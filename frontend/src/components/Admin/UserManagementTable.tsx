@@ -6,7 +6,7 @@ import apiClient from "@/lib/apiClient";
 import { getAllUsersClient } from "@/services/client/adminService";
 import { useAuthStore } from "@/store/authStore";
 import { IUser } from "@/types";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { FiMoreVertical, FiSlash } from "react-icons/fi";
 
 type UserUpdateAction =
@@ -20,6 +20,7 @@ interface Props {
 
 const UserManagementTable = ({ initialUsers }: Props) => {
   const [users, setUsers] = useState<IUser[]>(initialUsers);
+  const { user: currentUser } = useAuthStore();
   const [error, setError] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
   const [modalState, setModalState] = useState<{
@@ -29,13 +30,6 @@ const UserManagementTable = ({ initialUsers }: Props) => {
     onConfirm?: () => void;
     confirmButtonClass?: string;
   }>({ isOpen: false, title: "", message: "" });
-
-  const { user: currentUser } = useAuthStore();
-
-  const [isClient, setIsClient] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const handleUpdateUser = (userId: string, updates: UserUpdateAction) => {
     const actionKeys = Object.keys(updates) as Array<keyof UserUpdateAction>;
@@ -87,7 +81,7 @@ const UserManagementTable = ({ initialUsers }: Props) => {
           <UserCard
             key={user._id}
             user={user}
-            isCurrentUser={isClient && currentUser?._id === user._id}
+            isCurrentUser={currentUser?._id === user._id}
             onUpdate={handleUpdateUser}
           />
         ))}
@@ -107,7 +101,7 @@ const UserManagementTable = ({ initialUsers }: Props) => {
           </thead>
           <tbody>
             {users.map((user) => {
-              const isCurrentUser = isClient && currentUser?._id === user._id;
+              const isCurrentUser = currentUser?._id === user._id;
               return (
                 <tr
                   key={user._id}
