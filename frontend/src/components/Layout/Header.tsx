@@ -58,6 +58,8 @@ const Header = () => {
               Challenges
             </Link>
 
+            <NotificationBell />
+
             {isClient && (
               <>
                 {token && user ? (

@@ -9,6 +9,7 @@ import UserAvatar from "../Profile/UserAvatar";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import { useEffect, useState } from "react";
 import ProfileDropdown from "../Common/ProfileDropdown";
+import NotificationBell from "./NotificationBell";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -50,6 +51,7 @@ const DashboardHeader = () => {
           </div>
 
           <div className="navbar-end flex items-center gap-4">
+            <NotificationBell />
             {isClient && (
               <>
                 {token && user ? (
