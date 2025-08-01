@@ -10,8 +10,7 @@ import {
   FiTrash2,
 } from "react-icons/fi";
 
-// The props this card will accept
-interface SubmissionCardProps {
+interface Props {
   submission: ISubmission;
   onEdit: (submission: ISubmission) => void;
   onDelete: (submission: ISubmission) => void;
@@ -24,18 +23,12 @@ const statusStyles: { [key: string]: string } = {
   rejected: "badge-error",
 };
 
-const SubmissionCard = ({
-  submission,
-  onEdit,
-  onDelete,
-}: SubmissionCardProps) => {
-  // Safely access nested data
+const SubmissionCard = ({ submission, onEdit, onDelete }: Props) => {
   const challenge =
     typeof submission.challengeId === "object" ? submission.challengeId : null;
 
-  if (!challenge) return null; // Don't render if challenge data is not populated
+  if (!challenge) return null;
 
-  // Determine if actions should be allowed
   const canTakeAction =
     submission.status === "pending" || submission.status === "reviewed";
 
