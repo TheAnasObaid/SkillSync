@@ -1,118 +1,70 @@
 "use client";
 
-import { RegisterFormData, registerSchema } from "@/lib/validationSchemas";
-import apiClient from "@/lib/apiClient";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useRegisterForm } from "@/hooks/useRegisterForm";
 
 const RegisterForm = () => {
+  const { form, isSubmitting, onSubmit } = useRegisterForm();
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-  });
-
-  const router = useRouter();
-  const [error, setError] = useState("");
-
-  const onSubmit = async (formData: RegisterFormData) => {
-    setError("");
-    try {
-      await apiClient.post("/auth/register", formData);
-      router.push(`/check-inbox?email=${formData.email}`);
-    } catch (err) {
-      if (err instanceof AxiosError) {
-        setError(err.response?.data.message || "Registration failed.");
-      } else {
-        setError("An unexpected error occurred during registration.");
-      }
-    }
-  };
+    formState: { errors },
+  } = form;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
-      {error && (
-        <div className="toast">
-          <p className="alert alert-error">{error}</p>
-        </div>
-      )}
-
-      <div className="grid gap-2">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">First Name</legend>
-          <input
-            type="text"
-            placeholder="e.g., John"
-            className="input input-bordered bg-base-200 w-full"
-            {...register("name", { required: "Name is required" })}
-          />
-        </fieldset>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+      <div className="space-y-1">
+        <label className="label text-sm font-medium">Full Name</label>
+        <input
+          type="text"
+          placeholder="e.g., John Doe"
+          className="input input-bordered w-full"
+          {...register("name")}
+        />
         {errors.name && (
-          <p className="text-error text-sm">{errors.name.message}</p>
+          <p className="text-error text-xs">{errors.name.message}</p>
         )}
       </div>
 
-      <div className="grid gap-2">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Email</legend>
-          <input
-            type="email"
-            placeholder="name@example.com"
-            className="input input-bordered bg-base-200 w-full"
-            {...register("email", { required: "Email is required" })}
-          />
-        </fieldset>
+      <div className="space-y-1">
+        <label className="label text-sm font-medium">Email</label>
+        <input
+          type="email"
+          placeholder="name@example.com"
+          className="input input-bordered w-full"
+          {...register("email")}
+        />
         {errors.email && (
-          <p className="text-error text-sm">{errors.email.message}</p>
+          <p className="text-error text-xs">{errors.email.message}</p>
         )}
       </div>
 
-      <div className="grid gap-2">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Password</legend>
-          <input
-            type="password"
-            placeholder="6+ characters"
-            className="input input-bordered bg-base-200 w-full"
-            {...register("password", {
-              required: "Password is required",
-              minLength: 6,
-            })}
-          />
-        </fieldset>
+      <div className="space-y-1">
+        <label className="label text-sm font-medium">Password</label>
+        <input
+          type="password"
+          placeholder="6+ characters"
+          className="input input-bordered w-full"
+          {...register("password")}
+        />
         {errors.password && (
-          <p className="text-error text-sm">{errors.password.message}</p>
+          <p className="text-error text-xs">{errors.password.message}</p>
         )}
       </div>
 
-      <div className="grid gap-2">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">I am a...</legend>
-          <select
-            defaultValue=""
-            className="select select-bordered bg-base-200 w-full"
-            {...register("role", { required: "Please select a role" })}
-          >
-            <option value="" disabled>
-              Select a role
-            </option>
-            <option value="developer">Developer</option>
-            <option value="client">Client</option>
-          </select>
-        </fieldset>
+      <div className="space-y-1">
+        <label className="label text-sm font-medium">I am a...</label>
+        <select className="select select-bordered w-full" {...register("role")}>
+          <option value="developer">Developer</option>
+          <option value="client">Client</option>
+        </select>
         {errors.role && (
-          <p className="text-error text-sm">{errors.role.message}</p>
+          <p className="text-error text-xs">{errors.role.message}</p>
         )}
       </div>
 
       <button
         type="submit"
-        className="btn btn-primary w-full"
+        className="btn btn-primary w-full !mt-6" // Use !mt-6 for higher specificity
         disabled={isSubmitting}
       >
         {isSubmitting ? (
