@@ -1,10 +1,10 @@
-import { PublicSubmission } from "@/types";
+import { ISubmission } from "@/types";
 import Link from "next/link";
 import { FiExternalLink, FiGithub } from "react-icons/fi";
 import UserAvatar from "../Profile/UserAvatar";
 
 interface Props {
-  submission: PublicSubmission;
+  submission: ISubmission & { isNew?: boolean };
 }
 
 const SubmissionCard = ({ submission }: Props) => {
@@ -13,7 +13,11 @@ const SubmissionCard = ({ submission }: Props) => {
 
   if (developer) {
     return (
-      <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
+      <div
+        className={`card transition-colors duration-1000 ${
+          submission.isNew ? "bg-primary/20" : "bg-base-200/50"
+        } border border-base-300 shadow-md`}
+      >
         <div className="card-body p-6">
           <div className="flex items-center gap-3">
             <Link

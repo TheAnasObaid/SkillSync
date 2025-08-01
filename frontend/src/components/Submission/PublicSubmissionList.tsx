@@ -1,9 +1,9 @@
-import { ISubmission, PublicSubmission } from "@/types";
+import { ISubmission } from "@/types";
 import { FiInbox } from "react-icons/fi";
 import SubmissionCard from "./SubmissionCard";
 
 interface Props {
-  submissions: ISubmission[];
+  submissions: (ISubmission & { isNew?: boolean })[];
   isLoading: boolean;
 }
 
@@ -31,7 +31,7 @@ const PublicSubmissionList = ({ submissions, isLoading }: Props) => {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {submissions.map((sub) => (
-        <SubmissionCard key={sub._id} submission={sub as PublicSubmission} />
+        <SubmissionCard key={sub._id} submission={sub} />
       ))}
     </div>
   );
