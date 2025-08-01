@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import apiClient from "@/lib/apiClient";
 import { useState } from "react";
 import ConfirmationModal from "../Common/ConfirmationModal";
+import EmptyState from "../Common/EmptyState";
 
 interface Props {
   challenges: IChallenge[];
@@ -56,16 +57,12 @@ const ClientChallengeList = ({ challenges }: Props) => {
 
   if (challenges.length === 0) {
     return (
-      <div className="text-center p-12 bg-base-200/50 border border-dashed border-base-300 rounded-lg">
-        <h3 className="text-xl font-bold">No Challenges Found</h3>
-        <p className="text-base-content/70 mt-2">
-          You haven't posted any challenges yet.{" "}
-          <Link href="/client/dashboard/create" className="link link-primary">
-            Create one now
-          </Link>{" "}
-          to get started!
-        </p>
-      </div>
+      <EmptyState
+        title="No Challenges Posted"
+        message="Post your first development challenge to attract top talent."
+        ctaText="Create a New Challenge"
+        ctaLink="/client/dashboard/create"
+      />
     );
   }
 
