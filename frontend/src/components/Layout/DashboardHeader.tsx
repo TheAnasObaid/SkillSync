@@ -61,12 +61,12 @@ const DashboardHeader = () => {
                 ) : (
                   <nav className="flex items-center gap-2">
                     {pathname !== "/login" && (
-                      <Link href="/login" className="btn btn-primary btn-sm">
+                      <Link href="/login" className="btn btn-secondary btn-sm">
                         Sign In
                       </Link>
                     )}
                     {pathname !== "/register" && (
-                      <Link href="/register" className="btn btn-ghost btn-sm">
+                      <Link href="/register" className="btn btn-primary btn-sm">
                         Sign Up
                       </Link>
                     )}

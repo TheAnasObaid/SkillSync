@@ -9,7 +9,7 @@ interface Props {
   color?: "green" | "blue" | "orange" | "red";
 }
 
-const AdminStatCard = ({
+const StateCard = ({
   icon,
   label,
   value,
@@ -25,26 +25,17 @@ const AdminStatCard = ({
   };
 
   return (
-    // The base card style remains consistent with our application's theme.
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:shadow-lg">
       <div className="card-body p-6">
         <div className="flex justify-between items-start">
-          {/* --- 3. IMPROVED VISUAL HIERARCHY --- */}
-          {/* The label is now smaller and positioned at the top. */}
           <p className="text-sm font-semibold text-base-content/70">{label}</p>
-          {/* The icon is now subtly styled with the theme color. */}
           <div
             className={`p-2 rounded-md bg-base-content/5 ${colorClasses[color]}`}
           >
             {icon}
           </div>
         </div>
-
-        {/* The main value is now the "hero" of the card. */}
         <p className="text-4xl font-bold mt-2">{value}</p>
-
-        {/* --- 4. OPTIONAL CALL TO ACTION --- */}
-        {/* If a `link` prop is provided, a "View all" link is rendered at the bottom. */}
         {link && (
           <div className="card-actions mt-2">
             <Link
@@ -62,4 +53,4 @@ const AdminStatCard = ({
   );
 };
 
-export default AdminStatCard;
+export default StateCard;

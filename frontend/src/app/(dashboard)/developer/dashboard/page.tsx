@@ -1,14 +1,39 @@
-import DeveloperStatCard from "@/components/Developer/DeveloperStatCard";
+import StatCardGrid, { StatItem } from "@/components/Common/StatCardGrid";
 import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionList";
 import { getMySubmissions } from "@/services/server/submissionService";
 import { getMyDeveloperStats } from "@/services/server/userService";
 import Link from "next/link";
+import { FiAward, FiClipboard, FiClock } from "react-icons/fi";
 
 const DeveloperDashboardPage = async () => {
-  const [stats, recentSubmissions] = await Promise.all([
+  const [statsData, recentSubmissions] = await Promise.all([
     getMyDeveloperStats(),
     getMySubmissions(),
   ]);
+
+  const developerStats: StatItem[] = statsData
+    ? [
+        {
+          icon: <FiClipboard size={24} />,
+          label: "Total Submissions",
+          value: statsData.totalSubmissions,
+          color: "green",
+          link: "/developer/dashboard/submissions",
+        },
+        {
+          icon: <FiAward size={24} />,
+          label: "Challenges Won",
+          value: statsData.winningSubmissions,
+          color: "blue",
+        },
+        {
+          icon: <FiClock size={24} />,
+          label: "Pending Reviews",
+          value: statsData.pendingReviews,
+          color: "orange",
+        },
+      ]
+    : [];
 
   return (
     <div className="space-y-8">
@@ -18,7 +43,9 @@ const DeveloperDashboardPage = async () => {
           Here's a summary of your activity on SkillSync.
         </p>
       </div>
-      {stats && <DeveloperStatCard stats={stats} />}
+      {statsData && (
+        <StatCardGrid stats={developerStats} loading={!statsData} />
+      )}
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Recent Submissions</h2>
