@@ -1,13 +1,10 @@
 "use client";
 
+import { useSubmissionsManager } from "@/hooks/useSubmissionsManager";
 import { ISubmission } from "@/types";
-import NoSubmissions from "./NoSubmissions";
 import ConfirmationModal from "../Common/ConfirmationModal";
+import EmptyState from "../Common/EmptyState";
 import SubmissionCard from "./SubmissionCard";
-import {
-  useSubmissionsManager,
-  EditSubmissionFormData,
-} from "@/hooks/useSubmissionsManager";
 
 const DeveloperSubmissionList = ({
   submissions,
@@ -34,7 +31,14 @@ const DeveloperSubmissionList = ({
   } = form;
 
   if (submissions.length === 0) {
-    return <NoSubmissions />;
+    return (
+      <EmptyState
+        title="No Submissions Yet"
+        message="Your journey to prove your skills starts with the first challenge."
+        ctaText="Find a Challenge to Solve"
+        ctaLink="/challenges"
+      />
+    );
   }
 
   return (
