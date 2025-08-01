@@ -1,13 +1,13 @@
 "use client";
 
-import { ChallengeFormData, challengeSchema } from "@/lib/validationSchemas";
 import apiClient from "@/lib/apiClient";
+import { ChallengeFormData, challengeSchema } from "@/lib/validationSchemas";
+import { IChallenge } from "@/types";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { IChallenge } from "@/types";
 
 interface Props {
   isEditing?: boolean;
@@ -152,7 +152,6 @@ const ChallengeForm = ({ isEditing = false, existingChallenge }: Props) => {
             <p className="text-error text-xs">{errors.category.message}</p>
           )}
         </div>
-
         <div className="grid gap-2">
           <fieldset className="fieldset">
             <legend className="fieldset-legend">Difficulty</legend>

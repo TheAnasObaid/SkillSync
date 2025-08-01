@@ -3,8 +3,8 @@ import { Request, Response } from "express";
 import User from "../models/User";
 import sendEmail from "../services/emailService";
 import { generateToken } from "../services/tokenService";
-import { LoginDto, RegisterDto } from "../utils/validationSchemas";
 import asyncHandler from "../utils/asyncHandler";
+import { LoginDto, RegisterDto } from "../utils/validationSchemas";
 
 const createStyledEmail = (
   title: string,
@@ -132,7 +132,7 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const token = generateToken(user.id);
+  const token = generateToken(user);
   const userPayload = user.toObject();
   delete userPayload.password;
 
@@ -287,7 +287,7 @@ export const resetPassword = asyncHandler(
     await user.save();
     res.status(200).json({
       status: "success",
-      token: generateToken(String(user._id)),
+      token: generateToken(user),
     });
   }
 );

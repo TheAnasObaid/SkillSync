@@ -1,17 +1,13 @@
 "use client";
 
-import DashboardLayout from "@/components/Layout/DashboardLayout";
 import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
-import { clientSidebarLinks, DashboardLink } from "@/config/dashboard";
 import apiClient from "@/lib/apiClient";
 import { IUser } from "@/types";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
-import { BsGrid } from "react-icons/bs";
-import { FiArchive, FiEdit, FiUser, FiX } from "react-icons/fi";
-import { GoPlusCircle } from "react-icons/go";
+import { FiEdit, FiX } from "react-icons/fi";
 
 interface ClientProfileFormData {
   name: string;
@@ -57,7 +53,7 @@ function ClientProfilePage() {
     if (!file) return;
 
     const formData = new FormData();
-    formData.append("file", file); // 'file' must match the name in the multer config
+    formData.append("file", file);
 
     try {
       const response = await apiClient.post("/users/me/avatar", formData, {
@@ -65,7 +61,6 @@ function ClientProfilePage() {
           "Content-Type": "multipart/form-data",
         },
       });
-      // Update the user in the global store to reflect the new avatar
       setUser({
         ...user!,
         profile: { ...user!.profile!, avatar: response.data.avatarUrl },
@@ -111,7 +106,7 @@ function ClientProfilePage() {
   }, [isEditMode, user, reset]);
 
   return (
-    <DashboardLayout sidebarLinks={clientSidebarLinks}>
+    <>
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold">Client Profile</h2>
         <button
@@ -203,7 +198,7 @@ function ClientProfilePage() {
           />
         </>
       )}
-    </DashboardLayout>
+    </>
   );
 }
 

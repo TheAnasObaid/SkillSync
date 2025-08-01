@@ -15,6 +15,7 @@ export interface PortfolioItem {
   imageUrl: string;
   liveUrl?: string;
   githubUrl?: string;
+  portfolioImage: FileList;
 }
 
 // This represents the USER data object as it exists in JSON
@@ -175,4 +176,56 @@ export interface ProfileFormData {
     skills: string;
     experience: string;
   };
+}
+
+// --- NEW TYPES FOR DASHBOARD COMPONENTS ---
+
+/**
+ * @interface StatCardProps
+ * @desc Props for the reusable StatCard component.
+ * @property {ReactNode} icon - The icon to be displayed in the card.
+ * @property {string} label - The descriptive label for the statistic.
+ * @property {number | string} value - The main value of the statistic.
+ * @property {string} [link] - Optional URL for a "call to action" link.
+ * @property {string} [linkText] - Optional text for the link (defaults to "View all").
+ * @property {'primary' | 'secondary' | 'accent' | 'success' | 'info'} [color] - Optional theme color for styling accents on the card.
+ */
+export interface StatCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: number | string;
+  link?: string;
+  linkText?: string;
+  color?: "green" | "blue" | "orange" | "red";
+}
+
+/**
+ * @interface PlatformStats
+ * @desc The shape of the statistics object for the Admin dashboard.
+ */
+export interface PlatformStats {
+  totalUsers: number;
+  totalChallenges: number;
+  completedChallenges: number;
+  pendingSubmissions: number;
+}
+
+/**
+ * @interface ClientStats
+ * @desc The shape of the statistics object for the Client dashboard.
+ */
+export interface ClientStats {
+  totalChallengesPosted: number;
+  activeChallenges: number;
+  totalSubmissionsReceived: number;
+}
+
+/**
+ * @interface DeveloperStats
+ * @desc The shape of the statistics object for the Developer dashboard.
+ */
+export interface DeveloperStats {
+  totalSubmissions: number;
+  winningSubmissions: number;
+  pendingReviews: number;
 }

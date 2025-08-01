@@ -5,11 +5,11 @@ import { useAuthStore } from "@/store/authStore";
 import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import UserAvatar from "../Profile/UserAvatar";
-import NotificationBell from "./NotificationBell";
 import ConfirmationModal from "../Common/ConfirmationModal";
+import { useEffect, useState } from "react";
 import ProfileDropdown from "../Common/ProfileDropdown";
+import NotificationBell from "./NotificationBell";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -18,9 +18,9 @@ const spaceMono = Space_Mono({
   variable: "--font-space-mono",
 });
 
-const Header = () => {
-  const pathname = usePathname();
+const DashboardHeader = () => {
   const router = useRouter();
+  const pathname = usePathname();
   const { token, user, logout } = useAuthStore();
   const [isClient, setIsClient] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
@@ -51,15 +51,7 @@ const Header = () => {
           </div>
 
           <div className="navbar-end flex items-center gap-4">
-            <Link
-              href="/challenges"
-              className="btn btn-ghost btn-sm hidden md:inline-flex"
-            >
-              Challenges
-            </Link>
-
             <NotificationBell />
-
             {isClient && (
               <>
                 {token && user ? (
@@ -101,4 +93,4 @@ const Header = () => {
   );
 };
 
-export default Header;
+export default DashboardHeader;

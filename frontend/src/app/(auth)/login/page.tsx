@@ -3,9 +3,13 @@ import { Suspense } from "react";
 
 const LoginPage = () => {
   return (
-    <Suspense fallback={<div className="loading loading-spinner" />}>
-      <LoginClientComponent />
-    </Suspense>
+    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+      <Suspense
+        fallback={<span className="loading loading-spinner loading-lg" />}
+      >
+        <LoginClientComponent />
+      </Suspense>
+    </div>
   );
 };
 

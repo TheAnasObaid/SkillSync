@@ -5,9 +5,16 @@ const Challenges = async () => {
   const challenges = await getAllChallenges();
 
   return (
-    <div className="h-screen grid max-w-5xl py-5 w-full mx-auto">
-      <div className="grid gap-5">
-        <h1 className="text-3xl text-center font-bold">Open Challenges</h1>
+    <div className="py-10">
+      <div className="space-y-5 text-center">
+        <h1 className="text-4xl font-bold">Open Challenges</h1>
+        <p className="text-base-content/70 max-w-xl mx-auto">
+          Browse the list of challenges posted by our clients. Find a project
+          that matches your skills and submit your solution to win prizes and
+          build your reputation.
+        </p>
+      </div>
+      <div className="mt-12">
         <ChallengeList challenges={challenges} />
       </div>
     </div>

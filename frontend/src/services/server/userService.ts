@@ -65,3 +65,19 @@ export const getPublicUserProfileClient = async (
     return null;
   }
 };
+
+/**
+ * @desc    Fetches the full profile of the currently authenticated user.
+ * @note    This is a SERVER-SIDE function.
+ * @returns {Promise<IUser | null>} The full user object or null if not found/error.
+ */
+export const getMyProfileServer = async (): Promise<IUser | null> => {
+  try {
+    const serverApi = await getServerApi();
+    const response = await serverApi.get("/users/me");
+    return response.data;
+  } catch (error) {
+    console.error("Service Error: getMyProfileServer failed", error);
+    return null;
+  }
+};
