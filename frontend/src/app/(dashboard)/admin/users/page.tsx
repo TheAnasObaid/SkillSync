@@ -6,7 +6,7 @@ const ManageUsersPage = async () => {
 
   return (
     <div className="grid gap-6">
-      <h1 className="text-3xl font-bold mb-6">Manage Users</h1>
+      <h1 className="text-3xl font-bold">Manage Users</h1>
       <UserManagementTable initialUsers={initialUsers} />
     </div>
   );
