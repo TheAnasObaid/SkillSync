@@ -5,9 +5,8 @@ import { useAuthStore } from "@/store/authStore";
 import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import UserAvatar from "../Profile/UserAvatar";
-import ConfirmationModal from "../Common/ConfirmationModal";
 import { useEffect, useState } from "react";
+import ConfirmationModal from "../Common/ConfirmationModal";
 import ProfileDropdown from "../Common/ProfileDropdown";
 
 const spaceMono = Space_Mono({
@@ -20,9 +19,11 @@ const spaceMono = Space_Mono({
 const DashboardHeader = () => {
   const router = useRouter();
   const pathname = usePathname();
-  const { token, user, logout } = useAuthStore();
   const [isClient, setIsClient] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const logout = useAuthStore((state) => state.logout);
+  const { token, user } = useAuthStore.getState();
 
   useEffect(() => {
     setIsClient(true);

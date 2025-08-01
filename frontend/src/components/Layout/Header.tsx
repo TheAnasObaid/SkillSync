@@ -6,8 +6,6 @@ import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import UserAvatar from "../Profile/UserAvatar";
-import NotificationBell from "./NotificationBell";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import ProfileDropdown from "../Common/ProfileDropdown";
 
@@ -21,9 +19,11 @@ const spaceMono = Space_Mono({
 const Header = () => {
   const pathname = usePathname();
   const router = useRouter();
-  const { token, user, logout } = useAuthStore();
   const [isClient, setIsClient] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
+
+  const logout = useAuthStore((state) => state.logout);
+  const { user, token } = useAuthStore.getState();
 
   useEffect(() => {
     setIsClient(true);
