@@ -1,21 +1,23 @@
-import { IChallenge } from "@/types";
+import { getAllChallenges } from "@/services/server/challengeService";
 import ChallengeCard from "./ChallengeCard";
+import EmptyState from "../Common/EmptyState";
 
-interface Props {
-  challenges: IChallenge[];
-}
+const ChallengeList = async () => {
+  const challenges = await getAllChallenges();
 
-const ChallengeList = ({ challenges }: Props) => {
   if (!challenges || challenges.length === 0) {
     return (
-      <p className="text-center text-base-content/70 p-10">
-        No challenges available at the moment. Check back soon!
-      </p>
+      <EmptyState
+        title="No Open Challenges"
+        message="There are no challenges available at the moment. Please check back soon!"
+        ctaText="Return Home"
+        ctaLink="/"
+      />
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
       {challenges.map((challenge) => (
         <ChallengeCard key={challenge._id} challenge={challenge} />
       ))}
