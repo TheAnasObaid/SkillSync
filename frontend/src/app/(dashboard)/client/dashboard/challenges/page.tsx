@@ -7,7 +7,7 @@ const ClientChallengesPage = async () => {
   return (
     <div className="grid gap-6">
       <h1 className="text-3xl font-bold">My Challenges</h1>
-      <ClientChallengeList challenges={challenges} />
+      <ClientChallengeList initialChallenges={challenges} />
     </div>
   );
 };

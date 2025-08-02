@@ -32,8 +32,8 @@
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 0;
-  --noise: 0;
+  --depth: 1;
+  --noise: 0.03;
 }
 
 @keyframes scroll-vertical {
@@ -41,13 +41,10 @@
     transform: translateY(0);
   }
   to {
-    transform: translateY(
-      -50%
-    ); /* This is the magic for a seamless loop with a duplicated list */
+    transform: translateY(-50%);
   }
 }
 
-/* Add this if it doesn't already exist */
 @keyframes fade-in-up {
   from {
     opacity: 0;

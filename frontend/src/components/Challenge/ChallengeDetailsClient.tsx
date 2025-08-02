@@ -1,22 +1,21 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useAuthStore } from "@/store/authStore";
-import { IChallenge, ISubmission } from "@/types";
-import { FiCheckCircle, FiClock, FiUsers, FiX } from "react-icons/fi";
-import SubmissionForm from "@/components/Submission/SubmissionForm";
 import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
-import UserAvatar from "../Profile/UserAvatar";
-import ChallengeSidebar from "./ChallengeSidebar";
+import { IChallenge, ISubmission } from "@/types";
+import { useState } from "react";
+import { FiClock, FiUsers } from "react-icons/fi";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import SubmissionModal from "../Common/SubmissionModal";
+import UserAvatar from "../Profile/UserAvatar";
+import ChallengeSidebar from "./ChallengeSidebar";
 
-// The full type for submissions with our temporary 'isNew' flag
 type LiveSubmission = ISubmission & { isNew?: boolean };
 
 interface Props {
   initialChallenge: IChallenge | null;
   initialSubmissions?: LiveSubmission[];
+  onSubmissionSuccess: () => void;
 }
 
 const difficultyStyles = {
@@ -28,9 +27,9 @@ const difficultyStyles = {
 const ChallengeDetailsClient = ({
   initialChallenge,
   initialSubmissions = [],
+  onSubmissionSuccess,
 }: Props) => {
-  // --- STATE MANAGEMENT ---
-  const [challenge] = useState(initialChallenge); // Initial data from server
+  const [challenge] = useState(initialChallenge);
   const [submissions, setSubmissions] =
     useState<LiveSubmission[]>(initialSubmissions);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -39,23 +38,8 @@ const ChallengeDetailsClient = ({
     "description"
   );
 
-  const { user } = useAuthStore();
+  const handleModalClose = () => setIsModalOpen(false);
 
-  // Example real-time update logic (requires a Socket.io context)
-  // const socket = useSocket();
-  // useEffect(() => {
-  //   if (!socket || !challenge) return;
-  //   socket.on("new_submission", (newSub: ISubmission) => {
-  //     const submissionWithFlag = { ...newSub, isNew: true };
-  //     setSubmissions(prev => [submissionWithFlag, ...prev]);
-  //     setTimeout(() => {
-  //       setSubmissions(current => current.map(s => s._id === newSub._id ? { ...s, isNew: false } : s));
-  //     }, 3000);
-  //   });
-  //   return () => { socket.off("new_submission"); };
-  // }, [socket, challenge]);
-
-  // --- DERIVED STATE & HANDLERS ---
   if (!challenge) {
     return <div className="alert alert-error">Challenge data is missing.</div>;
   }
@@ -71,19 +55,13 @@ const ChallengeDetailsClient = ({
   );
   const submissionCount = submissions.length;
 
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-    setTimeout(() => setSubmissionSuccess(false), 300);
-  };
-
   const handleSuccessfulSubmission = () => {
     setSubmissionSuccess(true);
-    // You might want to refresh the submissions list from the API here
+    onSubmissionSuccess();
   };
 
   return (
     <>
-      {/* --- 1. UPGRADED HERO SECTION --- */}
       <div className="card bg-base-200/50 border border-base-300">
         <div className="max-w-6xl w-full mx-auto px-4 py-8">
           {typeof client === "object" && client?.profile && (
@@ -170,53 +148,18 @@ const ChallengeDetailsClient = ({
               />
             )}
           </div>
-          {/* 5. CONSOLIDATED SIDEBAR */}
           <ChallengeSidebar
             challenge={challenge}
             onOpenModal={() => setIsModalOpen(true)}
           />
         </div>
       </div>
-
-      <dialog
-        id="submission_modal"
-        className={`modal ${isModalOpen ? "modal-open" : ""}`}
-      >
-        <div className="modal-box relative border border-base-300">
-          <button
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-            onClick={handleModalClose}
-          >
-            <FiX />
-          </button>
-
-          {submissionSuccess ? (
-            <div className="text-center p-8 space-y-4">
-              <FiCheckCircle className="text-success text-6xl mx-auto" />
-              <h3 className="font-bold text-2xl">Submission Successful!</h3>
-              <p className="text-base-content/70">
-                Your solution has been submitted for review. Good luck!
-              </p>
-              <div className="modal-action justify-center mt-4">
-                <button className="btn btn-primary" onClick={handleModalClose}>
-                  Done
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <h3 className="font-bold text-lg mb-6">Submit Your Solution</h3>
-              <SubmissionForm
-                challengeId={challenge._id}
-                onSuccess={handleSuccessfulSubmission}
-              />
-            </>
-          )}
-        </div>
-        <form method="dialog" className="modal-backdrop">
-          <button onClick={handleModalClose}>close</button>
-        </form>
-      </dialog>
+      <SubmissionModal
+        isOpen={isModalOpen}
+        onClose={handleModalClose}
+        challengeId={challenge._id}
+        onSubmissionSuccess={handleSuccessfulSubmission}
+      />
     </>
   );
 };

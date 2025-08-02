@@ -1,5 +1,4 @@
 "use client";
-"use client";
 
 import ChallengeDetailsClient from "@/components/Challenge/ChallengeDetailsClient";
 import { getChallengeByIdClient } from "@/services/client/challengeService";
@@ -38,9 +37,8 @@ const ChallengeDetailsPage = () => {
     } finally {
       setLoading(false);
     }
-  }, [id]); // The dependency is the `id` from the URL
+  }, [id]);
 
-  // Initial fetch on component mount
   useEffect(() => {
     fetchChallengeData();
   }, [fetchChallengeData]);

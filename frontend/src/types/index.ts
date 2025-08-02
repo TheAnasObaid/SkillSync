@@ -33,7 +33,6 @@ export interface IUser {
   updatedAt: string;
 }
 
-// --- CHALLENGE RELATED TYPES ---
 export type ChallengeStatus =
   | "draft"
   | "published"

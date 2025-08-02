@@ -7,6 +7,7 @@ import ConfirmationModal from "../Common/ConfirmationModal";
 import apiClient from "@/lib/apiClient";
 import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 interface PortfolioListProps {
   initialPortfolio: PortfolioItem[];
@@ -43,9 +44,9 @@ const PortfolioList = ({
       setPortfolio(
         portfolio.filter((p) => p._id !== modalState.itemToDelete?._id)
       );
-      alert("Project deleted successfully.");
+      toast.success("Project deleted successfully.");
     } catch (error) {
-      alert("Failed to delete project.");
+      toast.error("Failed to delete project.");
     } finally {
       setIsDeleting(false);
       setModalState({ isOpen: false, itemToDelete: null });

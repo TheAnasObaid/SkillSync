@@ -6,6 +6,7 @@ import { IUser } from "@/types";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { FiEdit, FiX } from "react-icons/fi";
 
 interface ClientProfileFormData {
@@ -64,9 +65,9 @@ function ClientProfilePage() {
         ...user!,
         profile: { ...user!.profile!, avatar: response.data.avatarUrl },
       });
-      alert("Avatar updated successfully!");
+      toast.success("Avatar updated successfully!");
     } catch (error) {
-      alert("Failed to upload avatar.");
+      toast.error("Failed to upload avatar.");
     }
   };
 
@@ -81,7 +82,7 @@ function ClientProfilePage() {
       const response = await apiClient.put<IUser>("/users/me", updatePayload);
       setUser(response.data);
       setIsEditMode(false);
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!");
     } catch (err) {
       if (err instanceof AxiosError) {
         setError(err.response?.data.message || "Failed to update profile.");
