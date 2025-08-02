@@ -91,7 +91,7 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
         onConfirm={modalState.onConfirm}
         onCancel={closeModal}
         confirmText="Yes, Delete"
-        confirmButtonClass="btn-error"
+        variant="error"
         isActionInProgress={isDeleting}
       />
     </>

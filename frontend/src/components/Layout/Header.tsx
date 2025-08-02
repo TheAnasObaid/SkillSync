@@ -91,6 +91,7 @@ const Header = () => {
       <ConfirmationModal
         isOpen={isModalOpen}
         title="Confirm Logout"
+        variant="error"
         message="Are you sure you want to log out of your account?"
         onConfirm={handleLogout}
         onCancel={() => setModalOpen(false)}

@@ -84,7 +84,7 @@ const PortfolioList = ({
         onConfirm={handleConfirmDelete}
         onCancel={() => setModalState({ isOpen: false, itemToDelete: null })}
         confirmText="Yes, Delete"
-        confirmButtonClass="btn-error"
+        variant="error"
         isActionInProgress={isDeleting}
       />
     </>

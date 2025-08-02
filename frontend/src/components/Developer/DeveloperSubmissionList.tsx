@@ -59,12 +59,13 @@ const DeveloperSubmissionList = ({
 
       <ConfirmationModal
         isOpen={isDeleteModalOpen}
+        variant="error"
         title="Withdraw Submission"
         message="Are you sure you want to withdraw this submission? This action cannot be undone."
         onConfirm={handleDeleteConfirm}
         onCancel={closeModal}
         confirmText="Yes, Withdraw"
-        confirmButtonClass="btn-error"
+        variant="error"
         isActionInProgress={isUpdating}
       />
     </>

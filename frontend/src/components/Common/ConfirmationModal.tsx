@@ -1,6 +1,9 @@
 "use client";
 
-interface Props {
+import Modal from "./Modal";
+import { FiAlertTriangle } from "react-icons/fi";
+
+interface ConfirmationModalProps {
   isOpen: boolean;
   title: string;
   message: string;
@@ -8,7 +11,7 @@ interface Props {
   onCancel: () => void;
   confirmText?: string;
   cancelText?: string;
-  confirmButtonClass?: string;
+  variant?: "primary" | "error" | "warning" | "info";
   isActionInProgress?: boolean;
 }
 
@@ -20,17 +23,26 @@ const ConfirmationModal = ({
   onCancel,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  confirmButtonClass = "btn-primary",
+  variant = "primary",
   isActionInProgress = false,
-}: Props) => {
-  if (!isOpen) return null;
+}: ConfirmationModalProps) => {
+  const themeClasses = {
+    primary: { button: "btn-primary", icon: "text-primary" },
+    error: { button: "btn-error", icon: "text-error" },
+    warning: { button: "btn-warning", icon: "text-warning" },
+    info: { button: "btn-info", icon: "text-info" },
+  };
+
+  const currentTheme = themeClasses[variant];
 
   return (
-    <dialog open className="modal modal-open bg-black/30 backdrop-blur-sm">
-      <div className="modal-box border border-base-300">
-        <h3 className="font-bold text-lg">{title}</h3>
-        <p className="py-4">{message}</p>
-        <div className="modal-action">
+    <Modal isOpen={isOpen} onClose={onCancel} title={title}>
+      <div className="grid grid-cols-1 gap-4 text-center">
+        <div className={`mx-auto ${currentTheme.icon}`}>
+          <FiAlertTriangle size={48} />
+        </div>
+        <p className="text-base-content/80">{message}</p>
+        <div className="modal-action justify-center">
           <button
             className="btn btn-ghost"
             onClick={onCancel}
@@ -39,19 +51,19 @@ const ConfirmationModal = ({
             {cancelText}
           </button>
           <button
-            className={`btn ${confirmButtonClass}`}
+            className={`btn ${currentTheme.button}`}
             onClick={onConfirm}
             disabled={isActionInProgress}
           >
             {isActionInProgress ? (
-              <span className="loading loading-spinner"></span>
+              <span className="loading loading-spinner" />
             ) : (
               confirmText
             )}
           </button>
         </div>
       </div>
-    </dialog>
+    </Modal>
   );
 };
 

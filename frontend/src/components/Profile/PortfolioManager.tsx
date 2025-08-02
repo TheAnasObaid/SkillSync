@@ -9,6 +9,7 @@ import { TextInput, Textarea, FileInput } from "../Forms/FormFields";
 import toast from "react-hot-toast";
 import apiClient from "@/lib/apiClient";
 import { IPortfolioItem, PortfolioFormData } from "@/types";
+import Modal from "../Common/Modal";
 
 interface PortfolioManagerProps {
   initialPortfolio: IPortfolioItem[];
@@ -111,50 +112,56 @@ const PortfolioManager = ({
       )}
 
       {/* Add Project Modal */}
-      <dialog className={`modal ${isModalOpen ? "modal-open" : ""}`}>
-        <div className="modal-box">
-          <button
-            onClick={() => setIsModalOpen(false)}
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
+      <Modal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title="Add New Portfolio Project"
+      >
+        {/* The entire form is now the 'children' of the Modal component */}
+        <FormProvider {...formMethods}>
+          <form
+            onSubmit={handleSubmit(handleAddProject)}
+            className="grid gap-4"
           >
-            <FiX />
-          </button>
-          <h3 className="font-bold text-lg mb-4">Add New Project</h3>
-          <FormProvider {...formMethods}>
-            <form
-              onSubmit={handleSubmit(handleAddProject)}
-              className="grid gap-4"
-            >
-              <TextInput name="title" label="Project Title" />
-              <Textarea name="description" label="Description" rows={3} />
-              <TextInput
-                name="liveUrl"
-                label="Live URL (Optional)"
-                type="url"
-              />
-              <TextInput
-                name="githubUrl"
-                label="GitHub URL (Optional)"
-                type="url"
-              />
-              <FileInput name="portfolioImage" label="Project Image" />
-              <div className="modal-action">
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? (
-                    <span className="loading loading-spinner" />
-                  ) : (
-                    "Add Project"
-                  )}
-                </button>
-              </div>
-            </form>
-          </FormProvider>
-        </div>
-      </dialog>
+            <TextInput name="title" label="Project Title" required />
+            <Textarea
+              name="description"
+              label="Description"
+              rows={3}
+              required
+            />
+            <TextInput name="liveUrl" label="Live URL (Optional)" type="url" />
+            <TextInput
+              name="githubUrl"
+              label="GitHub URL (Optional)"
+              type="url"
+            />
+            <FileInput name="portfolioImage" label="Project Image" required />
+
+            <div className="modal-action mt-2">
+              <button
+                type="button"
+                onClick={() => setIsModalOpen(false)}
+                className="btn btn-ghost"
+                disabled={isSubmitting}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn btn-primary"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="loading loading-spinner" />
+                ) : (
+                  "Add Project"
+                )}
+              </button>
+            </div>
+          </form>
+        </FormProvider>
+      </Modal>
 
       {/* Delete Confirmation Modal */}
       <ConfirmationModal
@@ -164,7 +171,7 @@ const PortfolioManager = ({
         onConfirm={handleDeleteProject}
         onCancel={() => setDeleteModal({ isOpen: false, item: null })}
         confirmText="Yes, Delete"
-        confirmButtonClass="btn-error"
+        variant="error"
         isActionInProgress={isActionInProgress}
       />
     </>

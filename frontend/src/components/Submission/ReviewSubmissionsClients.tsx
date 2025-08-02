@@ -85,6 +85,7 @@ const ReviewSubmissionsClient = ({
         isOpen={winnerModal.isOpen}
         title="Confirm Winner Selection"
         message={`Select submission by ${winnerName}?`}
+        variant="primary"
         onConfirm={handleSelectWinner}
         onCancel={closeModal}
         confirmText="Confirm & Select"

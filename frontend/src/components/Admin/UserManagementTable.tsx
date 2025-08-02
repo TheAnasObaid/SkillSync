@@ -30,8 +30,8 @@ const UserManagementTable = ({ initialUsers }: Props) => {
     title: string;
     message: string;
     onConfirm?: () => void;
-    confirmButtonClass?: string;
-  }>({ isOpen: false, title: "", message: "" });
+    variant?: "error" | "primary" | "warning" | "info";
+  }>({ isOpen: false, title: "", message: "", variant: "primary" });
 
   const handleUpdateUser = (userId: string, updates: UserUpdateAction) => {
     const actionKeys = Object.keys(updates) as Array<keyof UserUpdateAction>;
@@ -47,10 +47,8 @@ const UserManagementTable = ({ initialUsers }: Props) => {
       isOpen: true,
       title: `Confirm Action`,
       message: `Are you sure you want to change this user's ${action} to "${value}"?`,
-      confirmButtonClass:
-        action === "accountStatus" && value === "banned"
-          ? "btn-error"
-          : "btn-primary",
+      variant:
+        action === "accountStatus" && value === "banned" ? "error" : "primary",
       onConfirm: async () => {
         setIsUpdating(true);
         try {
@@ -60,14 +58,22 @@ const UserManagementTable = ({ initialUsers }: Props) => {
           setError("Failed to update user.");
         } finally {
           setIsUpdating(false);
-          setModalState({ isOpen: false, title: "", message: "" });
+          setModalState({
+            isOpen: false,
+            title: "",
+            message: "",
+          });
         }
       },
     });
   };
 
   const handleCancel = () => {
-    setModalState({ isOpen: false, title: "", message: "" });
+    setModalState({
+      isOpen: false,
+      title: "",
+      message: "",
+    });
   };
 
   const fetchUsers = async () => {
@@ -77,7 +83,6 @@ const UserManagementTable = ({ initialUsers }: Props) => {
 
   return (
     <>
-      {/* --- MOBILE CARD VIEW (Default) --- */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
         {users.map((user) => (
           <UserCard
@@ -89,7 +94,6 @@ const UserManagementTable = ({ initialUsers }: Props) => {
         ))}
       </div>
 
-      {/* --- DESKTOP TABLE VIEW (Visible md and up) --- */}
       <div className="hidden md:block card bg-base-200/50 border border-base-300">
         <table className="table">
           <thead>
@@ -185,7 +189,7 @@ const UserManagementTable = ({ initialUsers }: Props) => {
         message={modalState.message}
         onConfirm={modalState.onConfirm!}
         onCancel={handleCancel}
-        confirmButtonClass={modalState.confirmButtonClass}
+        variant={modalState.variant}
         isActionInProgress={isUpdating}
       />
     </>
