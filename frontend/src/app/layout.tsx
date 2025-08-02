@@ -24,6 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="skillsync-pro">
       <body className={`${inter.className} ${inter.variable} antialiased`}>
+        <SocketProvider>{children}</SocketProvider>{" "}
         <Toaster
           position="top-center"
           gutter={12}
@@ -53,7 +54,6 @@ export default function RootLayout({
             },
           }}
         />
-        <SocketProvider>{children}</SocketProvider>
       </body>
     </html>
   );
