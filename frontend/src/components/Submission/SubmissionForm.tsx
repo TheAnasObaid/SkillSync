@@ -1,16 +1,8 @@
 "use client";
 
-import { SubmitHandler, useForm } from "react-hook-form";
-import apiClient from "@/lib/apiClient";
-import { useState } from "react";
-import { AxiosError } from "axios";
-
-interface SubmissionFormData {
-  githubRepo: string;
-  liveDemo?: string;
-  description: string;
-  file: FileList;
-}
+import { FormProvider } from "react-hook-form";
+import { TextInput, Textarea, FileInput } from "../Forms/FormFields";
+import { useSubmissionForm } from "@/hooks/useSubmissionsForm";
 
 interface Props {
   challengeId: string;
@@ -18,103 +10,52 @@ interface Props {
 }
 
 const SubmissionForm = ({ challengeId, onSuccess }: Props) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<SubmissionFormData>();
-  const [apiError, setApiError] = useState("");
-
-  const onSubmit: SubmitHandler<SubmissionFormData> = async (data) => {
-    setApiError("");
-
-    const formData = new FormData();
-
-    formData.append("githubRepo", data.githubRepo);
-    formData.append("description", data.description);
-    if (data.liveDemo) {
-      formData.append("liveDemo", data.liveDemo);
-      console.log("liveDemo", data.liveDemo);
-    }
-
-    if (data.file && data.file.length > 0) {
-      formData.append("file", data.file[0]);
-    }
-
-    try {
-      await apiClient.post(`/submissions/challenge/${challengeId}`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-      onSuccess();
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        setApiError(error.response?.data.message || "Submission failed.");
-      } else {
-        setApiError("An unexpected error occurred.");
-      }
-    }
-  };
+  const { form, isSubmitting, submitHandler } = useSubmissionForm(
+    challengeId,
+    onSuccess
+  );
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-      {apiError && <p className="text-error">{apiError}</p>}
-      <div>
-        <label className="label">GitHub Repository URL</label>
-        <input
+    <FormProvider {...form}>
+      <form onSubmit={submitHandler} className="grid gap-4">
+        <TextInput
+          name="githubRepo"
+          label="GitHub Repository URL"
           type="url"
-          className="input input-bordered w-full"
-          {...register("githubRepo", { required: "GitHub URL is required" })}
+          placeholder="https://github.com/user/repo"
+          required
         />
-        {errors.githubRepo && (
-          <p className="text-error text-sm">{errors.githubRepo.message}</p>
-        )}
-      </div>
-      <div>
-        <label className="label">Live Demo URL (Optional)</label>
-        <input
+        <TextInput
+          name="liveDemo"
+          label="Live Demo URL (Optional)"
           type="url"
-          className="input input-bordered w-full"
-          {...register("liveDemo")}
+          placeholder="https://myapp.vercel.app"
         />
-      </div>
-      <div>
-        <label className="label">Description</label>
-        <textarea
-          className="textarea textarea-bordered w-full"
+        <Textarea
+          name="description"
+          label="Description"
+          placeholder="Briefly describe your approach and key features."
           rows={5}
-          {...register("description", { required: "Description is required" })}
-        ></textarea>
-        {errors.description && (
-          <p className="text-error text-sm">{errors.description.message}</p>
-        )}
-      </div>
-
-      <div>
-        <label className="label">Submission File (Optional)</label>
-        <input
-          type="file"
-          className="file-input file-input-bordered w-full"
-          {...register("file")}
+          required
         />
-        <p className="label-text-alt mt-1">
-          You can upload a .zip, .pdf, or image file.
-        </p>
-      </div>
-
-      <button
-        type="submit"
-        className="btn btn-primary w-full mt-4"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? (
-          <span className="loading loading-spinner"></span>
-        ) : (
-          "Submit for Review"
-        )}
-      </button>
-    </form>
+        <FileInput
+          name="file"
+          label="Submission File (Optional)"
+          helperText="You can upload a .zip of your source code or other relevant files."
+        />
+        <button
+          type="submit"
+          className="btn btn-primary w-full mt-2"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <span className="loading loading-spinner"></span>
+          ) : (
+            "Submit for Review"
+          )}
+        </button>
+      </form>
+    </FormProvider>
   );
 };
 

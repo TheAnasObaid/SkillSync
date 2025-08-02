@@ -4,7 +4,7 @@ import apiClient from "@/lib/apiClient";
 import { ISubmission } from "@/types";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 
 export interface EditSubmissionFormData {
@@ -47,7 +47,9 @@ export const useSubmissionsManager = () => {
     setSelectedSubmission(null);
   };
 
-  const handleUpdateSubmit = async (data: EditSubmissionFormData) => {
+  const handleUpdateSubmit: SubmitHandler<EditSubmissionFormData> = async (
+    data
+  ) => {
     if (!selectedSubmission) return;
 
     const updateToast = toast.loading("Updating submission...");
@@ -91,7 +93,7 @@ export const useSubmissionsManager = () => {
     openEditModal,
     openDeleteModal,
     closeModal,
-    handleUpdateSubmit: handleSubmit(handleUpdateSubmit),
+    handleUpdateSubmit,
     handleDeleteConfirm,
   };
 };

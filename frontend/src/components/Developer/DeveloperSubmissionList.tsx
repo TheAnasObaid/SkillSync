@@ -1,10 +1,11 @@
 "use client";
 
-import { useSubmissionsManager } from "@/hooks/useSubmissionsManager";
 import { ISubmission } from "@/types";
+import { useSubmissionsManager } from "@/hooks/useSubmissionsManager";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import EmptyState from "../Common/EmptyState";
 import SubmissionCard from "./SubmissionCard";
+import EditSubmissionModal from "../Submission/EditSubmissionModal";
 
 const DeveloperSubmissionList = ({
   submissions,
@@ -15,20 +16,13 @@ const DeveloperSubmissionList = ({
     isEditModalOpen,
     isDeleteModalOpen,
     isUpdating,
-    isSubmitting,
     selectedSubmission,
-    form,
     openEditModal,
     openDeleteModal,
     closeModal,
-    handleUpdateSubmit,
+    handleUpdateSubmit, // This is the raw handler from the hook
     handleDeleteConfirm,
   } = useSubmissionsManager();
-
-  const {
-    register,
-    formState: { errors },
-  } = form;
 
   if (submissions.length === 0) {
     return (
@@ -54,62 +48,14 @@ const DeveloperSubmissionList = ({
         ))}
       </div>
 
-      {/* Edit Modal */}
-      <dialog className={`modal ${isEditModalOpen ? "modal-open" : ""}`}>
-        <div className="modal-box">
-          <button
-            onClick={closeModal}
-            className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
-          >
-            ✕
-          </button>
-          <h3 className="font-bold text-lg">Edit Your Submission</h3>
-          <form onSubmit={handleUpdateSubmit} className="space-y-4 py-4">
-            <div>
-              <label className="label">GitHub Repository URL</label>
-              <input
-                type="url"
-                className="input input-bordered w-full"
-                {...register("githubRepo", { required: true })}
-              />
-              {errors.githubRepo && (
-                <p className="text-error text-sm">This field is required.</p>
-              )}
-            </div>
-            <div>
-              <label className="label">Live Demo URL</label>
-              <input
-                type="url"
-                className="input input-bordered w-full"
-                {...register("liveDemo")}
-              />
-            </div>
-            <div>
-              <label className="label">Description</label>
-              <textarea
-                className="textarea textarea-bordered w-full"
-                {...register("description", { required: true })}
-              ></textarea>
-              {errors.description && (
-                <p className="text-error text-sm">This field is required.</p>
-              )}
-            </div>
-            <div className="modal-action">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <span className="loading loading-spinner"></span>
-                ) : (
-                  "Save Changes"
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-      </dialog>
+      {/* --- RENDER THE NEW, CLEANER MODALS --- */}
+      <EditSubmissionModal
+        isOpen={isEditModalOpen}
+        onClose={closeModal}
+        onSubmit={handleUpdateSubmit} // Pass the handler from the hook
+        isSubmitting={isUpdating}
+        submission={selectedSubmission}
+      />
 
       <ConfirmationModal
         isOpen={isDeleteModalOpen}
