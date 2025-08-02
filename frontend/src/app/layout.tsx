@@ -2,6 +2,7 @@ import { SocketProvider } from "@/context/SocketContext";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "react-hot-toast";
 
 export const metadata: Metadata = {
   title: "SkillSync",
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="en" data-theme="skillsync-pro">
       <body className={`${inter.className} ${inter.variable} antialiased`}>
         <SocketProvider>{children}</SocketProvider>
+        <Toaster />
       </body>
     </html>
   );
