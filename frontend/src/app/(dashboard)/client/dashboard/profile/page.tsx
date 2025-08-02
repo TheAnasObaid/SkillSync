@@ -1,6 +1,5 @@
 "use client";
 
-import ProfileEditForm from "@/components/Profile/ProfileEditForm";
 import ProfileView from "@/components/Profile/ProfileView";
 import apiClient from "@/lib/apiClient";
 import { IUser } from "@/types";
@@ -128,56 +127,7 @@ function ClientProfilePage() {
       {error && <div className="alert alert-error mb-6">{error}</div>}
 
       {isEditMode ? (
-        <ProfileEditForm
-          onSubmit={handleSubmit(handleFormSubmit)}
-          isSubmitting={isSubmitting}
-        >
-          {/* These are the specific fields for the CLIENT role */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">First Name</legend>
-                <input
-                  type="text"
-                  className="input w-full bg-transparent focus:outline-none"
-                  {...register("name", { required: "First name is required" })}
-                />
-              </fieldset>
-              {errors.name && (
-                <p className="text-error text-xs mt-1">{errors.name.message}</p>
-              )}
-            </div>
-            <div>
-              <fieldset className="fieldset">
-                <legend className="fieldset-legend">Last Name</legend>
-                <input
-                  type="text"
-                  className="input w-full bg-transparent focus:outline-none"
-                  {...register("profile.lastName")}
-                />
-              </fieldset>
-            </div>
-          </div>
-          <div>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Company Name</legend>
-              <input
-                type="text"
-                className="input w-full bg-transparent focus:outline-none"
-                {...register("profile.companyName")}
-              />
-            </fieldset>
-          </div>
-          <div>
-            <fieldset className="fieldset">
-              <legend className="fieldset-legend">Bio</legend>
-              <textarea
-                className="textarea w-full bg-transparent focus:outline-none h-24"
-                {...register("profile.bio")}
-              ></textarea>
-            </fieldset>
-          </div>
-        </ProfileEditForm>
+        <div>Form here</div>
       ) : loading ? (
         <div className="flex justify-center p-10">
           <span className="loading loading-spinner loading-lg"></span>

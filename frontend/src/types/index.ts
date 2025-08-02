@@ -8,16 +8,6 @@ export interface File {
 export type Role = "developer" | "client" | "admin";
 export type AccountStatus = "active" | "banned";
 
-export interface PortfolioItem {
-  _id?: string;
-  title: string;
-  description: string;
-  imageUrl: string;
-  liveUrl?: string;
-  githubUrl?: string;
-  portfolioImage: FileList;
-}
-
 // This represents the USER data object as it exists in JSON
 export interface IUser {
   _id: string;
@@ -228,4 +218,62 @@ export interface DeveloperStats {
   totalSubmissions: number;
   winningSubmissions: number;
   pendingReviews: number;
+}
+// src/types/index.ts
+
+// ... (keep all your other types like IUser, IChallenge, etc.)
+
+// --- NEW OR UPDATED TYPES FOR PORTFOLIO ---
+
+/**
+ * @interface IPortfolioItem
+ * @desc Represents a single portfolio item as it is stored in the database and sent from the API.
+ * @property {string} [_id] - The unique identifier from MongoDB.
+ * @property {string} title - The title of the project.
+ * @property {string} description - A description of the project.
+ * @property {string} imageUrl - The server path or URL to the project's image.
+ * @property {string} [liveUrl] - An optional URL to the live deployment.
+ * @property {string} [githubUrl] - An optional URL to the project's GitHub repository.
+ */
+export interface IPortfolioItem {
+  _id?: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  liveUrl?: string;
+  githubUrl?: string;
+}
+
+/**
+ * @interface PortfolioFormData
+ *- @desc Represents the raw data captured from the "Add/Edit Portfolio Project" form.
+ * @note This is kept separate from IPortfolioItem because the form handles the image as a FileList,
+ *       whereas the final data object has a string URL.
+ * @property {string} title - The title of the project.
+ * @property {string} description - A description of the project.
+ * @property {string} [liveUrl] - An optional URL to the live deployment.
+ * @property {string} [githubUrl] - An optional URL to the project's GitHub repository.
+ * @property {FileList} [portfolioImage] - The image file selected by the user in the form.
+ */
+export interface PortfolioFormData {
+  title: string;
+  description: string;
+  liveUrl?: string;
+  githubUrl?: string;
+  portfolioImage?: FileList;
+}
+
+/**
+ * @interface ProfileFormData
+ * @desc Represents the data captured from the main developer profile edit form.
+ */
+export interface ProfileFormData {
+  name: string;
+  email: string;
+  profile: {
+    lastName: string;
+    bio: string;
+    skills: string; // Skills are a comma-separated string in the form
+    experience: string;
+  };
 }
