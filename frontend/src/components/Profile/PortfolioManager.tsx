@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import PortfolioCard from "./PortfolioCard";
 import ConfirmationModal from "../Common/ConfirmationModal";
-import { FiPlus } from "react-icons/fi";
+import { FiPlus, FiX } from "react-icons/fi";
 import { TextInput, Textarea, FileInput } from "../Forms/FormFields";
 import toast from "react-hot-toast";
 import apiClient from "@/lib/apiClient";
@@ -117,7 +117,7 @@ const PortfolioManager = ({
             onClick={() => setIsModalOpen(false)}
             className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
           >
-            ✕
+            <FiX />
           </button>
           <h3 className="font-bold text-lg mb-4">Add New Project</h3>
           <FormProvider {...formMethods}>

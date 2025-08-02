@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuthStore } from "@/store/authStore";
 import { IChallenge, ISubmission } from "@/types";
-import { FiCheckCircle, FiClock, FiUsers } from "react-icons/fi";
+import { FiCheckCircle, FiClock, FiUsers, FiX } from "react-icons/fi";
 import SubmissionForm from "@/components/Submission/SubmissionForm";
 import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
 import UserAvatar from "../Profile/UserAvatar";
@@ -187,7 +187,7 @@ const ChallengeDetailsClient = ({
             className="btn btn-sm btn-circle btn-ghost absolute right-2 top-2"
             onClick={handleModalClose}
           >
-            ✕
+            <FiX />
           </button>
 
           {submissionSuccess ? (
