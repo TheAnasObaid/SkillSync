@@ -1,13 +1,13 @@
-import LoginClientComponent from "@/components/Auth/LoginClient";
+import LoginForm from "@/components/Auth/LoginForm";
 import { Suspense } from "react";
 
 const LoginPage = () => {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    <div className="flex flex-col w-full items-center p-4">
       <Suspense
         fallback={<span className="loading loading-spinner loading-lg" />}
       >
-        <LoginClientComponent />
+        <LoginForm />
       </Suspense>
     </div>
   );
