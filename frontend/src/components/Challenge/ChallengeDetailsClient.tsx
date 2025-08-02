@@ -10,12 +10,12 @@ import SubmissionModal from "../Common/SubmissionModal";
 import UserAvatar from "../Profile/UserAvatar";
 import ChallengeSidebar from "./ChallengeSidebar";
 
-// The full type for submissions with our temporary 'isNew' flag
 type LiveSubmission = ISubmission & { isNew?: boolean };
 
 interface Props {
   initialChallenge: IChallenge | null;
   initialSubmissions?: LiveSubmission[];
+  onSubmissionSuccess: () => void;
 }
 
 const difficultyStyles = {
@@ -27,6 +27,7 @@ const difficultyStyles = {
 const ChallengeDetailsClient = ({
   initialChallenge,
   initialSubmissions = [],
+  onSubmissionSuccess,
 }: Props) => {
   const [challenge] = useState(initialChallenge);
   const [submissions, setSubmissions] =
@@ -56,6 +57,7 @@ const ChallengeDetailsClient = ({
 
   const handleSuccessfulSubmission = () => {
     setSubmissionSuccess(true);
+    onSubmissionSuccess();
   };
 
   return (
