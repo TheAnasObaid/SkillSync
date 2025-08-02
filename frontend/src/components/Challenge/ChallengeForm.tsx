@@ -1,255 +1,137 @@
 "use client";
 
-import apiClient from "@/lib/apiClient";
-import { ChallengeFormData, challengeSchema } from "@/lib/validationSchemas";
+import { useChallengeForm } from "@/hooks/useChallengeForm";
 import { IChallenge } from "@/types";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { AxiosError } from "axios";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
+import { FileInput, Select, TextInput, Textarea } from "../Forms/FormFields";
 
 interface Props {
   isEditing?: boolean;
   existingChallenge?: IChallenge;
 }
 
+const FormSectionHeader = ({
+  title,
+  subtitle,
+}: {
+  title: string;
+  subtitle: string;
+}) => (
+  <div className="border-b border-base-300 pb-3">
+    <h3 className="text-xl font-bold">{title}</h3>
+    <p className="text-base-content/70 text-sm mt-1">{subtitle}</p>
+  </div>
+);
+
 const ChallengeForm = ({ isEditing = false, existingChallenge }: Props) => {
-  const router = useRouter();
-  const [error, setError] = useState("");
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<ChallengeFormData>({
-    resolver: zodResolver(challengeSchema),
-    defaultValues: isEditing
-      ? {
-          title: existingChallenge?.title || "",
-          description: existingChallenge?.description || "",
-          requirements: existingChallenge?.requirements || "",
-          category: existingChallenge?.category || "",
-          difficulty: existingChallenge?.difficulty || "beginner",
-          deadline: existingChallenge?.deadline
-            ? new Date(existingChallenge.deadline).toISOString().split("T")[0]
-            : "",
-          prize: existingChallenge?.prize || "0",
-          tags: (existingChallenge?.tags || []).join(", "),
-        }
-      : {},
-  });
-
-  const onSubmit = async (challengeFormData: ChallengeFormData) => {
-    setError("");
-    const formData = new FormData();
-
-    Object.entries(challengeFormData).forEach(([key, value]) => {
-      if (key !== "file" && value) {
-        formData.append(key, value);
-      }
-    });
-
-    const fileList = challengeFormData.file as FileList;
-    if (fileList && fileList.length > 0) {
-      formData.append("file", fileList[0]);
-    }
-
-    try {
-      if (isEditing) {
-        await apiClient.put(
-          `/challenges/${existingChallenge?._id}`,
-          challengeFormData
-        );
-        alert("Challenge updated successfully!");
-        router.push("/client/dashboard/challenges");
-        router.refresh();
-      } else {
-        await apiClient.post("/challenges", formData, {});
-        router.push("/client/dashboard");
-      }
-    } catch (error) {
-      if (error instanceof AxiosError) {
-        const zodIssues = error.response?.data?.issues;
-        if (zodIssues) {
-          setError(zodIssues.map((issue: any) => issue.message).join(". "));
-        } else {
-          setError(
-            error.response?.data.message || "An unexpected error occurred."
-          );
-        }
-      } else {
-        setError("An unexpected error occurred.");
-      }
-    }
-  };
+  const { form, isSubmitting, onSubmit } = useChallengeForm(
+    isEditing,
+    existingChallenge
+  );
+  const { handleSubmit } = form;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="grid gap-5">
-      {error && (
-        <div className="toast">
-          <p className="alert alert-error">{error}</p>
-        </div>
-      )}
-
-      <div className="grid gap-2">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Title</legend>
-          <input
-            type="text"
-            className="input input-bordered bg-base-200 w-full"
-            {...register("title", { required: "Title is required" })}
+    <FormProvider {...form}>
+      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-8">
+        <section className="grid gap-6">
+          <FormSectionHeader
+            title="Core Details"
+            subtitle="What is your challenge about?"
           />
-        </fieldset>
-        {errors.title && (
-          <p className="text-error text-xs">{errors.title.message}</p>
-        )}
-      </div>
-
-      <div className="grid gap-2">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Description</legend>
-          <textarea
-            rows={5}
-            className="textarea input-bordered bg-base-200 w-full"
-            {...register("description", {
-              required: "Description is required",
-            })}
+          <TextInput
+            name="title"
+            label="Challenge Title"
+            placeholder="e.g., Build a Real-time Chat App"
           />
-        </fieldset>
-        {errors.description && (
-          <p className="text-error text-xs">{errors.description.message}</p>
-        )}
-      </div>
-
-      <div className="grid gap-2">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Requirements</legend>
-          <textarea
-            rows={5}
-            className="textarea input-bordered bg-base-200 w-full"
-            {...register("requirements", {
-              required: "Requirements are required",
-            })}
+          <Textarea
+            name="description"
+            label="Brief Description"
+            rows={3}
+            placeholder="Summarize the main goal..."
           />
-        </fieldset>
-        {errors.requirements && (
-          <p className="text-error text-xs">{errors.requirements.message}</p>
-        )}
-      </div>
+          <Textarea
+            name="requirements"
+            label="Detailed Requirements"
+            rows={6}
+            placeholder="Use Markdown for lists, code blocks, etc."
+            helperText="Markdown is supported for rich formatting."
+          />
+        </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Category</legend>
-            <input
-              type="text"
-              className="input input-bordered bg-base-200 w-full"
-              {...register("category", { required: "Category is required" })}
+        <section className="grid gap-4">
+          <FormSectionHeader
+            title="Metadata"
+            subtitle="Help developers filter and find your challenge."
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <TextInput
+              name="category"
+              label="Category"
+              placeholder="e.g., Web Development"
             />
-          </fieldset>
-          {errors.category && (
-            <p className="text-error text-xs">{errors.category.message}</p>
-          )}
-        </div>
-        <div className="grid gap-2">
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Difficulty</legend>
-            <select
-              defaultValue=""
-              className="select input-bordered bg-base-200 w-full"
-              {...register("difficulty", {
-                required: "Difficulty level is required",
-              })}
-            >
-              <option value="" disabled>
-                Select level
-              </option>
+            <Select name="difficulty" label="Difficulty">
               <option value="beginner">Beginner</option>
               <option value="intermediate">Intermediate</option>
               <option value="advanced">Advanced</option>
-            </select>
-          </fieldset>
-          {errors.difficulty && (
-            <p className="text-error text-xs">{errors.difficulty.message}</p>
-          )}
-        </div>
-      </div>
+            </Select>
+          </div>
+          <TextInput
+            name="tags"
+            label="Tags"
+            helperText="Enter skills separated by commas."
+            placeholder="react, nodejs, typescript"
+          />
+        </section>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="grid gap-2">
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Deadline</legend>
-            <input
-              type="date"
-              className="input input-bordered bg-base-200 w-full"
-              {...register("deadline", { required: "Deadline is required" })}
-            />
-          </fieldset>
-          {errors.deadline && (
-            <p className="text-error text-xs">{errors.deadline.message}</p>
-          )}
-        </div>
-
-        <div className="grid gap-2">
-          <fieldset className="fieldset">
-            <legend className="fieldset-legend">Prize ($)</legend>
-            <input
+        <section className="grid gap-4">
+          <FormSectionHeader
+            title="Rewards & Deadline"
+            subtitle="Set the prize and timeline for your challenge."
+          />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <TextInput
+              name="prize"
+              label="Prize ($)"
               type="number"
-              className="input input-bordered bg-base-200 w-full"
-              {...register("prize", { required: "Prize is required" })}
+              placeholder="e.g., 500"
             />
-          </fieldset>
-          {errors.prize && (
-            <p className="text-error text-xs">{errors.prize.message}</p>
-          )}
+            <TextInput
+              name="deadline"
+              label="Submission Deadline"
+              type="date"
+            />
+          </div>
+        </section>
+
+        <section className="grid gap-4">
+          <FormSectionHeader
+            title="Resources"
+            subtitle="Attach any helpful files for the developers."
+          />
+          <FileInput
+            name="file"
+            label="Resource File (Optional)"
+            helperText="Max file size: 10MB."
+          />
+        </section>
+
+        <div className="border-t border-base-300 pt-6">
+          <button
+            type="submit"
+            className="btn btn-primary btn-block"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <span className="loading loading-spinner" />
+            ) : isEditing ? (
+              "Save Changes"
+            ) : (
+              "Publish Challenge"
+            )}
+          </button>
         </div>
-      </div>
-      <div className="grid gap-2">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Tags</legend>
-          <input
-            type="text"
-            placeholder="e.g., javascript, react, nodejs"
-            className="input input-bordered bg-base-200 w-full"
-            {...register("tags", { required: "Tags are required" })}
-          />
-          <p className="label">Enter tags separated by commas.</p>
-        </fieldset>
-        {errors.tags && (
-          <p className="text-error text-xs">{errors.tags.message}</p>
-        )}
-      </div>
-
-      <div className="grid gap-2">
-        <fieldset className="fieldset">
-          <legend className="fieldset-legend">Resource File (Optional)</legend>
-          <input
-            type="file"
-            className="file-input file-input-bordered w-full"
-            {...register("file")}
-          />
-          <p className="label">
-            Attach any relevant documents, mockups, or datasets (.zip, .pdf,
-            .png, etc.).
-          </p>
-        </fieldset>
-      </div>
-
-      <button
-        type="submit"
-        className="btn btn-primary w-full"
-        disabled={isSubmitting}
-      >
-        {isSubmitting ? (
-          <span className="loading loading-spinner"></span>
-        ) : isEditing ? (
-          "Save Changes"
-        ) : (
-          "Create Challenge"
-        )}
-      </button>
-    </form>
+      </form>
+    </FormProvider>
   );
 };
 
