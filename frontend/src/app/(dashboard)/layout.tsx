@@ -5,22 +5,23 @@ import {
   clientSidebarLinks,
   developerSidebarLinks,
 } from "@/config/dashboard";
+import { getServerApi } from "@/lib/serverApi";
 import { IUser } from "@/types";
-import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const getUserFromToken = async (): Promise<(IUser & { id: string }) | null> => {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("authToken")?.value;
+// FIX: Explicitly tell Next.js that this entire route segment is dynamic.
+// This is the modern, correct way to handle dynamic pages and will remove the build warning.
+export const dynamic = "force-dynamic";
 
-  if (!token) return null;
-
+// FIX: Replaced flawed JWT decoding with a direct, secure API call
+// to fetch the user's data on the server using the httpOnly cookie.
+const getUser = async (): Promise<IUser | null> => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    return { ...decoded.user, id: decoded.id, role: decoded.role };
+    const serverApi = await getServerApi(); // Automatically uses the auth cookie
+    const response = await serverApi.get("/users/me");
+    return response.data;
   } catch (error) {
-    console.error("Invalid token:", error);
+    // This will happen if the token is invalid or expired
     return null;
   }
 };
@@ -30,8 +31,10 @@ interface Props {
 }
 
 const DashboardsLayout = async ({ children }: Props) => {
-  const user = await getUserFromToken();
-  if (!user) redirect("/login");
+  const user = await getUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   let sidebarLinks = [];
 
@@ -46,6 +49,7 @@ const DashboardsLayout = async ({ children }: Props) => {
       sidebarLinks = adminSidebarLinks;
       break;
     default:
+      // Fallback for safety, though should not be reached if user is fetched
       redirect("/login");
   }
 

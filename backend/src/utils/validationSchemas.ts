@@ -5,9 +5,7 @@ export const registerSchema = z.object({
   email: z.email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters long"),
   role: z.enum(["developer", "client"], {
-    error: () => ({
-      message: "Role must be either 'developer' or 'client'",
-    }),
+    error: "Role must be either 'developer' or 'client'",
   }),
 });
 
@@ -23,16 +21,9 @@ export const challengeSchema = z.object({
   category: z.string().min(3, { message: "Category is too short" }),
   tags: z.string().min(1, { message: "At least one tag is required" }),
   difficulty: z.enum(["beginner", "intermediate", "advanced"], {
-    error: () => ({ message: "Please select a valid difficulty" }),
+    error: "Please select a valid difficulty",
   }),
-  file: z.any().optional(), // On the frontend, this will be a FileList
-
-  // --- Fields requiring transformation and coercion (the powerful part) ---
-
-  // Prize:
-  // 1. Starts as a string.
-  // 2. transform() attempts to convert it to a number.
-  // 3. The inner z.number() chain validates the result.
+  file: z.any().optional(),
   prize: z
     .string()
     .transform((val, ctx) => {
@@ -47,11 +38,6 @@ export const challengeSchema = z.object({
       return parsed;
     })
     .pipe(z.number().positive({ message: "Prize must be greater than 0" })),
-
-  // Deadline:
-  // 1. Starts as a string.
-  // 2. refine() checks if it's a valid date string.
-  // 3. transform() converts the valid string into a proper Date object.
   deadline: z
     .string()
     .refine((val) => val && !isNaN(Date.parse(val)), {

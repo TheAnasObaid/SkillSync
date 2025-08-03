@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
-  addMyPortfolioItem,
-  deleteMyPortfolioItem,
+  addMyIPortfolioItem,
+  deleteMyIPortfolioItem,
   getMe,
   getMyClientStats,
   getMyDeveloperStats,
@@ -20,11 +20,11 @@ meRouter.use(authenticate);
 meRouter.get("/", getMe);
 meRouter.put("/", updateMyProfile);
 meRouter.post("/avatar", uploadMyAvatar);
-meRouter.post("/portfolio", authorize("developer"), addMyPortfolioItem);
+meRouter.post("/portfolio", authorize("developer"), addMyIPortfolioItem);
 meRouter.delete(
   "/portfolio/:itemId",
   authorize("developer"),
-  deleteMyPortfolioItem
+  deleteMyIPortfolioItem
 );
 meRouter.get("/stats/developer", authorize("developer"), getMyDeveloperStats);
 meRouter.get("/stats/client", authorize("client"), getMyClientStats);

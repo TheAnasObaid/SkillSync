@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { PortfolioItem } from "@/types";
+import { IIPortfolioItem } from "@/types";
 import PortfolioCard from "./PortfolioCard";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import apiClient from "@/lib/apiClient";
@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
 interface PortfolioListProps {
-  initialPortfolio: PortfolioItem[];
+  initialPortfolio: IIPortfolioItem[];
   profileOwnerId: string;
 }
 
@@ -23,14 +23,14 @@ const PortfolioList = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [modalState, setModalState] = useState({
     isOpen: false,
-    itemToDelete: null as PortfolioItem | null,
+    itemToDelete: null as IIPortfolioItem | null,
   });
 
   const { user: loggedInUser } = useAuthStore();
 
   const isOwner = loggedInUser?._id === profileOwnerId;
 
-  const openDeleteModal = (item: PortfolioItem) => {
+  const openDeleteModal = (item: IIPortfolioItem) => {
     setModalState({ isOpen: true, itemToDelete: item });
   };
 
@@ -84,7 +84,7 @@ const PortfolioList = ({
         onConfirm={handleConfirmDelete}
         onCancel={() => setModalState({ isOpen: false, itemToDelete: null })}
         confirmText="Yes, Delete"
-        confirmButtonClass="btn-error"
+        variant="error"
         isActionInProgress={isDeleting}
       />
     </>

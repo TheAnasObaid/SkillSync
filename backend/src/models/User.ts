@@ -3,7 +3,7 @@ import crypto from "crypto";
 import mongoose, { Schema } from "mongoose";
 import { IUser } from "../types";
 
-const PortfolioItemSchema = new Schema({
+const IPortfolioItemSchema = new Schema({
   title: { type: String, required: true, trim: true },
   description: { type: String, required: true, trim: true },
   imageUrl: { type: String, required: true },
@@ -39,7 +39,7 @@ const UserSchema = new Schema<IUser>(
       bio: String,
       skills: [String],
       experience: String,
-      portfolio: [PortfolioItemSchema],
+      portfolio: [IPortfolioItemSchema],
       socialLinks: Object,
     },
     reputation: {

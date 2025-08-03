@@ -1,6 +1,5 @@
 "use client";
 
-import PublicSubmissionList from "@/components/Submission/PublicSubmissionList";
 import { IChallenge, ISubmission } from "@/types";
 import { useState } from "react";
 import { FiClock, FiUsers } from "react-icons/fi";
@@ -8,6 +7,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import SubmissionModal from "../Common/SubmissionModal";
 import UserAvatar from "../Profile/UserAvatar";
+import ISubmissonList from "../Submission/PublicSubmissionList";
 import ChallengeSidebar from "./ChallengeSidebar";
 
 type LiveSubmission = ISubmission & { isNew?: boolean };
@@ -142,10 +142,7 @@ const ChallengeDetailsClient = ({
               </div>
             )}
             {activeTab === "submissions" && (
-              <PublicSubmissionList
-                submissions={submissions}
-                isLoading={false}
-              />
+              <ISubmissonList submissions={submissions} isLoading={false} />
             )}
           </div>
           <ChallengeSidebar

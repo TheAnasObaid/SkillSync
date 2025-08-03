@@ -32,8 +32,8 @@ const StatCardGrid = async ({ stats, loading = false }: Props) => {
             label={stat.label}
             value={stat.value}
             color={stat.color}
-            // link={stat.link}
-            // linkText={stat.linkText}
+            link={stat.link}
+            linkText={stat.linkText}
           />
         </div>
       ))}

@@ -17,7 +17,7 @@ const SubmissionList = async ({ id }: { id: string }) => {
                 submission.developerId.profile.firstName}
             </p>
             <p>
-              <strong>Description:</strong> {submission.content}
+              <strong>Description:</strong> {submission.description}
             </p>
             <a href={"#"} target="_blank" className="link link-primary">
               View Code

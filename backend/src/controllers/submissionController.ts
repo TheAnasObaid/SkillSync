@@ -105,7 +105,7 @@ export const submitToChallenge = asyncHandler(
  * @route   GET /api/submissions/challenge/:challengeId
  * @access  Public
  */
-export const getPublicSubmissions = asyncHandler(
+export const getISubmissons = asyncHandler(
   async (req: Request, res: Response) => {
     const { challengeId } = req.params;
     const submissions = await Submission.find({ challengeId: challengeId })
@@ -174,59 +174,69 @@ export const selectWinner = asyncHandler(
     const session = await mongoose.startSession();
     session.startTransaction();
 
-    const winnerSubmission = await Submission.findById(submissionId).session(
-      session
-    );
-    if (!winnerSubmission) {
-      throw new Error("Submission not found.");
+    try {
+      const winnerSubmission = await Submission.findById(submissionId).session(
+        session
+      );
+      if (!winnerSubmission) {
+        throw new Error("Submission not found.");
+      }
+
+      const challenge = await Challenge.findById(
+        winnerSubmission.challengeId
+      ).session(session);
+      if (!challenge) {
+        throw new Error("Challenge not found.");
+      }
+
+      if (challenge.createdBy.toString() !== userId) {
+        throw new Error("Forbidden: You do not own this challenge.");
+      }
+
+      if (challenge.status === "completed") {
+        throw new Error(
+          "A winner has already been selected for this challenge."
+        );
+      }
+
+      winnerSubmission.status = "winner";
+      challenge.status = "completed";
+
+      const developer = await User.findById(
+        winnerSubmission.developerId
+      ).session(session);
+      if (developer && developer.reputation) {
+        developer.reputation.completedChallenges =
+          (developer.reputation.completedChallenges || 0) + 1;
+        await developer.save({ session });
+      }
+
+      await winnerSubmission.save({ session });
+      await challenge.save({ session });
+
+      await Submission.updateMany(
+        { challengeId: challenge._id, _id: { $ne: submissionId } },
+        { $set: { status: "rejected" } },
+        { session }
+      );
+
+      // --- NEW NOTIFICATION LOGIC ---
+      const developerId = winnerSubmission.developerId.toString();
+      emitToUser(developerId, "challenge_winner", {
+        message: `Congratulations! Your submission for "${challenge.title}" has been selected as the winner!`,
+        challengeId: challenge._id,
+      });
+      // --- END ---
+
+      await session.commitTransaction();
+      res.status(200).json({ message: "Winner selected successfully." });
+    } catch (error) {
+      await session.abortTransaction();
+      // The asyncHandler will catch this and send an appropriate response
+      throw error;
+    } finally {
+      session.endSession();
     }
-
-    const challenge = await Challenge.findById(
-      winnerSubmission.challengeId
-    ).session(session);
-    if (!challenge) {
-      throw new Error("Challenge not found.");
-    }
-
-    if (challenge.createdBy.toString() !== userId) {
-      throw new Error("Forbidden: You do not own this challenge.");
-    }
-
-    if (challenge.status === "completed") {
-      throw new Error("A winner has already been selected for this challenge.");
-    }
-
-    winnerSubmission.status = "winner";
-    challenge.status = "completed";
-
-    const developer = await User.findById(winnerSubmission.developerId).session(
-      session
-    );
-    if (developer && developer.reputation) {
-      developer.reputation.completedChallenges =
-        (developer.reputation.completedChallenges || 0) + 1;
-      await developer.save({ session });
-    }
-
-    await winnerSubmission.save({ session });
-    await challenge.save({ session });
-
-    await Submission.updateMany(
-      { challengeId: challenge._id, _id: { $ne: submissionId } },
-      { $set: { status: "rejected" } },
-      { session }
-    );
-
-    // --- NEW NOTIFICATION LOGIC ---
-    const developerId = winnerSubmission.developerId.toString();
-    emitToUser(developerId, "challenge_winner", {
-      message: `Congratulations! Your submission for "${challenge.title}" has been selected as the winner!`,
-      challengeId: challenge._id,
-    });
-    // --- END ---
-
-    await session.commitTransaction();
-    res.status(200).json({ message: "Winner selected successfully." });
   }
 );
 

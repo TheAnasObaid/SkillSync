@@ -6,6 +6,7 @@ import ConfirmationModal from "../Common/ConfirmationModal";
 import EmptyState from "../Common/EmptyState";
 import SubmissionCard from "./SubmissionCard";
 import EditSubmissionModal from "../Submission/EditSubmissionModal";
+import { FiTrash2 } from "react-icons/fi";
 
 const DeveloperSubmissionList = ({
   submissions,
@@ -64,8 +65,9 @@ const DeveloperSubmissionList = ({
         onConfirm={handleDeleteConfirm}
         onCancel={closeModal}
         confirmText="Yes, Withdraw"
-        confirmButtonClass="btn-error"
+        variant="error"
         isActionInProgress={isUpdating}
+        icon={<FiTrash2 size={48} />}
       />
     </>
   );

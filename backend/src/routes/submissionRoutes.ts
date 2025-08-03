@@ -1,7 +1,7 @@
 import { Router } from "express";
 import {
   getMySubmissions,
-  getPublicSubmissions,
+  getISubmissons,
   getSubmissionsForChallenge,
   rateSubmission,
   selectWinner,
@@ -11,17 +11,22 @@ import {
 } from "../controllers/submissionController";
 import { authenticate, authorize } from "../middleware/auth";
 
-const router = Router();
+const submissionsRouter = Router();
 
 // Routes for the LOGGED-IN developer
-router.get("/me", authenticate, authorize("developer"), getMySubmissions);
+submissionsRouter.get(
+  "/me",
+  authenticate,
+  authorize("developer"),
+  getMySubmissions
+);
 
 // --- Routes related to a SPECIFIC CHALLENGE ---
 // GET /api/submissions/challenge/:challengeId (Public submissions)
-router.get("/challenge/:challengeId", getPublicSubmissions);
+submissionsRouter.get("/challenge/:challengeId", getISubmissons);
 
 // POST /api/submissions/challenge/:challengeId (Submit a solution)
-router.post(
+submissionsRouter.post(
   "/challenge/:challengeId",
   authenticate,
   authorize("developer"),
@@ -29,7 +34,7 @@ router.post(
 );
 
 // GET /api/submissions/challenge/:challengeId/review (Client's review view)
-router.get(
+submissionsRouter.get(
   "/challenge/:challengeId/review",
   authenticate,
   authorize("client"),
@@ -38,7 +43,7 @@ router.get(
 
 // --- Routes for a SPECIFIC SUBMISSION ---
 // PATCH /api/submissions/:submissionId/winner (Select a winner)
-router.patch(
+submissionsRouter.patch(
   "/:submissionId/winner",
   authenticate,
   authorize("client"),
@@ -46,7 +51,7 @@ router.patch(
 );
 
 // POST /api/submissions/:submissionId/rate (Rate a submission)
-router.post(
+submissionsRouter.post(
   "/:submissionId/rate",
   authenticate,
   authorize("client"),
@@ -55,11 +60,17 @@ router.post(
 
 // --- NEW DYNAMIC ROUTES FOR A SPECIFIC SUBMISSION ---
 
-router.put("/:id", authenticate, authorize("developer"), updateMySubmission);
-router.delete(
+submissionsRouter.put(
+  "/:id",
+  authenticate,
+  authorize("developer"),
+  updateMySubmission
+);
+submissionsRouter.delete(
   "/:id",
   authenticate,
   authorize("developer"),
   withdrawMySubmission
 );
-export default router;
+
+export default submissionsRouter;

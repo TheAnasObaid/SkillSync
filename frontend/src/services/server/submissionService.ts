@@ -1,7 +1,7 @@
 import { getServerApi } from "@/lib/serverApi";
 import { ISubmission } from "@/types";
 
-export const getPublicSubmissionsServer = async (
+export const getISubmissonsServer = async (
   challengeId: string
 ): Promise<ISubmission[]> => {
   try {
@@ -12,7 +12,7 @@ export const getPublicSubmissionsServer = async (
     return response.data;
   } catch (error) {
     console.error(
-      `Service Error: getPublicSubmissionsServer for challenge ${challengeId} failed`,
+      `Service Error: getISubmissonsServer for challenge ${challengeId} failed`,
       error
     );
     return [];

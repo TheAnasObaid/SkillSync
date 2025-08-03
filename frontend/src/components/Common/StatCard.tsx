@@ -1,7 +1,8 @@
 import Link from "next/link";
+import { ReactNode } from "react";
 
 interface Props {
-  icon: React.ReactNode;
+  icon: ReactNode;
   label: string;
   value: number | string;
   link?: string;

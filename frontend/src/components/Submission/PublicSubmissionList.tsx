@@ -7,7 +7,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const PublicSubmissionList = ({ submissions, isLoading }: Props) => {
+const ISubmissonList = ({ submissions, isLoading }: Props) => {
   if (isLoading) {
     return (
       <div className="flex justify-center p-10">
@@ -18,7 +18,7 @@ const PublicSubmissionList = ({ submissions, isLoading }: Props) => {
 
   if (submissions.length === 0) {
     return (
-      <div className="text-center p-12 bg-base-200/50 border border-dashed border-base-300 rounded-lg">
+      <div className="text-center p-12 bg-base-200/50 border border-base-300 rounded-lg">
         <FiInbox className="mx-auto text-5xl text-base-content/40 mb-4" />
         <h3 className="text-2xl font-bold">No Submissions Yet</h3>
         <p className="text-base-content/70 mt-2">
@@ -37,4 +37,4 @@ const PublicSubmissionList = ({ submissions, isLoading }: Props) => {
   );
 };
 
-export default PublicSubmissionList;
+export default ISubmissonList;

@@ -17,7 +17,7 @@ const statusStyles = {
 const RecentChallengePreview = ({ challenges }: Props) => {
   if (challenges.length === 0) {
     return (
-      <div className="text-center p-8 bg-base-200/50 border border-dashed rounded-lg">
+      <div className="text-center p-8 bg-base-200/50 border border-base-300 rounded-lg">
         <p className="text-base-content/70">
           You haven't posted any challenges yet.
         </p>
@@ -60,4 +60,5 @@ const RecentChallengePreview = ({ challenges }: Props) => {
     </div>
   );
 };
+
 export default RecentChallengePreview;

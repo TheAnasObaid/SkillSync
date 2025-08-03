@@ -25,12 +25,14 @@ const DeveloperDashboardPage = async () => {
           label: "Challenges Won",
           value: statsData.winningSubmissions,
           color: "blue",
+          link: "/developer/dashboard/submissions",
         },
         {
           icon: <FiClock size={24} />,
           label: "Pending Reviews",
           value: statsData.pendingReviews,
           color: "orange",
+          link: "/developer/dashboard/submissions",
         },
       ]
     : [];

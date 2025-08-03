@@ -57,6 +57,7 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
           )}
           <div className="flex items-center gap-2 text-primary font-bold text-xl">
             <FiAward />
+            {/* FIX: Use challenge.prize which is now a number */}
             <span>${challenge.prize.toLocaleString()}</span>
           </div>
         </div>

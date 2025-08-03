@@ -4,7 +4,7 @@ import upload, { uploadPortfolioImage } from "../middleware/upload";
 import Challenge from "../models/Challenge";
 import Submission from "../models/Submission";
 import User from "../models/User";
-import { PortfolioItem } from "../types";
+import { IPortfolioItem } from "../types";
 import asyncHandler from "../utils/asyncHandler";
 
 /**
@@ -92,7 +92,7 @@ export const uploadMyAvatar = asyncHandler(
  * @route   POST /api/users/me/portfolio
  * @access  Private (Developer)
  */
-export const addMyPortfolioItem = asyncHandler(
+export const addMyIPortfolioItem = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     uploadPortfolioImage(req, res, async (err) => {
       if (err) {
@@ -117,7 +117,7 @@ export const addMyPortfolioItem = asyncHandler(
           .json({ message: "Title and description are required." });
       }
 
-      const newItem: PortfolioItem = {
+      const newItem: IPortfolioItem = {
         title,
         description,
         imageUrl: req.file.path,
@@ -137,7 +137,7 @@ export const addMyPortfolioItem = asyncHandler(
  * @route   DELETE /api/users/me/portfolio/:itemId
  * @access  Private (Developer)
  */
-export const deleteMyPortfolioItem = asyncHandler(
+export const deleteMyIPortfolioItem = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { itemId } = req.params;
     const user = await User.findById(req.userId);

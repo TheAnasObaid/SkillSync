@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from "express";
 import { ZodObject } from "zod";
 
 const validate =
-  (schema: ZodObject) =>
+  (schema: ZodObject<any, any>) =>
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       await schema.parseAsync(req.body);

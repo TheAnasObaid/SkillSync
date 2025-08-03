@@ -2,7 +2,6 @@ import PortfolioList from "@/components/Profile/PortfolioList";
 import ProfileView from "@/components/Profile/ProfileView";
 import Reputation from "@/components/Profile/Reputation";
 import { getPublicUserProfile } from "@/services/server/userService";
-import { FiAward } from "react-icons/fi";
 
 interface Props {
   params: Promise<{ id: string }>;

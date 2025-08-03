@@ -18,8 +18,9 @@ const Reputation = ({ user }: Props) => {
             <div className="stat-value text-primary">
               {user.reputation?.rating.toFixed(1) || "N/A"} ★
             </div>
+            {/* FIX: Changed from completedChallenges to totalRatings for accuracy */}
             <div className="stat-desc">
-              From {user.reputation?.completedChallenges || 0} reviews
+              From {user.reputation?.totalRatings || 0} reviews
             </div>
           </div>
           <div className="stat">

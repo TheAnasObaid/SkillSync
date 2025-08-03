@@ -1,7 +1,7 @@
 import RegisterForm from "@/components/Auth/RegisterForm";
 import { Suspense } from "react";
 
-const RegisterPage = () => {
+const RegisterPage = async () => {
   return (
     <div className="flex flex-col items-center w-full p-4">
       <Suspense

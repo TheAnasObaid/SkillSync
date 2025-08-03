@@ -37,7 +37,6 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
   return (
     <>
       <div className="space-y-4">
-        <h1 className="text-3xl font-bold mb-2">My Challenges</h1>
         {challenges.map((challenge) => (
           <div
             key={challenge._id}
@@ -91,7 +90,7 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
         onConfirm={modalState.onConfirm}
         onCancel={closeModal}
         confirmText="Yes, Delete"
-        confirmButtonClass="btn-error"
+        variant="error"
         isActionInProgress={isDeleting}
       />
     </>

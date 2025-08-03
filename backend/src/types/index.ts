@@ -10,7 +10,7 @@ export interface File {
 export type Role = "developer" | "client" | "admin";
 export type AccountStatus = "active" | "banned";
 
-export interface PortfolioItem {
+export interface IPortfolioItem {
   _id?: Types.ObjectId;
   title: string;
   description: string;
@@ -33,7 +33,7 @@ export interface IUser extends Document {
     bio?: string;
     skills: string[];
     experience?: string;
-    portfolio: PortfolioItem[];
+    portfolio: IPortfolioItem[];
     socialLinks?: Record<string, string>;
   };
   reputation: {

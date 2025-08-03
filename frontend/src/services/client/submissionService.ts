@@ -1,7 +1,7 @@
 import apiClient from "@/lib/apiClient";
-import { ISubmission, PublicSubmission } from "@/types";
+import { ISubmission } from "@/types";
 
-export const getPublicSubmissionsClient = async (
+export const getISubmissonsClient = async (
   challengeId: string
 ): Promise<ISubmission[]> => {
   try {
@@ -11,7 +11,7 @@ export const getPublicSubmissionsClient = async (
     return response.data;
   } catch (error) {
     console.error(
-      `Client Service Error: getPublicSubmissionsClient for challenge ${challengeId} failed`,
+      `Client Service Error: getISubmissonsClient for challenge ${challengeId} failed`,
       error
     );
     return [];

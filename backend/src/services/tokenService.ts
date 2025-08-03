@@ -1,17 +1,24 @@
+// ===== File: backend\src\services\tokenService.ts =====
 import jwt from "jsonwebtoken";
 import appConfig from "../config/config";
-import { IUser } from "../types";
+// FIX: No longer need the full IUser type, just the Role
+import { Role } from "../types";
 
 const JWT_SECRET = appConfig.jwtSecret!;
 const JWT_EXPIRES_IN = "7d";
 
 /**
- * Generates a JWT for a given user ID.
- * @param userId The ID of the user.
+ * Generates a JWT for a given user payload.
+ * FIX: The function now accepts a plain object with only the required data.
+ * This is more robust than passing a full Mongoose document.
+ * @param userPayload The user's ID and role.
  * @returns The generated JWT.
  */
-export const generateToken = (user: IUser): string => {
-  return jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, {
+export const generateToken = (userPayload: {
+  id: string;
+  role: Role;
+}): string => {
+  return jwt.sign({ id: userPayload.id, role: userPayload.role }, JWT_SECRET, {
     expiresIn: JWT_EXPIRES_IN,
   });
 };
@@ -25,7 +32,6 @@ export const verifyToken = (token: string): { id: string } => {
   try {
     return jwt.verify(token, JWT_SECRET) as { id: string };
   } catch (error) {
-    // You can handle different error types like TokenExpiredError here
     throw new Error("Invalid or expired token");
   }
 };

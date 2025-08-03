@@ -39,10 +39,7 @@ const ProfileDropdown = ({ user, dashboardHref, onModalOpen }: Props) => {
         </li>
         <div className="divider my-1"></div>
         <li>
-          <button
-            className="btn btn-error btn-soft"
-            onClick={() => onModalOpen(true)}
-          >
+          <button className="text-error" onClick={() => onModalOpen(true)}>
             Logout
           </button>
         </li>
