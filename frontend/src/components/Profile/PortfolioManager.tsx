@@ -106,7 +106,7 @@ const PortfolioManager = ({
           ))}
         </div>
       ) : (
-        <div className="text-center p-12 bg-base-200/50 border border-dashed rounded-lg">
+        <div className="text-center p-12 bg-base-200/50 border border-base-300 rounded-lg">
           <p className="text-base-content/60">Your portfolio is empty.</p>
         </div>
       )}

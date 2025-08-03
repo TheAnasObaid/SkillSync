@@ -21,7 +21,7 @@ const EmptyState = ({
   ctaLink = "/",
 }: EmptyStateProps) => {
   return (
-    <div className="card bg-base-200/50 border border-dashed border-base-300">
+    <div className="card bg-base-200/50 border border-base-300">
       <div className="card-body items-center text-center p-12">
         {icon}
         <h2 className="card-title text-2xl font-bold mt-4">{title}</h2>
