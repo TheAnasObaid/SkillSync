@@ -1,11 +1,9 @@
-import DashboardLayout from "@/components/Layout/DashboardLayout";
+import RecentChallengePreview from "@/components/Client/RecentChallengePreview";
+import StatCardGrid, { StatItem } from "@/components/Common/StatCardGrid";
 import { getMyChallenges } from "@/services/server/challengeService";
 import { getMyClientStats } from "@/services/server/userService";
-import { clientSidebarLinks } from "@/config/dashboard";
-import { FiArchive, FiCheckSquare, FiClipboard } from "react-icons/fi";
-import RecentChallengePreview from "@/components/Client/RecentChallengePreview"; // <-- Import the new component
 import Link from "next/link";
-import StatCardGrid, { StatItem } from "@/components/Common/StatCardGrid";
+import { FiArchive, FiCheckSquare, FiClipboard } from "react-icons/fi";
 
 const ClientDashboardPage = async () => {
   const [statsData, allChallengesData] = await Promise.all([
@@ -29,12 +27,14 @@ const ClientDashboardPage = async () => {
           label: "Active Challenges",
           value: statsData.activeChallenges,
           color: "blue",
+          link: "/client/dashboard/challenges",
         },
         {
           icon: <FiClipboard size={24} />,
           label: "Submissions Received",
           value: statsData.totalSubmissionsReceived,
           color: "orange",
+          link: "/client/dashboard/challenges",
         },
       ]
     : [];

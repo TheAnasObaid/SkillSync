@@ -20,12 +20,14 @@ const AdminPanelPage = async () => {
           label: "Total Challenges",
           value: statsData.totalChallenges,
           color: "orange",
+          link: "/challenges",
         },
         {
           icon: <FiCheckSquare size={24} />,
           label: "Completed",
           value: statsData.completedChallenges,
           color: "blue",
+          link: "/challenges",
         },
         {
           icon: <FiClipboard size={24} />,

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import {
   IUser,
-  PortfolioItem,
+  IIPortfolioItem,
   ProfileFormData,
   PortfolioFormData as AddPortfolioFormData,
 } from "@/types";
@@ -19,7 +19,7 @@ export const useDeveloperProfile = (initialUser: IUser) => {
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
-    item: null as PortfolioItem | null,
+    item: null as IIPortfolioItem | null,
   });
   const [isActionInProgress, setIsActionInProgress] = useState(false);
 
@@ -74,7 +74,7 @@ export const useDeveloperProfile = (initialUser: IUser) => {
     const toastId = toast.loading("Adding project...");
     setIsActionInProgress(true);
     try {
-      const response = await apiClient.post<PortfolioItem[]>(
+      const response = await apiClient.post<IIPortfolioItem[]>(
         "/users/me/portfolio",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }

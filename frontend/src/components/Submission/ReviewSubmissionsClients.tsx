@@ -90,6 +90,7 @@ const ReviewSubmissionsClient = ({
         onCancel={closeModal}
         confirmText="Confirm & Select"
         isActionInProgress={isUpdating}
+        icon={<FiAward size={48} />}
       />
     </>
   );

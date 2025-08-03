@@ -1,7 +1,9 @@
 "use client";
 
 import Modal from "./Modal";
-import { FiAlertTriangle } from "react-icons/fi";
+import { ReactNode } from "react";
+// Import a set of default/fallback icons
+import { FiAlertTriangle, FiHelpCircle } from "react-icons/fi";
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -13,6 +15,7 @@ interface ConfirmationModalProps {
   cancelText?: string;
   variant?: "primary" | "error" | "warning" | "info";
   isActionInProgress?: boolean;
+  icon?: ReactNode; // FIX: Add the optional icon prop
 }
 
 const ConfirmationModal = ({
@@ -25,6 +28,7 @@ const ConfirmationModal = ({
   cancelText = "Cancel",
   variant = "primary",
   isActionInProgress = false,
+  icon, // FIX: Destructure the new prop
 }: ConfirmationModalProps) => {
   const themeClasses = {
     primary: { button: "btn-primary", icon: "text-primary" },
@@ -33,14 +37,27 @@ const ConfirmationModal = ({
     info: { button: "btn-info", icon: "text-info" },
   };
 
+  // FIX: Define default icons to use if a specific one isn't provided
+  const getDefaultIcon = () => {
+    switch (variant) {
+      case "error":
+      case "warning":
+        return <FiAlertTriangle size={48} />;
+      case "primary":
+      case "info":
+      default:
+        return <FiHelpCircle size={48} />;
+    }
+  };
+
   const currentTheme = themeClasses[variant];
+  // FIX: Use the provided icon, or fall back to the default
+  const displayIcon = icon || getDefaultIcon();
 
   return (
     <Modal isOpen={isOpen} onClose={onCancel} title={title}>
       <div className="grid grid-cols-1 gap-4 text-center">
-        <div className={`mx-auto ${currentTheme.icon}`}>
-          <FiAlertTriangle size={48} />
-        </div>
+        <div className={`mx-auto ${currentTheme.icon}`}>{displayIcon}</div>
         <p className="text-base-content/80">{message}</p>
         <div className="modal-action justify-center">
           <button

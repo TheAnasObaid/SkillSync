@@ -20,7 +20,7 @@ interface AdminProfileFormData {
 }
 
 const AdminProfileClient = ({ initialUser }: Props) => {
-  const [user, setUser] = useState<IUser>(initialUser);
+  const [user, setUser] = useState<IUser | null>(initialUser);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
@@ -61,15 +61,20 @@ const AdminProfileClient = ({ initialUser }: Props) => {
     const formData = new FormData();
     formData.append("file", file);
 
+    const toastId = toast.loading("Uploading avatar...");
     try {
-      const response = await apiClient.post("/users/upload-avatar", formData);
-      setUser({
-        ...user!,
-        profile: { ...user!.profile!, avatar: response.data.avatarUrl },
-      });
-      toast.success("Avatar updated successfully!");
+      // FIX: Corrected the API endpoint for avatar upload
+      const response = await apiClient.post("/users/me/avatar", formData);
+      setUser(
+        (prevUser) =>
+          prevUser && {
+            ...prevUser,
+            profile: { ...prevUser.profile, avatar: response.data.avatarUrl },
+          }
+      );
+      toast.success("Avatar updated successfully!", { id: toastId });
     } catch (error) {
-      toast.error("Failed to upload avatar.");
+      toast.error("Failed to upload avatar.", { id: toastId });
     }
   };
 

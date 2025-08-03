@@ -32,8 +32,8 @@
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
-  --depth: 1;
-  --noise: 0.03;
+  --depth: 0;
+  --noise: 0;
 }
 
 @keyframes scroll-vertical {

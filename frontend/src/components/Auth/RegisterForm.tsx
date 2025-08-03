@@ -11,7 +11,7 @@ const RegisterForm = () => {
 
   return (
     <div className="grid gap-6 max-w-md w-full">
-      <div className="card bg-base-200/ ৫০ border border-base-300 w-full shadow-lg">
+      <div className="card bg-base-200/50 border border-base-300 w-full shadow-lg">
         <div className="card-body p-8">
           <h1 className="card-title text-2xl font-bold justify-center">
             Create Your Account

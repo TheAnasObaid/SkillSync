@@ -88,7 +88,6 @@ const DashboardHeader = () => {
         onConfirm={handleLogout}
         onCancel={() => setModalOpen(false)}
         confirmText="Yes, Logout"
-        confirmButtonClass="btn-error"
       />
     </>
   );

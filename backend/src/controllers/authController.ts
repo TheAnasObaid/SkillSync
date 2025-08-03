@@ -132,7 +132,8 @@ export const loginUser = asyncHandler(async (req: Request, res: Response) => {
     return;
   }
 
-  const token = generateToken(user);
+  const token = generateToken({ id: user.id, role: user.role });
+
   const userPayload = user.toObject();
   delete userPayload.password;
 
@@ -284,10 +285,18 @@ export const resetPassword = asyncHandler(
     user.passwordResetToken = undefined;
     user.passwordResetExpires = undefined;
 
+    // FIX: Pass a plain object to the updated generateToken function.
+    const token = generateToken({ id: user.id, role: user.role });
+
+    const userPayload = user.toObject();
+    delete userPayload.password;
+
     await user.save();
+
     res.status(200).json({
       status: "success",
-      token: generateToken(user),
+      token,
+      user: userPayload,
     });
   }
 );

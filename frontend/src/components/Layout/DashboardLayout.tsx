@@ -5,7 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FiHome } from "react-icons/fi";
 import { IoReturnUpBack } from "react-icons/io5";
-import Header from "./Header";
 
 interface Props {
   children: React.ReactNode;

@@ -6,6 +6,7 @@ import ConfirmationModal from "../Common/ConfirmationModal";
 import EmptyState from "../Common/EmptyState";
 import SubmissionCard from "./SubmissionCard";
 import EditSubmissionModal from "../Submission/EditSubmissionModal";
+import { FiTrash2 } from "react-icons/fi";
 
 const DeveloperSubmissionList = ({
   submissions,
@@ -59,7 +60,6 @@ const DeveloperSubmissionList = ({
 
       <ConfirmationModal
         isOpen={isDeleteModalOpen}
-        variant="error"
         title="Withdraw Submission"
         message="Are you sure you want to withdraw this submission? This action cannot be undone."
         onConfirm={handleDeleteConfirm}
@@ -67,6 +67,7 @@ const DeveloperSubmissionList = ({
         confirmText="Yes, Withdraw"
         variant="error"
         isActionInProgress={isUpdating}
+        icon={<FiTrash2 size={48} />}
       />
     </>
   );

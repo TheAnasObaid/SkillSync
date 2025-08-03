@@ -10,6 +10,7 @@ import UserAvatar from "../Profile/UserAvatar";
 import NotificationBell from "./NotificationBell";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import ProfileDropdown from "../Common/ProfileDropdown";
+import { FiLogOut } from "react-icons/fi";
 
 const spaceMono = Space_Mono({
   subsets: ["latin"],
@@ -96,7 +97,7 @@ const Header = () => {
         onConfirm={handleLogout}
         onCancel={() => setModalOpen(false)}
         confirmText="Yes, Logout"
-        confirmButtonClass="btn-error"
+        icon={<FiLogOut size={48} />}
       />
     </>
   );

@@ -1,3 +1,4 @@
+// ===== File: frontend\src/components/Challenge/ChallengeForm.tsx =====
 "use client";
 
 import { useChallengeForm } from "@/hooks/useChallengeForm";
@@ -24,15 +25,16 @@ const FormSectionHeader = ({
 );
 
 const ChallengeForm = ({ isEditing = false, existingChallenge }: Props) => {
-  const { form, isSubmitting, onSubmit } = useChallengeForm(
+  // FIX: Destructure the new `submitHandler` and remove the need for `onSubmit` and `handleSubmit` here
+  const { form, isSubmitting, submitHandler } = useChallengeForm(
     isEditing,
     existingChallenge
   );
-  const { handleSubmit } = form;
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={handleSubmit(onSubmit)} className="grid gap-8">
+      {/* FIX: Pass the ready-to-use submitHandler to the form's onSubmit prop */}
+      <form onSubmit={submitHandler} className="grid gap-8">
         <section className="grid gap-6">
           <FormSectionHeader
             title="Core Details"

@@ -1,10 +1,10 @@
 const avatarColors = [
-  "bg-primary/20 text-primary",
   "bg-secondary/20 text-secondary-content",
+  "bg-primary/20 text-primary",
   "bg-accent/20 text-accent",
   "bg-info/20 text-info",
   "bg-success/20 text-success",
-  "bg-warning/20 text-warning-content",
+  "bg-warning/20 text-warning",
   "bg-error/20 text-error",
 ];
 

@@ -7,7 +7,7 @@ interface Props {
   isLoading: boolean;
 }
 
-const PublicSubmissionList = ({ submissions, isLoading }: Props) => {
+const ISubmissonList = ({ submissions, isLoading }: Props) => {
   if (isLoading) {
     return (
       <div className="flex justify-center p-10">
@@ -37,4 +37,4 @@ const PublicSubmissionList = ({ submissions, isLoading }: Props) => {
   );
 };
 
-export default PublicSubmissionList;
+export default ISubmissonList;

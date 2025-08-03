@@ -1,13 +1,16 @@
+// ===== File: frontend\src\app\(dashboard)\client\dashboard\profile\page.tsx =====
 "use client";
 
+import { TextInput, Textarea } from "@/components/Forms/FormFields";
 import ProfileView from "@/components/Profile/ProfileView";
 import apiClient from "@/lib/apiClient";
 import { IUser } from "@/types";
 import { AxiosError } from "axios";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import { useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { FiEdit, FiX } from "react-icons/fi";
+import FormCard from "@/components/Common/FormCard";
 
 interface ClientProfileFormData {
   name: string;
@@ -26,12 +29,12 @@ function ClientProfilePage() {
   const [isEditMode, setIsEditMode] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
+  const formMethods = useForm<ClientProfileFormData>();
   const {
-    register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<ClientProfileFormData>();
+  } = formMethods;
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -55,25 +58,32 @@ function ClientProfilePage() {
     const formData = new FormData();
     formData.append("file", file);
 
+    const toastId = toast.loading("Uploading avatar...");
     try {
       const response = await apiClient.post("/users/me/avatar", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      setUser({
-        ...user!,
-        profile: { ...user!.profile!, avatar: response.data.avatarUrl },
-      });
-      toast.success("Avatar updated successfully!");
+      setUser((prevUser) =>
+        prevUser
+          ? {
+              ...prevUser,
+              profile: {
+                ...prevUser.profile!,
+                avatar: response.data.avatarUrl,
+              },
+            }
+          : null
+      );
+      toast.success("Avatar updated successfully!", { id: toastId });
     } catch (error) {
-      toast.error("Failed to upload avatar.");
+      toast.error("Failed to upload avatar.", { id: toastId });
     }
   };
 
   const handleFormSubmit = async (data: ClientProfileFormData) => {
     setError("");
     setIsSubmitting(true);
+    const toastId = toast.loading("Updating profile...");
     try {
       const updatePayload = {
         name: data.name,
@@ -82,11 +92,12 @@ function ClientProfilePage() {
       const response = await apiClient.put<IUser>("/users/me", updatePayload);
       setUser(response.data);
       setIsEditMode(false);
-      toast.success("Profile updated successfully!");
+      toast.success("Profile updated successfully!", { id: toastId });
     } catch (err) {
       if (err instanceof AxiosError) {
         setError(err.response?.data.message || "Failed to update profile.");
       }
+      toast.error("Failed to update profile.", { id: toastId });
     } finally {
       setIsSubmitting(false);
     }
@@ -127,8 +138,20 @@ function ClientProfilePage() {
 
       {error && <div className="alert alert-error mb-6">{error}</div>}
 
-      {isEditMode ? (
-        <div>Form here</div>
+      {isEditMode && user ? (
+        <FormProvider {...formMethods}>
+          <FormCard
+            onSubmit={handleSubmit(handleFormSubmit)}
+            isSubmitting={isSubmitting}
+          >
+            <div className="grid md:grid-cols-2 gap-4">
+              <TextInput name="name" label="First Name" />
+              <TextInput name="profile.lastName" label="Last Name" />
+            </div>
+            <TextInput name="profile.companyName" label="Company Name" />
+            <Textarea name="profile.bio" label="Bio / Company Details" />
+          </FormCard>
+        </FormProvider>
       ) : loading ? (
         <div className="flex justify-center p-10">
           <span className="loading loading-spinner loading-lg"></span>
@@ -139,7 +162,6 @@ function ClientProfilePage() {
             user={user}
             onAvatarClick={() => avatarInputRef.current?.click()}
           />
-
           <input
             type="file"
             ref={avatarInputRef}

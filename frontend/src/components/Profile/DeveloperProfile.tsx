@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { SubmitHandler } from "react-hook-form";
-import { IUser, IPortfolioItem, ProfileFormData } from "@/types";
+import { IUser, IIPortfolioItem, ProfileFormData } from "@/types";
 import toast from "react-hot-toast";
 import apiClient from "@/lib/apiClient";
 
@@ -40,7 +40,7 @@ const DeveloperProfile = ({ initialUser }: { initialUser: IUser }) => {
     }
   };
 
-  const onPortfolioUpdate = (updatedPortfolio: IPortfolioItem[]) => {
+  const onPortfolioUpdate = (updatedPortfolio: IIPortfolioItem[]) => {
     setUser((prev) => ({
       ...prev!,
       profile: { ...prev!.profile, portfolio: updatedPortfolio },

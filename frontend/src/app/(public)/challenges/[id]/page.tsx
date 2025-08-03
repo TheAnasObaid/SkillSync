@@ -2,7 +2,7 @@
 
 import ChallengeDetailsClient from "@/components/Challenge/ChallengeDetailsClient";
 import { getChallengeByIdClient } from "@/services/client/challengeService";
-import { getPublicSubmissionsClient } from "@/services/client/submissionService";
+import { getISubmissonsClient } from "@/services/client/submissionService";
 import { IChallenge, ISubmission } from "@/types";
 import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
@@ -23,7 +23,7 @@ const ChallengeDetailsPage = () => {
     try {
       const [challengeData, submissionsData] = await Promise.all([
         getChallengeByIdClient(id as string),
-        getPublicSubmissionsClient(id as string),
+        getISubmissonsClient(id as string),
       ]);
 
       if (!challengeData) {

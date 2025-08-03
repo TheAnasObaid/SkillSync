@@ -1,13 +1,13 @@
 "use client";
 
 import useImageFallback from "@/hooks/useImageFallback";
-import { PortfolioItem } from "@/types";
+import { IIPortfolioItem } from "@/types";
 import Link from "next/link";
 import { FiExternalLink, FiGithub, FiTrash } from "react-icons/fi";
 
 interface Props {
-  item: PortfolioItem;
-  onDelete: (item: PortfolioItem) => void;
+  item: IIPortfolioItem;
+  onDelete: (item: IIPortfolioItem) => void;
   isOwner: boolean;
 }
 
@@ -25,7 +25,6 @@ const PortfolioCard = ({ item, onDelete, isOwner }: Props) => {
   return (
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50 group">
       <figure className="relative h-48 bg-base-300">
-        {" "}
         <img
           {...imageProps}
           alt={item.title}

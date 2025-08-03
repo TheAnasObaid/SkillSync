@@ -60,4 +60,5 @@ const RecentChallengePreview = ({ challenges }: Props) => {
     </div>
   );
 };
+
 export default RecentChallengePreview;
