@@ -1,10 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { IChallenge } from "@/types";
 import apiClient from "@/lib/apiClient";
 import toast from "react-hot-toast";
+import { useAuthStore } from "@/store/authStore";
 
 export const useChallengeManager = (initialChallenges: IChallenge[]) => {
   const [challenges, setChallenges] = useState<IChallenge[]>(initialChallenges);
@@ -16,7 +16,7 @@ export const useChallengeManager = (initialChallenges: IChallenge[]) => {
     onConfirm: () => {},
   });
 
-  const router = useRouter();
+  const { user } = useAuthStore(); // <-- ADD THIS
 
   const openDeleteModal = (challenge: IChallenge) => {
     setModalState({
@@ -53,5 +53,6 @@ export const useChallengeManager = (initialChallenges: IChallenge[]) => {
     modalState,
     openDeleteModal,
     closeModal,
+    currentUser: user,
   };
 };

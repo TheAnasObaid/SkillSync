@@ -34,6 +34,7 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
     setChallenges,
     isDeleting,
     modalState,
+    currentUser,
     openDeleteModal,
     closeModal,
   } = useChallengeManager(initialChallenges);
@@ -106,6 +107,14 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
                 </p>
               </div>
               <div className="card-actions justify-end mt-4 sm:mt-0">
+                {currentUser?._id === challenge.createdBy && (
+                  <Link
+                    href={`/challenges/${challenge._id}/review`}
+                    className="btn btn-secondary btn-sm"
+                  >
+                    <FiEye /> Review Submissions
+                  </Link>
+                )}
                 {challenge.isFunded ? (
                   <span className="badge badge-success badge-soft font-medium gap-1 text-xs">
                     <FiCheckCircle /> Funded
@@ -144,13 +153,13 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
 
       <ConfirmationModal
         isOpen={fundModalState.isOpen}
-        title="Fund Challenge"
-        message={`This will simulate a payment of $${fundModalState.challenge?.prize.toLocaleString()} for "${
+        title="Fund Challenge Prize"
+        message={`You are about to fund the prize of $${fundModalState.challenge?.prize.toLocaleString()} for the challenge "${
           fundModalState.challenge?.title
         }". Do you want to proceed?`}
         onConfirm={handleFundConfirm}
         onCancel={() => setFundModalState({ isOpen: false, challenge: null })}
-        confirmText="Yes, Pay Now"
+        confirmText="Yes, Confirm Payment"
         variant="primary"
         isActionInProgress={isFunding}
         icon={<FiDollarSign size={48} />}

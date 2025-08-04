@@ -1,9 +1,8 @@
 import { IChallenge } from "@/types";
 import Link from "next/link";
 import { FiArrowRight, FiClock, FiAward } from "react-icons/fi";
-import UserAvatar from "../Profile/UserAvatar"; // <-- Import UserAvatar for client info
+import UserAvatar from "../Profile/UserAvatar";
 
-// The props interface should be updated to expect a potentially populated `createdBy` field
 interface ChallengeCardProps {
   challenge: IChallenge;
 }
@@ -15,8 +14,6 @@ const difficultyStyles = {
 };
 
 const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
-  // --- 1. ROBUST DATA HANDLING ---
-  // Safely format the deadline and handle populated client data.
   const formattedDeadline = new Date(challenge.deadline).toLocaleDateString(
     undefined,
     {
@@ -30,8 +27,6 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
     typeof challenge.createdBy === "object" ? challenge.createdBy : null;
 
   return (
-    // --- 2. CONSISTENT STYLING ---
-    // Added a `group` class to allow for hover effects on child elements.
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:shadow-xl hover:-translate-y-1 group">
       <div className="card-body p-6">
         {/* --- 3. CARD HEADER: Client Info & Prize --- */}

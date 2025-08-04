@@ -36,9 +36,15 @@ const SubmissionCard = ({ submission, onEdit, onDelete }: Props) => {
     <div className="card bg-base-200/50 border border-base-300 shadow-md">
       <div className="card-body p-6">
         <div className="flex justify-between items-start gap-4">
-          <h3 className="card-title text-xl font-bold">{challenge.title}</h3>
+          <div className="min-w-0">
+            <h3 className="card-title text-xl font-bold truncate">
+              {challenge.title}
+            </h3>
+          </div>
           <div
-            className={`badge badge-outline ${statusStyles[submission.status]}`}
+            className={`badge badge-outline flex-shrink-0 ${
+              statusStyles[submission.status]
+            }`}
           >
             {submission.status}
           </div>

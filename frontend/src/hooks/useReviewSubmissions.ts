@@ -86,8 +86,16 @@ export const useReviewSubmissions = (initialSubmissions: ISubmission[]) => {
       await refreshSubmissions(selectedSubmission.challengeId as string);
       toast.success("Review saved!", { id: toastId });
       closeModal();
-    } catch {
-      toast.error("Failed to save review.", { id: toastId });
+    } catch (error: any) {
+      const errorMessage =
+        error.response?.data?.message || "Failed to select winner.";
+      if (errorMessage.includes("prize has not been funded")) {
+        toast.error("You must fund the prize before selecting a winner.", {
+          id: toastId,
+        });
+      } else {
+        toast.error(errorMessage, { id: toastId });
+      }
     } finally {
       setIsUpdating(false);
     }

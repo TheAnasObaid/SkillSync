@@ -1,6 +1,6 @@
 import { ISubmission } from "@/types";
 import Link from "next/link";
-import { FiExternalLink, FiGithub } from "react-icons/fi";
+import { FiArrowRight, FiExternalLink, FiGithub } from "react-icons/fi";
 import UserAvatar from "../Profile/UserAvatar";
 
 interface Props {
@@ -40,13 +40,15 @@ const SubmissionCard = ({ submission }: Props) => {
             </Link>
           </div>
 
-          <p className="text-base-content/80 my-4">{submission.description}</p>
+          <p className="text-base-content/80 my-4 line-clamp-2">
+            {submission.description}
+          </p>
 
           <div className="card-actions justify-start gap-2">
             <Link
               href={submission.githubRepo}
               target="_blank"
-              className="btn btn-ghost btn-sm"
+              className="btn btn-secondary btn-sm"
             >
               <FiGithub /> GitHub
             </Link>
@@ -54,11 +56,14 @@ const SubmissionCard = ({ submission }: Props) => {
               <Link
                 href={submission.liveDemo}
                 target="_blank"
-                className="btn btn-ghost btn-sm"
+                className="btn btn-secondary btn-sm"
               >
                 <FiExternalLink /> Live Demo
               </Link>
             )}
+            <div className="btn btn-sm btn-secondary btn-outline text-base-content/60 group-hover:text-primary transition-colors">
+              Details <FiArrowRight className="ml-1" />
+            </div>
           </div>
         </div>
       </div>

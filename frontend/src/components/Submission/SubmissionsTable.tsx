@@ -4,10 +4,14 @@ import {
   FiAward,
   FiChevronDown,
   FiChevronUp,
+  FiDownload,
+  FiExternalLink,
+  FiGithub,
   FiInfo,
   FiStar,
 } from "react-icons/fi";
 import UserAvatar from "../Profile/UserAvatar";
+import Link from "next/link";
 
 interface Props {
   submissions: ISubmission[];
@@ -184,13 +188,55 @@ const SubmissionsTable = ({
                             : "bg-base-100/50"
                         }
                       >
-                        <td className="p-0"></td>
-                        <td colSpan={4} className="p-0">
-                          <div className="p-6 space-y-4">
-                            <h4 className="font-bold">Submission Details:</h4>
-                            <p className="whitespace-pre-wrap">
-                              {sub.description || "No description provided."}
-                            </p>
+                        <td></td>
+                        <td colSpan={4} className="p-4">
+                          <div className="p-2 space-y-4">
+                            <div>
+                              <h4 className="font-bold text-sm mb-1">
+                                Description:
+                              </h4>
+                              <p className="text-base-content/80 text-sm whitespace-pre-wrap">
+                                {sub.description || "No description provided."}
+                              </p>
+                            </div>
+
+                            <div className="divider my-1"></div>
+                            <div className="flex items-center gap-4 flex-wrap">
+                              <h4 className="font-bold text-sm">Links:</h4>
+                              <Link
+                                href={sub.githubRepo}
+                                target="_blank"
+                                className="btn btn-ghost btn-xs"
+                              >
+                                <FiGithub /> GitHub Repo
+                              </Link>
+                              {sub.liveDemo && (
+                                <Link
+                                  href={sub.liveDemo}
+                                  target="_blank"
+                                  className="btn btn-ghost btn-xs"
+                                >
+                                  <FiExternalLink /> Live Demo
+                                </Link>
+                              )}
+                            </div>
+                            {sub.files && sub.files.length > 0 && (
+                              <div className="flex items-center gap-4 flex-wrap">
+                                <h4 className="font-bold text-sm">Files:</h4>
+                                {sub.files.map((file) => (
+                                  <a
+                                    key={file.path}
+                                    href={`${
+                                      process.env.NEXT_PUBLIC_API_BASE_URL
+                                    }/${file.path.replace(/\\/g, "/")}`}
+                                    download={file.name}
+                                    className="btn btn-outline btn-xs"
+                                  >
+                                    <FiDownload /> {file.name}
+                                  </a>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         </td>
                       </tr>
