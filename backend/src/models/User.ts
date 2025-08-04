@@ -47,6 +47,7 @@ const UserSchema = new Schema<IUser>(
       totalRatings: { type: Number, default: 0 },
       completedChallenges: { type: Number, default: 0 },
     },
+    earnings: { type: Number, default: 0 },
     isVerified: { type: Boolean, default: false },
     lastLogin: Date,
     verificationToken: String,

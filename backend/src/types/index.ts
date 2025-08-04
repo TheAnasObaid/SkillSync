@@ -25,6 +25,7 @@ export interface IUser extends Document {
   password?: string;
   role: Role;
   accountStatus: AccountStatus;
+  earnings?: number;
   profile: {
     firstName: string;
     lastName?: string;
@@ -66,6 +67,7 @@ export interface IChallenge extends Document {
   title: string;
   description: string;
   prize: number;
+  isFunded?: boolean;
   createdBy: Types.ObjectId;
   requirements: string;
   category?: string;

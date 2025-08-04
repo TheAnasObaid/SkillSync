@@ -47,6 +47,7 @@ export const useChallengeManager = (initialChallenges: IChallenge[]) => {
   };
 
   return {
+    setChallenges,
     challenges,
     isDeleting,
     modalState,

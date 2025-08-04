@@ -18,6 +18,7 @@ const ChallengeSchema = new Schema<IChallenge>(
     title: { type: String, required: true },
     description: { type: String, required: true },
     prize: { type: Number, required: true },
+    isFunded: { type: Boolean, default: false },
     createdBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     requirements: { type: String, required: true },
     category: String,

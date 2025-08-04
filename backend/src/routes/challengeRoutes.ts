@@ -2,6 +2,7 @@ import express from "express";
 import {
   createChallenge,
   deleteMyChallenge,
+  fundChallenge,
   getAllChallenges,
   getChallengeById,
   getMyChallenges,
@@ -24,6 +25,15 @@ challengesRouter.get("/", getAllChallenges);
 challengesRouter.post("/", authenticate, authorize("client"), createChallenge);
 
 // --- Dynamic routes last ---
+
+
+challengesRouter.patch(
+  "/:id/fund",
+  authenticate,
+  authorize("client"),
+  fundChallenge
+);
+
 
 // GET a single challenge by its ID
 challengesRouter.get("/:id", getChallengeById);

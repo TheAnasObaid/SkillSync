@@ -1,14 +1,18 @@
 import StatCardGrid, { StatItem } from "@/components/Common/StatCardGrid";
 import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionList";
 import { getMySubmissions } from "@/services/server/submissionService";
-import { getMyDeveloperStats } from "@/services/server/userService";
+import {
+  getMyDeveloperStats,
+  getMyProfileServer,
+} from "@/services/server/userService";
 import Link from "next/link";
-import { FiAward, FiClipboard, FiClock } from "react-icons/fi";
+import { FiAward, FiClipboard, FiClock, FiDollarSign } from "react-icons/fi";
 
 const DeveloperDashboardPage = async () => {
-  const [statsData, recentSubmissions] = await Promise.all([
+  const [statsData, recentSubmissions, userProfile] = await Promise.all([
     getMyDeveloperStats(),
     getMySubmissions(),
+    getMyProfileServer(),
   ]);
 
   const developerStats: StatItem[] = statsData
@@ -33,6 +37,12 @@ const DeveloperDashboardPage = async () => {
           value: statsData.pendingReviews,
           color: "orange",
           link: "/developer/dashboard/submissions",
+        },
+        {
+          icon: <FiDollarSign size={24} />,
+          label: "Total Earnings",
+          value: `$${(userProfile?.earnings || 0).toLocaleString()}`,
+          color: "green",
         },
       ]
     : [];
