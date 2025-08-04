@@ -1,9 +1,18 @@
 "use client";
 
+import { useChallengeManager } from "@/hooks/useChallengeManager";
+import apiClient from "@/lib/apiClient";
 import { IChallenge } from "@/types";
 import Link from "next/link";
-import { FiEdit, FiTrash2, FiEye } from "react-icons/fi";
-import { useChallengeManager } from "@/hooks/useChallengeManager";
+import { useState } from "react";
+import toast from "react-hot-toast";
+import {
+  FiCheckCircle,
+  FiDollarSign,
+  FiEdit,
+  FiEye,
+  FiTrash2,
+} from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import EmptyState from "../Common/EmptyState";
 
@@ -20,8 +29,46 @@ const statusStyles = {
 };
 
 const ClientChallengeList = ({ initialChallenges }: Props) => {
-  const { challenges, isDeleting, modalState, openDeleteModal, closeModal } =
-    useChallengeManager(initialChallenges);
+  const {
+    challenges,
+    setChallenges,
+    isDeleting,
+    modalState,
+    openDeleteModal,
+    closeModal,
+  } = useChallengeManager(initialChallenges);
+  const [isFunding, setIsFunding] = useState(false);
+  const [fundModalState, setFundModalState] = useState({
+    isOpen: false,
+    challenge: null as IChallenge | null,
+  });
+
+  const openFundModal = (challenge: IChallenge) => {
+    setFundModalState({ isOpen: true, challenge });
+  };
+
+  const handleFundConfirm = async () => {
+    if (!fundModalState.challenge) return;
+    setIsFunding(true);
+    const toastId = toast.loading("Processing payment...");
+    try {
+      const res = await apiClient.patch(
+        `/challenges/${fundModalState.challenge._id}/fund`
+      );
+      // Update the state of this challenge to reflect it's now funded
+      setChallenges((prev) =>
+        prev.map((c) =>
+          c._id === fundModalState.challenge?._id ? res.data.challenge : c
+        )
+      );
+      toast.success("Challenge funded successfully!", { id: toastId });
+    } catch (error) {
+      toast.error("Funding failed.", { id: toastId });
+    } finally {
+      setIsFunding(false);
+      setFundModalState({ isOpen: false, challenge: null });
+    }
+  };
 
   if (challenges.length === 0) {
     return (
@@ -59,6 +106,18 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
                 </p>
               </div>
               <div className="card-actions justify-end mt-4 sm:mt-0">
+                {challenge.isFunded ? (
+                  <span className="badge badge-success badge-soft font-medium gap-1 text-xs">
+                    <FiCheckCircle /> Funded
+                  </span>
+                ) : (
+                  <button
+                    onClick={() => openFundModal(challenge)}
+                    className="btn btn-warning btn-sm"
+                  >
+                    <FiDollarSign /> Fund Prize
+                  </button>
+                )}
                 <Link
                   href={`/challenges/${challenge._id}/review`}
                   className="btn btn-secondary btn-sm"
@@ -82,6 +141,20 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
           </div>
         ))}
       </div>
+
+      <ConfirmationModal
+        isOpen={fundModalState.isOpen}
+        title="Fund Challenge"
+        message={`This will simulate a payment of $${fundModalState.challenge?.prize.toLocaleString()} for "${
+          fundModalState.challenge?.title
+        }". Do you want to proceed?`}
+        onConfirm={handleFundConfirm}
+        onCancel={() => setFundModalState({ isOpen: false, challenge: null })}
+        confirmText="Yes, Pay Now"
+        variant="primary"
+        isActionInProgress={isFunding}
+        icon={<FiDollarSign size={48} />}
+      />
 
       <ConfirmationModal
         isOpen={modalState.isOpen}

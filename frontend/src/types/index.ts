@@ -25,6 +25,7 @@ export interface IUser {
   email: string;
   role: Role;
   accountStatus: AccountStatus;
+  earnings?: number;
   profile: {
     firstName: string;
     lastName?: string;
@@ -58,6 +59,7 @@ export interface IChallenge {
   title: string;
   description: string;
   prize: number; // FIX: Changed from string to number
+  isFunded?: boolean;
   createdBy: string | IUser; // Can be populated
   requirements: string;
   category?: string;

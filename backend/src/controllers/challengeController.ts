@@ -167,3 +167,29 @@ export const deleteMyChallenge = asyncHandler(
     });
   }
 );
+
+/**
+ * @desc    Mark a challenge as funded by its creator
+ * @route   PATCH /api/challenges/:id/fund
+ * @access  Private (Client)
+ */
+export const fundChallenge = asyncHandler(
+  async (req: AuthenticatedRequest, res: Response) => {
+    const challenge = await Challenge.findOneAndUpdate(
+      // Ensure the user owns this challenge before funding
+      { _id: req.params.id, createdBy: req.userId },
+      { isFunded: true },
+      { new: true, runValidators: true }
+    );
+
+    if (!challenge) {
+      return res
+        .status(404)
+        .json({ message: "Challenge not found or you are not the owner." });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Challenge successfully funded.", challenge });
+  }
+);

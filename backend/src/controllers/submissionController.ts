@@ -189,6 +189,12 @@ export const selectWinner = asyncHandler(
         throw new Error("Challenge not found.");
       }
 
+      if (!challenge.isFunded) {
+        throw new Error(
+          "Cannot select a winner. The challenge prize has not been funded."
+        );
+      }
+
       if (challenge.createdBy.toString() !== userId) {
         throw new Error("Forbidden: You do not own this challenge.");
       }
@@ -208,6 +214,8 @@ export const selectWinner = asyncHandler(
       if (developer && developer.reputation) {
         developer.reputation.completedChallenges =
           (developer.reputation.completedChallenges || 0) + 1;
+        developer.earnings = (developer.earnings || 0) + challenge.prize;
+
         await developer.save({ session });
       }
 
