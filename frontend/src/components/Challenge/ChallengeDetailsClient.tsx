@@ -144,6 +144,7 @@ const ChallengeDetailsClient = ({
                 </ReactMarkdown>
               </div>
             )}
+
             {activeTab === "submissions" && (
               // FIX: Pass the submissions prop directly.
               <SubmissonList submissions={submissions} isLoading={false} />

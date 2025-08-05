@@ -1,7 +1,9 @@
+// ===== File: frontend\src\hooks\useReviewSubmissions.ts =====
 "use client";
 
 import apiClient from "@/lib/apiClient";
 import { ISubmission } from "@/types";
+import { AxiosError } from "axios"; // FIX: Import AxiosError for type checking
 import { useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -19,14 +21,12 @@ export const useReviewSubmissions = (initialSubmissions: ISubmission[]) => {
     useState<ISubmission | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
-  // State for modals
   const [isRatingModalOpen, setIsRatingModalOpen] = useState(false);
   const [winnerModal, setWinnerModal] = useState({
     isOpen: false,
     submission: null as ISubmission | null,
   });
 
-  // State for controls
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("desc");
 
@@ -62,7 +62,6 @@ export const useReviewSubmissions = (initialSubmissions: ISubmission[]) => {
     }
   };
 
-  // --- Handlers ---
   const openRatingModal = (submission: ISubmission) => {
     setSelectedSubmission(submission);
     setIsRatingModalOpen(true);
@@ -86,16 +85,14 @@ export const useReviewSubmissions = (initialSubmissions: ISubmission[]) => {
       await refreshSubmissions(selectedSubmission.challengeId as string);
       toast.success("Review saved!", { id: toastId });
       closeModal();
-    } catch (error: any) {
-      const errorMessage =
-        error.response?.data?.message || "Failed to select winner.";
-      if (errorMessage.includes("prize has not been funded")) {
-        toast.error("You must fund the prize before selecting a winner.", {
-          id: toastId,
-        });
-      } else {
-        toast.error(errorMessage, { id: toastId });
+    } catch (error) {
+      // FIX: Improved, user-friendly error handling
+      let errorMessage =
+        "An unexpected error occurred while saving the review.";
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        errorMessage = error.response.data.message;
       }
+      toast.error(errorMessage, { id: toastId });
     } finally {
       setIsUpdating(false);
     }
@@ -110,10 +107,17 @@ export const useReviewSubmissions = (initialSubmissions: ISubmission[]) => {
         `/submissions/${winnerModal.submission._id}/winner`
       );
       await refreshSubmissions(winnerModal.submission.challengeId as string);
-      toast.success("Winner selected!", { id: toastId });
+      toast.success("Winner selected successfully!", { id: toastId });
       closeModal();
-    } catch {
-      toast.error("Failed to select winner.", { id: toastId });
+    } catch (error) {
+      // FIX: Improved, user-friendly error handling for selecting a winner.
+      // This will now display specific messages from the backend like "Challenge prize has not been funded."
+      let errorMessage =
+        "An unexpected error occurred. Please try again later.";
+      if (error instanceof AxiosError && error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      toast.error(errorMessage, { id: toastId });
     } finally {
       setIsUpdating(false);
     }
@@ -131,16 +135,13 @@ export const useReviewSubmissions = (initialSubmissions: ISubmission[]) => {
     setSortOrder,
     filteredAndSortedSubmissions,
     isChallengeCompleted,
-    // Modals & Forms
     ratingForm,
     isRatingModalOpen,
     openRatingModal,
     winnerModal,
     openWinnerModal,
     closeModal,
-    // Actions
     handleRateSubmit,
-    handleRateSubmitWrapper: handleSubmit(handleRateSubmit),
     handleSelectWinner,
   };
 };

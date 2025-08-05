@@ -1,79 +1,52 @@
-import { Router } from "express";
+// ===== File: backend\src\routes\submissionRoutes.ts =====
+import express from "express";
 import {
-  getMySubmissions,
+  submitToChallenge,
   getPublicSubmissionsForChallenge,
   getSubmissionsForChallenge,
-  rateSubmission,
+  getMySubmissions,
   selectWinner,
-  submitToChallenge,
+  rateSubmission,
   updateMySubmission,
   withdrawMySubmission,
+  getSubmissionDetails,
 } from "../controllers/submissionController";
 import { authenticate, authorize } from "../middleware/auth";
 
-const submissionsRouter = Router();
+const router = express.Router();
 
-// Routes for the LOGGED-IN developer
-submissionsRouter.get(
-  "/me",
-  authenticate,
-  authorize("developer"),
-  getMySubmissions
-);
+// --- ORDER MATTERS: MOST SPECIFIC ROUTES FIRST ---
 
-// --- Routes related to a SPECIFIC CHALLENGE ---
-// GET /api/submissions/challenge/:challengeId (Public submissions)
-submissionsRouter.get(
-  "/challenge/:challengeId",
-  getPublicSubmissionsForChallenge
-);
+// Static private route
+router.route("/me").get(authenticate, authorize("developer"), getMySubmissions);
 
-// POST /api/submissions/challenge/:challengeId (Submit a solution)
-submissionsRouter.post(
-  "/challenge/:challengeId",
-  authenticate,
-  authorize("developer"),
-  submitToChallenge
-);
+// Specific parameterized public route for details
+router.route("/:submissionId/details").get(getSubmissionDetails);
 
-// GET /api/submissions/challenge/:challengeId/review (Client's review view)
-submissionsRouter.get(
-  "/challenge/:challengeId/review",
-  authenticate,
-  authorize("client"),
-  getSubmissionsForChallenge
-);
+// Specific parameterized private routes for actions
+router
+  .route("/:submissionId/winner")
+  .patch(authenticate, authorize("client"), selectWinner);
+router
+  .route("/:submissionId/rate")
+  .post(authenticate, authorize("client"), rateSubmission);
 
-// --- Routes for a SPECIFIC SUBMISSION ---
-// PATCH /api/submissions/:submissionId/winner (Select a winner)
-submissionsRouter.patch(
-  "/:submissionId/winner",
-  authenticate,
-  authorize("client"),
-  selectWinner
-);
+// --- CHALLENGE-SPECIFIC ROUTES ---
+// These are also specific and grouped. The /review route must come first.
+router
+  .route("/challenge/:challengeId/review")
+  .get(authenticate, authorize("client"), getSubmissionsForChallenge);
 
-// POST /api/submissions/:submissionId/rate (Rate a submission)
-submissionsRouter.post(
-  "/:submissionId/rate",
-  authenticate,
-  authorize("client"),
-  rateSubmission
-);
+router
+  .route("/challenge/:challengeId")
+  .get(getPublicSubmissionsForChallenge)
+  .post(authenticate, authorize("developer"), submitToChallenge);
 
-// --- NEW DYNAMIC ROUTES FOR A SPECIFIC SUBMISSION ---
+// --- GENERIC PARAMETERIZED ROUTE LAST ---
+// This will only match if none of the more specific routes above did.
+router
+  .route("/:id")
+  .put(authenticate, authorize("developer"), updateMySubmission)
+  .delete(authenticate, authorize("developer"), withdrawMySubmission);
 
-submissionsRouter.put(
-  "/:id",
-  authenticate,
-  authorize("developer"),
-  updateMySubmission
-);
-submissionsRouter.delete(
-  "/:id",
-  authenticate,
-  authorize("developer"),
-  withdrawMySubmission
-);
-
-export default submissionsRouter;
+export default router;

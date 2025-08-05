@@ -110,7 +110,10 @@ export const getPublicSubmissionsForChallenge = asyncHandler(
   async (req: Request, res: Response) => {
     const { challengeId } = req.params;
     const submissions = await Submission.find({ challengeId: challengeId })
-      .select("developerId description githubRepo liveDemo createdAt")
+      // FIX: Added 'challengeId' to the select statement to ensure it's returned to the client.
+      .select(
+        "challengeId developerId description githubRepo liveDemo createdAt"
+      )
       .populate("developerId", "profile.firstName profile.avatar");
 
     res.status(200).json(submissions);
@@ -406,5 +409,25 @@ export const withdrawMySubmission = asyncHandler(
     } finally {
       session.endSession();
     }
+  }
+);
+export const getSubmissionDetails = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { submissionId } = req.params;
+    const submission = await Submission.findById(submissionId)
+      .populate({
+        path: "developerId",
+        select: "profile.firstName profile.lastName profile.avatar email",
+      })
+      .populate({
+        path: "challengeId",
+        select: "title prize deadline",
+      });
+
+    if (!submission) {
+      return res.status(404).json({ message: "Submission not found." });
+    }
+
+    res.status(200).json(submission);
   }
 );
