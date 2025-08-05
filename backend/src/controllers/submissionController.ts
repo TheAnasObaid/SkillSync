@@ -1,3 +1,4 @@
+// ===== File: backend\src\controllers\submissionController.ts =====
 import { Request, Response } from "express";
 import mongoose, { Types } from "mongoose";
 import { AuthenticatedRequest } from "../middleware/auth";
@@ -105,11 +106,14 @@ export const submitToChallenge = asyncHandler(
  * @route   GET /api/submissions/challenge/:challengeId
  * @access  Public
  */
-export const getISubmissons = asyncHandler(
+export const getPublicSubmissionsForChallenge = asyncHandler(
   async (req: Request, res: Response) => {
     const { challengeId } = req.params;
     const submissions = await Submission.find({ challengeId: challengeId })
-      .select("developerId description githubRepo liveDemo createdAt")
+      // FIX: Added 'challengeId' to the select statement to ensure it's returned to the client.
+      .select(
+        "challengeId developerId description githubRepo liveDemo createdAt"
+      )
       .populate("developerId", "profile.firstName profile.avatar");
 
     res.status(200).json(submissions);
@@ -127,10 +131,14 @@ export const getSubmissionsForChallenge = asyncHandler(
     const userId = req.userId;
 
     const challenge = await Challenge.findById(challengeId);
+
+    console.log("Hello");
+
     if (!challenge) {
       res.status(404).json({ message: "Challenge not found" });
       return;
     }
+
     if (challenge?.createdBy.toString() !== userId) {
       res
         .status(403)
@@ -141,6 +149,7 @@ export const getSubmissionsForChallenge = asyncHandler(
     const submissions = await Submission.find({
       challengeId,
     }).populate("developerId", "profile.firstName email profile.avatar");
+    console.log("Submissions", submissions);
     res.status(200).json(submissions);
     return;
   }
@@ -153,10 +162,11 @@ export const getSubmissionsForChallenge = asyncHandler(
  */
 export const getMySubmissions = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const developerId = req.userId;
-    const submissions = await Submission.find({ developerId })
+    const challengeId = req.userId;
+    const submissions = await Submission.find({ challengeId })
       .populate("challengeId", "title status prize")
       .sort({ createdAt: -1 });
+
     res.status(200).json(submissions);
   }
 );
@@ -399,5 +409,25 @@ export const withdrawMySubmission = asyncHandler(
     } finally {
       session.endSession();
     }
+  }
+);
+export const getSubmissionDetails = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { submissionId } = req.params;
+    const submission = await Submission.findById(submissionId)
+      .populate({
+        path: "developerId",
+        select: "profile.firstName profile.lastName profile.avatar email",
+      })
+      .populate({
+        path: "challengeId",
+        select: "title prize deadline",
+      });
+
+    if (!submission) {
+      return res.status(404).json({ message: "Submission not found." });
+    }
+
+    res.status(200).json(submission);
   }
 );

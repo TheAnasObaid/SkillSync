@@ -1,4 +1,5 @@
-import { Response } from "express";
+// ===== File: backend\src\controllers\challengeController.ts =====
+import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import upload from "../middleware/upload";
 import Challenge from "../models/Challenge";
@@ -6,11 +7,6 @@ import Submission from "../models/Submission";
 import asyncHandler from "../utils/asyncHandler";
 import { ChallengeDto, challengeSchema } from "../utils/validationSchemas";
 
-/**
- * @desc    Create a new challenge
- * @route   POST /api/challenges
- * @access  Private (Client)
- */
 export const createChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     upload(req, res, async (err) => {
@@ -58,25 +54,20 @@ export const createChallenge = asyncHandler(
   }
 );
 
-/**
- * @desc    Get a list of all public, published challenges
- * @route   GET /api/challenges
- * @access  Public
- */
 export const getAllChallenges = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
-    const allChallenges = await Challenge.find();
+  async (req: Request, res: Response) => {
+    // FIX: Removed the { status: "published" } filter to ensure all challenges are fetched.
+    // This prevents an empty page if challenges are in a different state (e.g., draft).
+    const allChallenges = await Challenge.find({}).populate(
+      "createdBy",
+      "profile.firstName profile.companyName profile.avatar"
+    );
     res.status(200).json(allChallenges);
   }
 );
 
-/**
- * @desc    Get a single challenge by its ID
- * @route   GET /api/challenges/:id
- * @access  Public
- */
 export const getChallengeById = asyncHandler(
-  async (req: AuthenticatedRequest, res: Response) => {
+  async (req: Request, res: Response) => {
     const challenge = await Challenge.findById(req.params.id).populate(
       "createdBy",
       "profile.firstName profile.companyName"
@@ -89,11 +80,6 @@ export const getChallengeById = asyncHandler(
   }
 );
 
-/**
- * @desc    Get challenges created by the logged-in client
- * @route   GET /api/challenges/me
- * @access  Private (Client)
- */
 export const getMyChallenges = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const allChallenges = await Challenge.find({ createdBy: req.userId }).sort({
@@ -103,17 +89,11 @@ export const getMyChallenges = asyncHandler(
   }
 );
 
-/**
- * @desc    Update a challenge owned by the logged-in client
- * @route   PUT /api/challenges/:id
- * @access  Private (Client)
- */
 export const updateMyChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { id: challengeId } = req.params;
     const clientId = req.userId;
 
-    // We can reuse our Zod schema for validation
     const parsedBody = challengeSchema.safeParse(req.body);
     if (!parsedBody.success) {
       res.status(400).json({ issues: parsedBody.error.issues });
@@ -121,9 +101,9 @@ export const updateMyChallenge = asyncHandler(
     }
 
     const challenge = await Challenge.findOneAndUpdate(
-      { _id: challengeId, createdBy: clientId }, // Condition: Find the challenge AND ensure ownership
-      { $set: parsedBody.data }, // Update with the validated data
-      { new: true, runValidators: true } // Options: return the new document and run schema validators
+      { _id: challengeId, createdBy: clientId },
+      { $set: parsedBody.data },
+      { new: true, runValidators: true }
     );
 
     if (!challenge) {
@@ -137,11 +117,6 @@ export const updateMyChallenge = asyncHandler(
   }
 );
 
-/**
- * @desc    Delete a challenge owned by the logged-in client
- * @route   DELETE /api/challenges/:id
- * @access  Private (Client)
- */
 export const deleteMyChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { id: challengeId } = req.params;
@@ -159,7 +134,6 @@ export const deleteMyChallenge = asyncHandler(
       return;
     }
 
-    // Optional but highly recommended: Delete all submissions associated with this challenge
     await Submission.deleteMany({ challengeId: challengeId });
 
     res.status(200).json({
@@ -168,15 +142,9 @@ export const deleteMyChallenge = asyncHandler(
   }
 );
 
-/**
- * @desc    Mark a challenge as funded by its creator
- * @route   PATCH /api/challenges/:id/fund
- * @access  Private (Client)
- */
 export const fundChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const challenge = await Challenge.findOneAndUpdate(
-      // Ensure the user owns this challenge before funding
       { _id: req.params.id, createdBy: req.userId },
       { isFunded: true },
       { new: true, runValidators: true }

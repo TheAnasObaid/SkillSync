@@ -1,3 +1,4 @@
+// ===== File: frontend\src\components\Challenge\ChallengeDetailsClient.tsx =====
 "use client";
 
 import { IChallenge, ISubmission } from "@/types";
@@ -7,14 +8,15 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import SubmissionModal from "../Common/SubmissionModal";
 import UserAvatar from "../Profile/UserAvatar";
-import ISubmissonList from "../Submission/PublicSubmissionList";
+import SubmissonList from "../Submission/PublicSubmissionList";
 import ChallengeSidebar from "./ChallengeSidebar";
 
 type LiveSubmission = ISubmission & { isNew?: boolean };
 
 interface Props {
-  initialChallenge: IChallenge | null;
-  initialSubmissions?: LiveSubmission[];
+  // FIX: Renamed props for clarity. This component now receives the final data.
+  challenge: IChallenge | null;
+  submissions: LiveSubmission[];
   onSubmissionSuccess: () => void;
 }
 
@@ -25,15 +27,13 @@ const difficultyStyles = {
 };
 
 const ChallengeDetailsClient = ({
-  initialChallenge,
-  initialSubmissions = [],
+  challenge,
+  submissions,
   onSubmissionSuccess,
 }: Props) => {
-  const [challenge] = useState(initialChallenge);
-  const [submissions, setSubmissions] =
-    useState<LiveSubmission[]>(initialSubmissions);
+  // FIX: Removed the internal `useState` for `challenge` and `submissions`.
+  // The component now renders directly from its props, making it a "dumb" component.
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<"description" | "submissions">(
     "description"
   );
@@ -53,10 +53,13 @@ const ChallengeDetailsClient = ({
       day: "numeric",
     }
   );
+  // FIX: Directly use the length of the submissions prop.
   const submissionCount = submissions.length;
 
   const handleSuccessfulSubmission = () => {
-    setSubmissionSuccess(true);
+    // The parent's socket listener will handle the data update.
+    // We just need to trigger the parent to know the submission was successful,
+    // which can be used for things like closing the modal or showing a toast.
     onSubmissionSuccess();
   };
 
@@ -135,14 +138,16 @@ const ChallengeDetailsClient = ({
               </a>
             </div>
             {activeTab === "description" && (
-              <div className="prose prose-lg max-w-none text-base-content/90 bg-base-200/30 p-6 rounded-lg">
+              <div className="prose prose-lg max-w-none bg-base-200/30 p-6 rounded-lg text-base-content/90 prose-h2:text-xl prose-h2:mb-2 prose-p:my-2 prose-li:my-1">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {challenge.requirements}
                 </ReactMarkdown>
               </div>
             )}
+
             {activeTab === "submissions" && (
-              <ISubmissonList submissions={submissions} isLoading={false} />
+              // FIX: Pass the submissions prop directly.
+              <SubmissonList submissions={submissions} isLoading={false} />
             )}
           </div>
           <ChallengeSidebar

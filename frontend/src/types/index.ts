@@ -38,7 +38,7 @@ export interface IUser {
   };
   reputation: {
     rating: number;
-    totalRatings: number; // FIX: Added this missing field
+    totalRatings: number;
     completedChallenges: number;
   };
   isVerified: boolean;
@@ -58,7 +58,7 @@ export interface IChallenge {
   _id: string;
   title: string;
   description: string;
-  prize: number; // FIX: Changed from string to number
+  prize: number;
   isFunded?: boolean;
   createdBy: string | IUser; // Can be populated
   requirements: string;
@@ -89,7 +89,7 @@ export interface ISubmission {
       };
   githubRepo: string;
   liveDemo?: string;
-  description: string; // FIX: Removed 'content' in favor of 'description' for consistency
+  description: string;
   status: SubmissionStatus;
   files: File[];
   ratings?: { overall: number };

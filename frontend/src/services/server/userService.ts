@@ -1,3 +1,4 @@
+// ===== File: frontend\src\services\server\userService.ts =====
 import { getServerApi } from "@/lib/serverApi";
 import { ClientStats, DeveloperStats, IUser } from "@/types";
 
@@ -38,28 +39,6 @@ export const getPublicUserProfile = async (
   } catch (error) {
     console.error(
       `Service Error: getPublicUserProfile for user ${userId} failed`,
-      error
-    );
-    return null;
-  }
-};
-
-/**
- * Fetches a public user profile by ID.
- * For use in CLIENT COMPONENTS.
- * @param userId The ID of the user to fetch.
- * @returns The user's public profile data or null.
- */
-export const getPublicUserProfileClient = async (
-  userId: string
-): Promise<IUser | null> => {
-  try {
-    const serverApi = await getServerApi();
-    const response = await serverApi.get(`/users/${userId}`);
-    return response.data;
-  } catch (error) {
-    console.error(
-      `Client Service Error: getPublicUserProfileClient for user ${userId} failed`,
       error
     );
     return null;

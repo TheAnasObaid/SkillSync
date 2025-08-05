@@ -1,9 +1,8 @@
 import { IChallenge } from "@/types";
 import Link from "next/link";
 import { FiArrowRight, FiClock, FiAward } from "react-icons/fi";
-import UserAvatar from "../Profile/UserAvatar"; // <-- Import UserAvatar for client info
+import UserAvatar from "../Profile/UserAvatar";
 
-// The props interface should be updated to expect a potentially populated `createdBy` field
 interface ChallengeCardProps {
   challenge: IChallenge;
 }
@@ -15,8 +14,6 @@ const difficultyStyles = {
 };
 
 const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
-  // --- 1. ROBUST DATA HANDLING ---
-  // Safely format the deadline and handle populated client data.
   const formattedDeadline = new Date(challenge.deadline).toLocaleDateString(
     undefined,
     {
@@ -30,8 +27,6 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
     typeof challenge.createdBy === "object" ? challenge.createdBy : null;
 
   return (
-    // --- 2. CONSISTENT STYLING ---
-    // Added a `group` class to allow for hover effects on child elements.
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:shadow-xl hover:-translate-y-1 group">
       <div className="card-body p-6">
         {/* --- 3. CARD HEADER: Client Info & Prize --- */}
@@ -76,7 +71,7 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
         <div className="mt-4 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <div
-              className={`badge badge-outline ${
+              className={`badge badge-soft ${
                 difficultyStyles[challenge.difficulty]
               }`}
             >
@@ -85,7 +80,7 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
             {challenge.tags.slice(0, 3).map((tag) => (
               <div
                 key={tag}
-                className="badge badge-neutral badge-outline font-mono text-xs"
+                className="badge badge-info badge-soft font-mono text-xs"
               >
                 {tag}
               </div>

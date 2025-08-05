@@ -54,7 +54,7 @@ const ReviewSubmissionsClient = ({
       </div>
 
       {isChallengeCompleted && (
-        <div className="alert alert-success">
+        <div className="alert alert-success mb-6">
           <FiAward /> A winner has been selected!
         </div>
       )}
