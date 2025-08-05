@@ -1,12 +1,12 @@
 "use client";
 
-import { ISubmission } from "@/types";
 import { useSubmissionsManager } from "@/hooks/useSubmissionsManager";
+import { ISubmission } from "@/types";
+import { FiTrash2 } from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import EmptyState from "../Common/EmptyState";
-import SubmissionCard from "./SubmissionCard";
 import EditSubmissionModal from "../Submission/EditSubmissionModal";
-import { FiTrash2 } from "react-icons/fi";
+import SubmissionCard from "./SubmissionCard";
 
 const DeveloperSubmissionList = ({
   submissions,
@@ -21,7 +21,7 @@ const DeveloperSubmissionList = ({
     openEditModal,
     openDeleteModal,
     closeModal,
-    handleUpdateSubmit, // This is the raw handler from the hook
+    handleUpdateSubmit,
     handleDeleteConfirm,
   } = useSubmissionsManager();
 
@@ -49,11 +49,10 @@ const DeveloperSubmissionList = ({
         ))}
       </div>
 
-      {/* --- RENDER THE NEW, CLEANER MODALS --- */}
       <EditSubmissionModal
         isOpen={isEditModalOpen}
         onClose={closeModal}
-        onSubmit={handleUpdateSubmit} // Pass the handler from the hook
+        onSubmit={handleUpdateSubmit}
         isSubmitting={isUpdating}
         submission={selectedSubmission}
       />

@@ -12,8 +12,6 @@ const errorHandler = (
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal Server Error";
 
-  // You can add custom error handling here for specific error types
-  // For example, Mongoose validation errors
   if (err.name === "ValidationError") {
     statusCode = 400;
     message = Object.values(err.errors)
@@ -30,7 +28,6 @@ const errorHandler = (
 
   res.status(statusCode).json({
     message,
-    // Optional: include stack trace in development
     stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
   });
 };

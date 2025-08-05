@@ -162,11 +162,12 @@ export const getSubmissionsForChallenge = asyncHandler(
  */
 export const getMySubmissions = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const challengeId = req.userId;
-    const submissions = await Submission.find({ challengeId })
+    const developerId = req.userId;
+    const submissions = await Submission.find({ developerId })
       .populate("challengeId", "title status prize")
       .sort({ createdAt: -1 });
 
+    console.log(submissions);
     res.status(200).json(submissions);
   }
 );
