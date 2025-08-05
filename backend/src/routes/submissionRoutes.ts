@@ -1,6 +1,7 @@
 import { Router } from "express";
 import {
   getMySubmissions,
+  getPublicSubmissionsForChallenge,
   getSubmissionsForChallenge,
   rateSubmission,
   selectWinner,
@@ -22,7 +23,10 @@ submissionsRouter.get(
 
 // --- Routes related to a SPECIFIC CHALLENGE ---
 // GET /api/submissions/challenge/:challengeId (Public submissions)
-submissionsRouter.get("/challenge/:challengeId", getMySubmissions);
+submissionsRouter.get(
+  "/challenge/:challengeId",
+  getPublicSubmissionsForChallenge
+);
 
 // POST /api/submissions/challenge/:challengeId (Submit a solution)
 submissionsRouter.post(

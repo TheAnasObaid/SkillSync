@@ -7,7 +7,7 @@ import { getChallengeByIdClient } from "@/services/client/challengeService";
 import { getSubmissonsClient } from "@/services/client/submissionService";
 import { IChallenge, ISubmission } from "@/types";
 import { useParams } from "next/navigation";
-import { useEffect, useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 const ChallengeDetailsPage = () => {
   const { id } = useParams();

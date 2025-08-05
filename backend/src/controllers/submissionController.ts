@@ -128,10 +128,14 @@ export const getSubmissionsForChallenge = asyncHandler(
     const userId = req.userId;
 
     const challenge = await Challenge.findById(challengeId);
+
+    console.log("Hello");
+
     if (!challenge) {
       res.status(404).json({ message: "Challenge not found" });
       return;
     }
+
     if (challenge?.createdBy.toString() !== userId) {
       res
         .status(403)
@@ -142,6 +146,7 @@ export const getSubmissionsForChallenge = asyncHandler(
     const submissions = await Submission.find({
       challengeId,
     }).populate("developerId", "profile.firstName email profile.avatar");
+    console.log("Submissions", submissions);
     res.status(200).json(submissions);
     return;
   }
@@ -158,6 +163,7 @@ export const getMySubmissions = asyncHandler(
     const submissions = await Submission.find({ challengeId })
       .populate("challengeId", "title status prize")
       .sort({ createdAt: -1 });
+
     res.status(200).json(submissions);
   }
 );
