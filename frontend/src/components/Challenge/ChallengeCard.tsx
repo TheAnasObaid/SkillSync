@@ -71,7 +71,7 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
         <div className="mt-4 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <div
-              className={`badge badge-outline ${
+              className={`badge badge-soft ${
                 difficultyStyles[challenge.difficulty]
               }`}
             >
@@ -80,7 +80,7 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
             {challenge.tags.slice(0, 3).map((tag) => (
               <div
                 key={tag}
-                className="badge badge-neutral badge-outline font-mono text-xs"
+                className="badge badge-info badge-soft font-mono text-xs"
               >
                 {tag}
               </div>

@@ -1,9 +1,10 @@
+// ===== File: frontend\src\app\(public)\challenges\[id]\page.tsx =====
 "use client";
 
 import ChallengeDetailsClient from "@/components/Challenge/ChallengeDetailsClient";
 import { useSocket } from "@/context/SocketContext";
 import { getChallengeByIdClient } from "@/services/client/challengeService";
-import { getISubmissonsClient } from "@/services/client/submissionService";
+import { getSubmissonsClient } from "@/services/client/submissionService";
 import { IChallenge, ISubmission } from "@/types";
 import { useParams } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
@@ -16,6 +17,35 @@ const ChallengeDetailsPage = () => {
   const [submissions, setSubmissions] = useState<ISubmission[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  const fetchChallengeData = useCallback(async () => {
+    if (!id) return;
+
+    // Keep loading true at the start of a fetch
+    setLoading(true);
+    setError("");
+    try {
+      const [challengeData, submissionsData] = await Promise.all([
+        getChallengeByIdClient(id as string),
+        getSubmissonsClient(id as string),
+      ]);
+
+      if (!challengeData) {
+        setError("Challenge not found.");
+      } else {
+        setChallenge(challengeData);
+        setSubmissions(submissionsData);
+      }
+    } catch (err) {
+      setError("Failed to load challenge details.");
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    fetchChallengeData();
+  }, [fetchChallengeData]);
 
   useEffect(() => {
     if (socket && id) {
@@ -41,34 +71,6 @@ const ChallengeDetailsPage = () => {
     }
   }, [socket, id]);
 
-  const fetchChallengeData = useCallback(async () => {
-    if (!id) return;
-
-    setLoading(true);
-    setError("");
-    try {
-      const [challengeData, submissionsData] = await Promise.all([
-        getChallengeByIdClient(id as string),
-        getISubmissonsClient(id as string),
-      ]);
-
-      if (!challengeData) {
-        setError("Challenge not found.");
-      } else {
-        setChallenge(challengeData);
-        setSubmissions(submissionsData);
-      }
-    } catch (err) {
-      setError("Failed to load challenge details.");
-    } finally {
-      setLoading(false);
-    }
-  }, [id]);
-
-  useEffect(() => {
-    fetchChallengeData();
-  }, [fetchChallengeData]);
-
   if (loading) {
     return (
       <div className="flex justify-center items-center min-h-screen">
@@ -82,8 +84,8 @@ const ChallengeDetailsPage = () => {
 
   return (
     <ChallengeDetailsClient
-      initialChallenge={challenge}
-      initialSubmissions={submissions || []}
+      challenge={challenge}
+      submissions={submissions || []}
       onSubmissionSuccess={fetchChallengeData}
     />
   );

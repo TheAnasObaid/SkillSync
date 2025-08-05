@@ -1,3 +1,4 @@
+// ===== File: frontend\src\components\Auth\RegisterForm.tsx =====
 "use client";
 
 import { useRegisterForm } from "@/hooks/useRegisterForm";
@@ -21,9 +22,9 @@ const RegisterForm = () => {
             <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 mt-4">
               <TextInput
                 name="name"
-                label="Full Name"
+                label="First Name"
                 type="text"
-                placeholder="e.g., John Doe"
+                placeholder="e.g., John"
               />
 
               <TextInput

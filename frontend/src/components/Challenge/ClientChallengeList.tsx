@@ -1,3 +1,4 @@
+// ===== File: frontend\src\components\Challenge\ClientChallengeList.tsx =====
 "use client";
 
 import { useChallengeManager } from "@/hooks/useChallengeManager";
@@ -100,21 +101,18 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
                   >
                     {challenge.status}
                   </span>
-                  <p className="font-bold text-lg">{challenge.title}</p>
+                  <Link
+                    href={`/challenges/${challenge._id}/review`}
+                    className="font-bold text-lg link link-hover"
+                  >
+                    {challenge.title}
+                  </Link>
                 </div>
                 <p className="text-sm text-base-content/60 mt-1">
                   Prize: ${challenge.prize.toLocaleString()}
                 </p>
               </div>
-              <div className="card-actions justify-end mt-4 sm:mt-0">
-                {currentUser?._id === challenge.createdBy && (
-                  <Link
-                    href={`/challenges/${challenge._id}/review`}
-                    className="btn btn-secondary btn-sm"
-                  >
-                    <FiEye /> Review Submissions
-                  </Link>
-                )}
+              <div className="card-actions items-center justify-end mt-4 sm:mt-0">
                 {challenge.isFunded ? (
                   <span className="badge badge-success badge-soft font-medium gap-1 text-xs">
                     <FiCheckCircle /> Funded
@@ -128,22 +126,16 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
                   </button>
                 )}
                 <Link
-                  href={`/challenges/${challenge._id}/review`}
-                  className="btn btn-secondary btn-sm"
-                >
-                  <FiEye /> Review
-                </Link>
-                <Link
                   href={`/client/dashboard/challenges/edit/${challenge._id}`}
                   className="btn btn-ghost btn-sm"
                 >
-                  <FiEdit />
+                  <FiEdit /> Edit
                 </Link>
                 <button
                   onClick={() => openDeleteModal(challenge)}
                   className="btn btn-ghost btn-sm text-error"
                 >
-                  <FiTrash2 />
+                  <FiTrash2 /> Delete
                 </button>
               </div>
             </div>

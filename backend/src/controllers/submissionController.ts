@@ -1,3 +1,4 @@
+// ===== File: backend\src\controllers\submissionController.ts =====
 import { Request, Response } from "express";
 import mongoose, { Types } from "mongoose";
 import { AuthenticatedRequest } from "../middleware/auth";
@@ -105,7 +106,7 @@ export const submitToChallenge = asyncHandler(
  * @route   GET /api/submissions/challenge/:challengeId
  * @access  Public
  */
-export const getISubmissons = asyncHandler(
+export const getPublicSubmissionsForChallenge = asyncHandler(
   async (req: Request, res: Response) => {
     const { challengeId } = req.params;
     const submissions = await Submission.find({ challengeId: challengeId })
@@ -153,8 +154,8 @@ export const getSubmissionsForChallenge = asyncHandler(
  */
 export const getMySubmissions = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const developerId = req.userId;
-    const submissions = await Submission.find({ developerId })
+    const challengeId = req.userId;
+    const submissions = await Submission.find({ challengeId })
       .populate("challengeId", "title status prize")
       .sort({ createdAt: -1 });
     res.status(200).json(submissions);

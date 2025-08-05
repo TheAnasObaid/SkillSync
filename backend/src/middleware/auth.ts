@@ -7,6 +7,7 @@ import asyncHandler from "../utils/asyncHandler";
 export interface AuthenticatedRequest extends Request {
   user?: IUser;
   userId?: string;
+  challengeId?: string;
 }
 
 export const authenticate = asyncHandler(

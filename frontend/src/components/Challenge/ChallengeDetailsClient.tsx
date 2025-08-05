@@ -1,3 +1,4 @@
+// ===== File: frontend\src\components\Challenge\ChallengeDetailsClient.tsx =====
 "use client";
 
 import { IChallenge, ISubmission } from "@/types";
@@ -13,8 +14,9 @@ import ChallengeSidebar from "./ChallengeSidebar";
 type LiveSubmission = ISubmission & { isNew?: boolean };
 
 interface Props {
-  initialChallenge: IChallenge | null;
-  initialSubmissions?: LiveSubmission[];
+  // FIX: Renamed props for clarity. This component now receives the final data.
+  challenge: IChallenge | null;
+  submissions: LiveSubmission[];
   onSubmissionSuccess: () => void;
 }
 
@@ -25,15 +27,13 @@ const difficultyStyles = {
 };
 
 const ChallengeDetailsClient = ({
-  initialChallenge,
-  initialSubmissions = [],
+  challenge,
+  submissions,
   onSubmissionSuccess,
 }: Props) => {
-  const [challenge] = useState(initialChallenge);
-  const [submissions, setSubmissions] =
-    useState<LiveSubmission[]>(initialSubmissions);
+  // FIX: Removed the internal `useState` for `challenge` and `submissions`.
+  // The component now renders directly from its props, making it a "dumb" component.
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [submissionSuccess, setSubmissionSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState<"description" | "submissions">(
     "description"
   );
@@ -53,10 +53,13 @@ const ChallengeDetailsClient = ({
       day: "numeric",
     }
   );
+  // FIX: Directly use the length of the submissions prop.
   const submissionCount = submissions.length;
 
   const handleSuccessfulSubmission = () => {
-    setSubmissionSuccess(true);
+    // The parent's socket listener will handle the data update.
+    // We just need to trigger the parent to know the submission was successful,
+    // which can be used for things like closing the modal or showing a toast.
     onSubmissionSuccess();
   };
 
@@ -142,6 +145,7 @@ const ChallengeDetailsClient = ({
               </div>
             )}
             {activeTab === "submissions" && (
+              // FIX: Pass the submissions prop directly.
               <SubmissonList submissions={submissions} isLoading={false} />
             )}
           </div>

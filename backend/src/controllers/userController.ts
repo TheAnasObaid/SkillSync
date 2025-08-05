@@ -1,3 +1,4 @@
+// ===== File: backend\src\controllers\userController.ts =====
 import { Request, Response } from "express";
 import { AuthenticatedRequest } from "../middleware/auth";
 import upload, { uploadPortfolioImage } from "../middleware/upload";
@@ -92,7 +93,7 @@ export const uploadMyAvatar = asyncHandler(
  * @route   POST /api/users/me/portfolio
  * @access  Private (Developer)
  */
-export const addMyIPortfolioItem = asyncHandler(
+export const addMyPortfolioItem = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     uploadPortfolioImage(req, res, async (err) => {
       if (err) {
@@ -137,7 +138,7 @@ export const addMyIPortfolioItem = asyncHandler(
  * @route   DELETE /api/users/me/portfolio/:itemId
  * @access  Private (Developer)
  */
-export const deleteMyIPortfolioItem = asyncHandler(
+export const deleteMyPortfolioItem = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
     const { itemId } = req.params;
     const user = await User.findById(req.userId);

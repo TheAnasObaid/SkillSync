@@ -41,7 +41,7 @@ const ChallengeSidebar = ({
             <FiHash className="text-base-content/70 text-xl flex-shrink-0 mt-1" />
             <div className="flex flex-wrap items-center gap-2">
               {challenge.tags.map((tag) => (
-                <div key={tag} className="badge badge-neutral">
+                <div key={tag} className="badge badge-neutral badge-soft">
                   {tag}
                 </div>
               ))}

@@ -1,3 +1,4 @@
+// ===== File: backend\src\types\index.ts =====
 import { Document, Types } from "mongoose";
 
 // A generic type for our file uploads
@@ -100,5 +101,6 @@ export interface ISubmission extends Document {
     overall: number;
   };
   feedback?: string;
+  createdAt: Date;
   updatedAt: Date;
 }

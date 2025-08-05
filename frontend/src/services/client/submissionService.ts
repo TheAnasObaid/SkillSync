@@ -1,7 +1,7 @@
 import apiClient from "@/lib/apiClient";
 import { ISubmission } from "@/types";
 
-export const getISubmissonsClient = async (
+export const getSubmissonsClient = async (
   challengeId: string
 ): Promise<ISubmission[]> => {
   try {
