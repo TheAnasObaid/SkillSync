@@ -28,8 +28,6 @@ app.use("/api/users", userRoute);
 app.use("/api/submissions", submissionsRoute);
 app.use("/api/challenges", challengesRoute);
 
-// --- SOCKET.IO INTEGRATION ---
-
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
   cors: {
@@ -93,6 +91,12 @@ export const emitToUser = (userId: string, eventName: string, data: any) => {
 // IMPORTANT: The error handler must be the LAST middleware added.
 app.use(errorHandler);
 
-httpServer.listen(appConfig.port, () =>
-  console.log(`🚀 Server is running on http://localhost:${appConfig.port}`)
-);
+// Vercel handles the listening part, so we only listen locally
+if (process.env.NODE_ENV !== "production") {
+  httpServer.listen(appConfig.port, () =>
+    console.log(`🚀 Server is running on http://localhost:${appConfig.port}`)
+  );
+}
+
+// Export the app for Vercel's entry point
+export default app;

@@ -6,13 +6,6 @@ const FileSchema = new Schema({
   path: { type: String, required: true },
 });
 
-const JudgingCriteriaSchema = new Schema({
-  codeQuality: { type: Number },
-  functionality: { type: Number },
-  creativity: { type: Number },
-  documentation: { type: Number },
-});
-
 const ChallengeSchema = new Schema<IChallenge>(
   {
     title: { type: String, required: true },
@@ -34,7 +27,6 @@ const ChallengeSchema = new Schema<IChallenge>(
       default: "published",
     },
     submissions: [{ type: Schema.Types.ObjectId, ref: "Submission" }],
-    judgingCriteria: JudgingCriteriaSchema,
     files: [FileSchema],
     tags: [String],
   },

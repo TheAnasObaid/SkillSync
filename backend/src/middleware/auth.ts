@@ -51,7 +51,6 @@ export const authorize =
       return;
     }
 
-    // 2. We check if the user's role is included in the list of allowed roles.
     const hasRequiredRole = requiredRoles.includes(req.user.role);
 
     if (!hasRequiredRole) {
@@ -63,6 +62,5 @@ export const authorize =
       return;
     }
 
-    // 3. If everything is okay, we proceed.
     next();
   };

@@ -91,29 +91,49 @@ export const getMyChallenges = asyncHandler(
 
 export const updateMyChallenge = asyncHandler(
   async (req: AuthenticatedRequest, res: Response) => {
-    const { id: challengeId } = req.params;
-    const clientId = req.userId;
+    // FIX: Wrap the entire function logic in the 'upload' middleware
+    // to correctly parse multipart/form-data, just like in createChallenge.
+    upload(req, res, async (err) => {
+      if (err) {
+        return res.status(400).json({ message: err.message });
+      }
 
-    const parsedBody = challengeSchema.safeParse(req.body);
-    if (!parsedBody.success) {
-      res.status(400).json({ issues: parsedBody.error.issues });
-      return;
-    }
+      const { id: challengeId } = req.params;
+      const clientId = req.userId;
 
-    const challenge = await Challenge.findOneAndUpdate(
-      { _id: challengeId, createdBy: clientId },
-      { $set: parsedBody.data },
-      { new: true, runValidators: true }
-    );
+      // Zod validation will now work because multer has populated req.body
+      const parsedBody = challengeSchema.safeParse(req.body);
+      if (!parsedBody.success) {
+        res.status(400).json({ issues: parsedBody.error.issues });
+        return;
+      }
 
-    if (!challenge) {
-      res
-        .status(404)
-        .json({ message: "Challenge not found or you are not the owner." });
-      return;
-    }
+      // Create the base payload with validated text fields
+      const updatePayload: any = { ...parsedBody.data };
 
-    res.status(200).json(challenge);
+      // If a new file was uploaded, add it to the payload.
+      // This will replace the existing file.
+      if (req.file) {
+        updatePayload.files = [
+          { name: req.file.originalname, path: req.file.path },
+        ];
+      }
+
+      const challenge = await Challenge.findOneAndUpdate(
+        { _id: challengeId, createdBy: clientId },
+        { $set: updatePayload },
+        { new: true, runValidators: true }
+      );
+
+      if (!challenge) {
+        res
+          .status(404)
+          .json({ message: "Challenge not found or you are not the owner." });
+        return;
+      }
+
+      res.status(200).json(challenge);
+    });
   }
 );
 
