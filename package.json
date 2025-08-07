@@ -1,0 +1,8 @@
+{
+  "name": "skillsync-monorepo",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ]
+}
