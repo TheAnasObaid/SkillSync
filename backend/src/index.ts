@@ -18,7 +18,33 @@ const app = express();
 config();
 connectDB();
 
-app.use(cors());
+const allowedOrigins = [
+  appConfig.clientUrl, // Your main production URL
+  "http://localhost:3000", // For local development
+];
+
+const corsOptions: cors.CorsOptions = {
+  origin: (origin, callback) => {
+    // This regex allows all your Vercel preview domains
+    const vercelPreviewRegex = /https:\/\/skill-sync-.*\.vercel\.app$/;
+
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+
+    if (
+      allowedOrigins.indexOf(origin) !== -1 ||
+      vercelPreviewRegex.test(origin)
+    ) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true,
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
 app.use("/uploads", express.static(path.join(__dirname, "../uploads")));
@@ -30,10 +56,7 @@ app.use("/api/challenges", challengesRoute);
 
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
-  cors: {
-    origin: appConfig.clientUrl,
-    methods: ["GET", "POST"],
-  },
+  cors: corsOptions,
 });
 
 let onlineUsers: { userId: string; socketId: string }[] = [];
