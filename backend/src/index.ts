@@ -114,9 +114,6 @@ export const emitToUser = (userId: string, eventName: string, data: any) => {
 // IMPORTANT: The error handler must be the LAST middleware added.
 app.use(errorHandler);
 
-// Vercel handles the listening part, so we only listen locally
-if (process.env.NODE_ENV !== "production") {
-  httpServer.listen(appConfig.port, () =>
-    console.log(`🚀 Server is running on http://localhost:${appConfig.port}`)
-  );
-}
+httpServer.listen(appConfig.port, () => {
+  console.log(`🚀 Server is successfully listening on port ${appConfig.port}`);
+});
