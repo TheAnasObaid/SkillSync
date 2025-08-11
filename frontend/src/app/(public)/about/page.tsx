@@ -1,66 +1,94 @@
-import Image from "next/image";
+// ===== File: src/app/(public)/about/page.tsx =====
+import PageTitle from "@/components/Common/PageTitle";
+import TeamMemberCard from "@/components/Common/TeamCard";
 import Link from "next/link";
-import { FiTarget, FiZap, FiEye } from "react-icons/fi";
+import { FiTarget, FiUsers } from "react-icons/fi";
+
+const teamMembers = [
+  {
+    name: "Anas Obaid",
+    title: "Founder & CEO",
+    bio: "Driving the mission to revolutionize technical hiring with a background in full-stack development and product strategy.",
+    imageUrl: "/team/founder.png",
+    socials: {
+      linkedin: "https://linkedin.com/in/theanasobaid/",
+      github: "https://github.com/TheAnasObaid",
+    },
+  },
+  {
+    name: "Syed Muhammad Muslim",
+    title: "Technical & Strategic Project Director",
+    bio: "A seasoned strategist ensuring SkillSync aligns with market needs, delivering maximum value and impact for our clients.",
+    imageUrl: "/team/director.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/in/syedmuhammadmuslim/",
+      github: "http://github.com/syedmuhammadmuslim",
+    },
+  },
+  {
+    name: "Mahrukh Tahir",
+    title: "Co-Founder & CMO",
+    bio: "The growth engine behind SkillSync, Mahrukh builds our community and connects our platform with innovative companies worldwide.",
+    imageUrl: "/team/co-founder-cmo.png",
+    socials: {
+      // linkedin: "https://linkedin.com/in/...",
+      github: "https://github.com/Maha0298",
+    },
+  },
+  {
+    name: "Faizan Ali",
+    title: "Co-Founder",
+    bio: "With a keen eye for user-centric design, Faizan crafts the clean, responsive, and engaging interface that makes SkillSync a joy to use.",
+    imageUrl: "/team/co.png",
+    socials: {
+      linkedin: "https://www.linkedin.com/in/m-faizan-ali-webdeveloper",
+      github: "https://github.com/M-faizan-ali",
+    },
+  },
+];
 
 const AboutPage = () => {
   return (
-    <div className="max-w-4xl mx-auto py-12 md:py-20 px-4 space-y-16">
-      {/* --- Section 1: Our Mission --- */}
-      <section className="text-center">
-        <FiTarget className="mx-auto text-5xl text-primary mb-4" />
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-          Our Mission
-        </h1>
-        <p className="mt-4 text-lg text-base-content/80 max-w-2xl mx-auto">
-          To build a world where technical hiring is based on proven skill, not
-          resumes. We connect innovative companies with exceptional developers
-          through objective, real-world challenges.
-        </p>
-      </section>
+    <div className="max-w-5xl mx-auto py-12 md:py-20 px-4 space-y-24">
+      <PageTitle
+        icon={<FiTarget />}
+        title="Our Mission"
+        subtitle="To build a world where technical hiring is based on proven skill, not resumes. We connect innovative companies with exceptional developers through objective, real-world challenges."
+      />
 
-      {/* --- Section 2: Founder's Story --- */}
-      <section className="card bg-base-200/50 border border-base-300 shadow-lg">
-        <div className="card-body items-center text-center p-8 md:p-12">
-          <div className="avatar">
-            <div className="w-32 rounded-full ring ring-primary ring-offset-base-100 ring-offset-4">
-              {/* Replace with a real photo of you in the /public folder */}
-              <Image
-                src="/founder.png"
-                alt="Anas Obaid, Founder of SkillSync"
-                width={128}
-                height={128}
-              />
-            </div>
-          </div>
-          <h2 className="text-3xl font-bold mt-6">Meet the Founder</h2>
-          <p className="font-semibold text-primary">
-            Anas Obaid, Founder & CEO
+      <section>
+        <div className="text-center mb-12">
+          <FiUsers className="mx-auto text-5xl text-primary mb-4" />
+          <h2 className="text-4xl md:text-5xl font-bold tracking-tight">
+            The Leadership Team
+          </h2>
+          <p className="mt-4 text-lg text-base-content/80 max-w-2xl mx-auto">
+            We are a passionate team of developers and strategists dedicated to
+            fixing the broken technical hiring process.
           </p>
-          <blockquote className="mt-4 text-base-content/70 max-w-xl italic">
-            "As a developer, I saw brilliant peers overlooked because they
-            couldn't fit their skills onto a single page. I built SkillSync to
-            end the guesswork. This is a platform where businesses see real
-            work, and developers prove their talent by solving real problems. No
-            more noise, just results."
-          </blockquote>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          {teamMembers.map((member) => (
+            <TeamMemberCard key={member.name} member={member} />
+          ))}
         </div>
       </section>
 
-      {/* --- Section 3: Our Vision --- */}
-      <section className="text-center">
-        <FiEye className="mx-auto text-5xl text-primary mb-4" />
-        <h2 className="text-4xl font-bold tracking-tight">
-          Our Vision for the Future
-        </h2>
-        <p className="mt-4 text-lg text-base-content/80 max-w-2xl mx-auto">
-          We're just getting started. Our roadmap includes team-based
-          competitions, enterprise integrations with leading ATS platforms, and
-          advanced analytics to provide companies with deeper insights into
-          developer skills.
+      <section className="text-center bg-base-200/50 border border-base-300 rounded-lg p-10">
+        <h2 className="text-3xl font-bold">Join Our Mission</h2>
+        <p className="mt-4 max-w-xl mx-auto text-base-content/70">
+          Whether you're a business looking to hire the best talent or a
+          developer ready to prove your skills, SkillSync is your platform.
         </p>
-        <Link href="/challenges" className="btn btn-primary mt-8">
-          See Our Challenges in Action
-        </Link>
+        <div className="mt-8 flex justify-center gap-4">
+          <Link href="/pricing" className="btn btn-primary">
+            For Businesses
+          </Link>
+          <Link href="/challenges" className="btn btn-ghost">
+            For Developers
+          </Link>
+        </div>
       </section>
     </div>
   );
