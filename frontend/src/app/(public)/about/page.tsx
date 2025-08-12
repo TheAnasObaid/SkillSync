@@ -31,7 +31,7 @@ const teamMembers = [
     bio: "The growth engine behind SkillSync, Mahrukh builds our community and connects our platform with innovative companies worldwide.",
     imageUrl: "/team/co-founder-cmo.png",
     socials: {
-      // linkedin: "https://linkedin.com/in/...",
+      linkedin: "http://www.linkedin.com/in/mahrukh-tahir",
       github: "https://github.com/Maha0298",
     },
   },
