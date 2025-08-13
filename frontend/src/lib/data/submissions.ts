@@ -1,0 +1,77 @@
+// ===== File: src/lib/data/submissions.ts =====
+import { ISubmission } from "@/types";
+import { unstable_noStore as noStore } from "next/cache";
+import "server-only";
+
+// export const getMySubmissions = async (): Promise<ISubmission[]> => {
+//   noStore();
+//   try {
+//     const session = await getSession();
+//     if (!session?.user) throw new Error("Authentication required.");
+
+//     await dbConnect();
+//     const submissions = await Submission.find({ developerId: session.user._id })
+//       .populate("challengeId", "title status prize")
+//       .sort({ createdAt: -1 })
+//       .lean();
+//     return JSON.parse(JSON.stringify(submissions));
+//   } catch (error) {
+//     console.error("Database Error: Failed to fetch user's submissions.", error);
+//     throw new Error("Could not fetch your submissions.");
+//   }
+// };
+
+// export const getSubmissionsForReview = async (
+//   challengeId: string
+// ): Promise<ISubmission[]> => {
+//   noStore();
+//   try {
+//     const session = await getSession();
+//     if (!session?.user) throw new Error("Authentication required.");
+
+//     await dbConnect();
+//     // Authorization check: Ensure the logged-in user is the one who created the challenge
+//     const challenge = await Challenge.findById(challengeId)
+//       .select("createdBy")
+//       .lean();
+//     if (!challenge || challenge.createdBy.toString() !== session.user._id) {
+//       throw new Error(
+//         "Forbidden: You are not authorized to view these submissions."
+//       );
+//     }
+
+//     const submissions = await Submission.find({ challengeId })
+//       .populate("developerId", "profile.firstName email profile.avatar")
+//       .lean();
+//     return JSON.parse(JSON.stringify(submissions));
+//   } catch (error) {
+//     console.error(
+//       `Database Error: Failed to fetch submissions for review for challenge ${challengeId}.`,
+//       error
+//     );
+//     throw new Error("Could not fetch submissions for review.");
+//   }
+// };
+
+// export const getSubmissionDetails = async (
+//   submissionId: string
+// ): Promise<ISubmission | null> => {
+//   noStore();
+//   try {
+//     await dbConnect();
+//     const submission = await Submission.findById(submissionId)
+//       .populate(
+//         "developerId",
+//         "profile.firstName profile.lastName profile.avatar email"
+//       )
+//       .populate("challengeId", "title prize deadline")
+//       .lean();
+//     return submission ? JSON.parse(JSON.stringify(submission)) : null;
+//   } catch (error) {
+//     console.error(
+//       `Database Error: Failed to fetch submission details for ${submissionId}.`,
+//       error
+//     );
+//     throw new Error("Could not fetch submission details.");
+//   }
+// };
