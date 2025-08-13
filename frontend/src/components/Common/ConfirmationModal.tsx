@@ -2,7 +2,6 @@
 
 import Modal from "./Modal";
 import { ReactNode } from "react";
-// Import a set of default/fallback icons
 import { FiAlertTriangle, FiHelpCircle } from "react-icons/fi";
 
 interface ConfirmationModalProps {

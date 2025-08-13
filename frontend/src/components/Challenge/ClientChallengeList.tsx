@@ -1,4 +1,3 @@
-// ===== File: frontend\src\components\Challenge\ClientChallengeList.tsx =====
 "use client";
 
 import { useChallengeManager } from "@/hooks/useChallengeManager";

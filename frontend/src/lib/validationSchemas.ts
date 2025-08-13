@@ -1,23 +1,19 @@
-// ===== File: frontend\src/lib/validationSchemas.ts =====
 import { z } from "zod";
 
 // --- AUTH SCHEMAS ---
 export const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters long"),
-  email: z.string().email("Invalid email address"),
+  email: z.email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   role: z.enum(["developer", "client"]),
 });
 
 export const loginSchema = z.object({
-  email: z.string().email(),
+  email: z.email(),
   password: z.string().nonempty("Password is required"),
 });
 
 // --- CHALLENGE SCHEMAS ---
-
-// FIX 1: A schema for VALIDATING the raw form input (strings). No transformations.
-// This is what react-hook-form's resolver will use.
 export const challengeFormSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters" }),
   description: z.string().min(20, { message: "Description is too short" }),
@@ -45,7 +41,6 @@ export const challengeFormSchema = z.object({
     }),
 });
 
-// FIX 2: A schema representing the final, TRANSFORMED data for the API.
 export const challengeApiSchema = challengeFormSchema.transform((data) => ({
   ...data,
   prize: Number(data.prize),

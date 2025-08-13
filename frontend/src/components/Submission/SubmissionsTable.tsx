@@ -1,4 +1,3 @@
-// ===== File: frontend\src\components\Submission\SubmissionsTable.tsx =====
 import { ISubmission } from "@/types";
 import Link from "next/link";
 import { Fragment } from "react";

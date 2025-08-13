@@ -1,4 +1,3 @@
-// ===== File: frontend\src/components\Client\RecentChallengePreview.tsx =====
 import { IChallenge } from "@/types";
 import Link from "next/link";
 import { FiAward, FiChevronRight, FiInbox, FiUsers } from "react-icons/fi";
@@ -16,7 +15,6 @@ const statusStyles: { [key: string]: string } = {
 };
 
 const RecentChallengePreview = ({ challenges }: Props) => {
-  // --- A more engaging empty state ---
   if (challenges.length === 0) {
     return (
       <div className="card bg-base-200/50 border border-base-300 border-dashed">

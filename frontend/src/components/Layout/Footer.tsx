@@ -1,4 +1,3 @@
-// ===== File: src/components/Layout/Footer.tsx =====
 import Link from "next/link";
 import { FiGithub, FiTwitter, FiLinkedin } from "react-icons/fi";
 

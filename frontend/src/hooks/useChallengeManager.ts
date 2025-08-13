@@ -16,7 +16,7 @@ export const useChallengeManager = (initialChallenges: IChallenge[]) => {
     onConfirm: () => {},
   });
 
-  const { user } = useAuthStore(); // <-- ADD THIS
+  const { user } = useAuthStore();
 
   const openDeleteModal = (challenge: IChallenge) => {
     setModalState({

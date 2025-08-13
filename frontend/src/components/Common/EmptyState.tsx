@@ -2,8 +2,6 @@ import Link from "next/link";
 import { ReactNode } from "react";
 import { FiInbox } from "react-icons/fi"; // FiInbox is a great generic icon for "empty"
 
-// --- 1. GENERIC PROPS INTERFACE ---
-// We now accept all the key content as props.
 interface EmptyStateProps {
   icon?: ReactNode;
   title: string;

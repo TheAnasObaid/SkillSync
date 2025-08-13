@@ -3,17 +3,17 @@
 import { useEffect } from "react";
 import { FormProvider, useForm, SubmitHandler } from "react-hook-form";
 import { TextInput, Textarea, Select } from "@/components/Forms/FormFields";
-import { IUser, ProfileFormData } from "@/types";
+import { IUser, DeveloperProfileFormData } from "@/types";
 import FormCard from "../Common/FormCard";
 
 interface Props {
   currentUser: IUser;
-  onSubmit: SubmitHandler<ProfileFormData>;
+  onSubmit: SubmitHandler<DeveloperProfileFormData>;
   isSubmitting: boolean;
 }
 
 const ProfileEditor = ({ currentUser, onSubmit, isSubmitting }: Props) => {
-  const formMethods = useForm<ProfileFormData>();
+  const formMethods = useForm<DeveloperProfileFormData>();
   const { handleSubmit, reset } = formMethods;
 
   useEffect(() => {

@@ -1,4 +1,3 @@
-// ===== File: frontend\src/hooks/useChallengeForm.ts =====
 "use client";
 
 import apiClient from "@/lib/apiClient";
@@ -20,8 +19,6 @@ export const useChallengeForm = (
 ) => {
   const router = useRouter();
 
-  // FIX: useForm is typed with ChallengeFormValues and uses the matching schema for validation.
-  // This completely resolves the resolver error.
   const form = useForm<ChallengeFormValues>({
     resolver: zodResolver(challengeFormSchema),
     defaultValues: isEditing
@@ -54,20 +51,16 @@ export const useChallengeForm = (
     formState: { isSubmitting },
   } = form;
 
-  // FIX: This handler now receives the validated raw data (ChallengeFormValues).
   const onSubmit: SubmitHandler<ChallengeFormValues> = async (data) => {
-    // FIX: We now transform the data here, after validation, before sending to the API.
     const transformedData: ChallengeDto = challengeApiSchema.parse(data);
 
     const formData = new FormData();
     Object.entries(transformedData).forEach(([key, value]) => {
-      // Don't append the file object from the transformed data
       if (key !== "file") {
         formData.append(key, String(value));
       }
     });
 
-    // Append the actual file from the original form data
     if (data.file && data.file.length > 0) {
       formData.append("file", data.file[0]);
     }

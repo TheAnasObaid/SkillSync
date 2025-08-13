@@ -1,7 +1,6 @@
 import PageTitle from "@/components/Common/PageTitle";
 import { FiShield } from "react-icons/fi";
 
-// A reusable component for each policy section to keep the layout clean and readable
 const PolicySection = ({
   title,
   children,

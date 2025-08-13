@@ -1,24 +1,23 @@
 "use client";
 
+import apiClient from "@/lib/apiClient";
+import { DeveloperProfileFormData, IPortfolioItem, IUser } from "@/types";
 import { useState } from "react";
 import { SubmitHandler } from "react-hook-form";
-import { IUser, IIPortfolioItem, ProfileFormData } from "@/types";
 import toast from "react-hot-toast";
-import apiClient from "@/lib/apiClient";
-
-import ProfileView from "../Profile/ProfileView";
-import PortfolioManager from "./PortfolioManager";
 import { FiEdit, FiX } from "react-icons/fi";
 import ProfileEditor from "../Developer/ProfileEditor";
+import ProfileView from "../Profile/ProfileView";
+import PortfolioManager from "./PortfolioManager";
 
 const DeveloperProfile = ({ initialUser }: { initialUser: IUser }) => {
   const [user, setUser] = useState<IUser>(initialUser);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // The form hook has been removed from this component.
-
-  const handleProfileUpdate: SubmitHandler<ProfileFormData> = async (data) => {
+  const handleProfileUpdate: SubmitHandler<DeveloperProfileFormData> = async (
+    data
+  ) => {
     const toastId = toast.loading("Updating profile...");
     setIsSubmitting(true);
     try {
@@ -40,7 +39,7 @@ const DeveloperProfile = ({ initialUser }: { initialUser: IUser }) => {
     }
   };
 
-  const onPortfolioUpdate = (updatedPortfolio: IIPortfolioItem[]) => {
+  const onPortfolioUpdate = (updatedPortfolio: IPortfolioItem[]) => {
     setUser((prev) => ({
       ...prev!,
       profile: { ...prev!.profile, portfolio: updatedPortfolio },

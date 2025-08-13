@@ -8,7 +8,7 @@ import { FiPlus, FiX } from "react-icons/fi";
 import { TextInput, Textarea, FileInput } from "../Forms/FormFields";
 import toast from "react-hot-toast";
 import apiClient from "@/lib/apiClient";
-import { IIPortfolioItem, PortfolioFormData } from "@/types";
+import { IIPortfolioItem, DeveloperPortfolioFormData } from "@/types";
 import Modal from "../Common/Modal";
 
 interface PortfolioManagerProps {
@@ -29,12 +29,14 @@ const PortfolioManager = ({
   });
   const [isActionInProgress, setIsActionInProgress] = useState(false);
 
-  const formMethods = useForm<PortfolioFormData>();
+  const formMethods = useForm<DeveloperPortfolioFormData>();
   const { handleSubmit, reset } = formMethods;
   const isSubmitting = formMethods.formState.isSubmitting;
 
   // --- API HANDLERS ---
-  const handleAddProject: SubmitHandler<PortfolioFormData> = async (data) => {
+  const handleAddProject: SubmitHandler<DeveloperPortfolioFormData> = async (
+    data
+  ) => {
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("description", data.description);

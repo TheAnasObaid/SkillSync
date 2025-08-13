@@ -1,4 +1,3 @@
-// ===== File: frontend\src\components\Challenge\ChallengeDetailsClient.tsx =====
 "use client";
 
 import { IChallenge, ISubmission } from "@/types";
@@ -14,7 +13,6 @@ import ChallengeSidebar from "./ChallengeSidebar";
 type LiveSubmission = ISubmission & { isNew?: boolean };
 
 interface Props {
-  // FIX: Renamed props for clarity. This component now receives the final data.
   challenge: IChallenge | null;
   submissions: LiveSubmission[];
   onSubmissionSuccess: () => void;

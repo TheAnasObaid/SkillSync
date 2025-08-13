@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 
 export const useRegisterForm = () => {
   const router = useRouter();
-  const [apiError, setApiError] = useState(""); // Kept for potential specific error displays if needed
+  const [apiError, setApiError] = useState("");
 
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
@@ -19,7 +19,7 @@ export const useRegisterForm = () => {
       name: "",
       email: "",
       password: "",
-      role: "developer", // A sensible default
+      role: "developer",
     },
   });
 

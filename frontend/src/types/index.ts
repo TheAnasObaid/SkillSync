@@ -1,8 +1,10 @@
-// ===== File: frontend\src\types\index.ts =====
 import { ReactNode } from "react";
 
-// --- GENERIC & SHARED TYPES ---
-export interface File {
+export type Serializable<T> = {
+  [P in keyof T]: T[P] extends Date ? string : T[P];
+};
+
+export interface IFile {
   name: string;
   path: string;
 }
@@ -10,8 +12,7 @@ export interface File {
 export type Role = "developer" | "client" | "admin";
 export type AccountStatus = "active" | "banned";
 
-// --- DATA MODELS (matching the backend) ---
-export interface IIPortfolioItem {
+export interface IPortfolioItem {
   _id?: string;
   title: string;
   description: string;
@@ -25,7 +26,7 @@ export interface IUser {
   email: string;
   role: Role;
   accountStatus: AccountStatus;
-  earnings?: number;
+  earnings: number;
   profile: {
     firstName: string;
     lastName?: string;
@@ -34,7 +35,7 @@ export interface IUser {
     bio?: string;
     skills: string[];
     experience?: string;
-    portfolio: IIPortfolioItem[];
+    portfolio: IPortfolioItem[];
   };
   reputation: {
     rating: number;
@@ -42,8 +43,12 @@ export interface IUser {
     completedChallenges: number;
   };
   isVerified: boolean;
-  createdAt: string;
-  updatedAt: string;
+  verificationToken?: string;
+  passwordResetToken?: string;
+  passwordResetExpires?: Date; // Correct type is Date
+  lastLogin?: Date; // Correct type is Date
+  createdAt: Date; // Correct type is Date
+  updatedAt: Date; // Correct type is Date
 }
 
 export type ChallengeStatus =
@@ -52,53 +57,47 @@ export type ChallengeStatus =
   | "active"
   | "judging"
   | "completed";
+
 export type ChallengeDifficulty = "beginner" | "intermediate" | "advanced";
 
 export interface IChallenge {
   _id: string;
   title: string;
   description: string;
-  prize: number;
-  isFunded?: boolean;
-  createdBy: string | IUser; // Can be populated
   requirements: string;
-  category?: string;
+  prize: number;
+  category: string;
   difficulty: ChallengeDifficulty;
-  deadline: string; // Sticking with string for easier date input handling
   status: ChallengeStatus;
-  submissions: string[];
-  files: File[];
   tags: string[];
-  createdAt: string;
-  updatedAt: string;
+  isFunded: boolean;
+  createdBy: string | IUser; // Can be a string ID or a populated IUser object
+  submissions: string[] | ISubmission[]; // Can be an array of IDs or populated objects
+  files: IFile[];
+  deadline: Date; // Correct type is Date
+  createdAt: Date; // Correct type is Date
+  updatedAt: Date; // Correct type is Date
 }
 
 export type SubmissionStatus = "pending" | "reviewed" | "winner" | "rejected";
 
 export interface ISubmission {
   _id: string;
-  challengeId:
-    | string
-    | { _id: string; title: string; status: string; prize?: number };
-  developerId:
-    | string
-    | {
-        _id: string;
-        email?: string;
-        profile: { firstName: string; avatar?: string };
-      };
   githubRepo: string;
-  liveDemo?: string;
   description: string;
+  liveDemo?: string;
   status: SubmissionStatus;
-  files: File[];
+  challengeId: string | IChallenge; // Can be a string ID or a populated IChallenge object
+  developerId: string | IUser; // Can be a string ID or a populated IUser object
+  files: IFile[];
   ratings?: { overall: number };
   feedback?: string;
-  createdAt: string;
-  updatedAt: string;
+  createdAt: Date; // Correct type is Date
+  updatedAt: Date; // Correct type is Date
 }
 
 // --- API & STATS TYPES ---
+
 export interface PlatformStats {
   totalUsers: number;
   totalChallenges: number;
@@ -118,7 +117,8 @@ export interface DeveloperStats {
   pendingReviews: number;
 }
 
-// --- UI & FORM TYPES ---
+// --- UI & FORM-SPECIFIC TYPES ---
+
 export interface DashboardLink {
   href: string;
   label: string;
@@ -134,7 +134,8 @@ export interface StatCardProps {
   color?: "green" | "blue" | "orange" | "red";
 }
 
-export interface PortfolioFormData {
+// Form data for adding a portfolio item for developer
+export interface DeveloperPortfolioFormData {
   title: string;
   description: string;
   liveUrl?: string;
@@ -142,13 +143,24 @@ export interface PortfolioFormData {
   portfolioImage?: FileList;
 }
 
-export interface ProfileFormData {
+// Form data for editing a developer profile
+export interface DeveloperProfileFormData {
   name: string;
   email: string;
   profile: {
     lastName: string;
     bio: string;
-    skills: string; // Skills are a comma-separated string in the form
+    skills: string;
     experience: string;
+  };
+}
+
+// Form data for editing a client profile
+export interface ClientProfileFormData {
+  name: string;
+  profile: {
+    lastName: string;
+    companyName: string;
+    bio: string;
   };
 }

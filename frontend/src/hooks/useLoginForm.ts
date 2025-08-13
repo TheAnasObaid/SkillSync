@@ -15,12 +15,10 @@ export const useLoginForm = () => {
   const router = useRouter();
   const { setToken, setUser } = useAuthStore();
 
-  // State for API-related feedback
   const [apiError, setApiError] = useState("");
   const [isUnverified, setIsUnverified] = useState(false);
   const [isResending, setIsResending] = useState(false);
 
-  // Initialize react-hook-form
   const form = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },

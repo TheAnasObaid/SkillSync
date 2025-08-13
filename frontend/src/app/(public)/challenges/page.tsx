@@ -1,9 +1,6 @@
-// ===== File: frontend\src\app\(public)\challenges\page.tsx =====
 import ChallengeList from "@/components/Challenge/ChallengeList";
 import { Suspense } from "react";
 
-// FIX: This line ensures the page is always rendered dynamically,
-// bypassing any cache and fetching the latest data on every request.
 export const dynamic = "force-dynamic";
 
 const ChallengesPage = () => {

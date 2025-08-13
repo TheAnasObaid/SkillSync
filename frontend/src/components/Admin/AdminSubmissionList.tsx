@@ -1,5 +1,4 @@
-// ===== File: frontend\src/components\Admin\AdminSubmissionList.tsx =====
-"use client"; // Required for hooks like useRouter
+"use client";
 
 import { ISubmission } from "@/types";
 import Link from "next/link";

@@ -1,9 +1,8 @@
-// ===== File: frontend\src\hooks\useReviewSubmissions.ts =====
 "use client";
 
 import apiClient from "@/lib/apiClient";
 import { ISubmission } from "@/types";
-import { AxiosError } from "axios"; // FIX: Import AxiosError for type checking
+import { AxiosError } from "axios";
 import { useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -86,7 +85,6 @@ export const useReviewSubmissions = (initialSubmissions: ISubmission[]) => {
       toast.success("Review saved!", { id: toastId });
       closeModal();
     } catch (error) {
-      // FIX: Improved, user-friendly error handling
       let errorMessage =
         "An unexpected error occurred while saving the review.";
       if (error instanceof AxiosError && error.response?.data?.message) {
@@ -110,8 +108,6 @@ export const useReviewSubmissions = (initialSubmissions: ISubmission[]) => {
       toast.success("Winner selected successfully!", { id: toastId });
       closeModal();
     } catch (error) {
-      // FIX: Improved, user-friendly error handling for selecting a winner.
-      // This will now display specific messages from the backend like "Challenge prize has not been funded."
       let errorMessage =
         "An unexpected error occurred. Please try again later.";
       if (error instanceof AxiosError && error.response?.data?.message) {

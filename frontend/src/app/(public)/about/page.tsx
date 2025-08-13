@@ -1,4 +1,3 @@
-// ===== File: src/app/(public)/about/page.tsx =====
 import PageTitle from "@/components/Common/PageTitle";
 import TeamMemberCard from "@/components/Common/TeamCard";
 import Link from "next/link";

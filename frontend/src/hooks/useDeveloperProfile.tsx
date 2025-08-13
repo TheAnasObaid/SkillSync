@@ -1,30 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import {
-  IUser,
-  IIPortfolioItem,
-  ProfileFormData,
-  PortfolioFormData as AddPortfolioFormData,
-} from "@/types";
 import apiClient from "@/lib/apiClient";
+import {
+  DeveloperPortfolioFormData,
+  DeveloperProfileFormData,
+  IPortfolioItem,
+  IUser,
+} from "@/types";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { AxiosError } from "axios";
 
 export const useDeveloperProfile = (initialUser: IUser) => {
-  // --- STATE MANAGEMENT ---
   const [user, setUser] = useState<IUser>(initialUser);
   const [isEditMode, setIsEditMode] = useState(false);
   const [isPortfolioModalOpen, setIsPortfolioModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
-    item: null as IIPortfolioItem | null,
+    item: null as IPortfolioItem | null,
   });
   const [isActionInProgress, setIsActionInProgress] = useState(false);
 
-  // --- PROFILE EDIT FORM ---
-  const profileForm = useForm<ProfileFormData>();
+  const profileForm = useForm<DeveloperProfileFormData>();
   const { reset, handleSubmit } = profileForm;
 
   useEffect(() => {
@@ -42,7 +39,7 @@ export const useDeveloperProfile = (initialUser: IUser) => {
     }
   }, [isEditMode, user, reset]);
 
-  const handleProfileSubmit = async (data: ProfileFormData) => {
+  const handleProfileSubmit = async (data: DeveloperProfileFormData) => {
     const toastId = toast.loading("Updating profile...");
     setIsActionInProgress(true);
     try {
@@ -64,17 +61,15 @@ export const useDeveloperProfile = (initialUser: IUser) => {
     }
   };
 
-  // --- PORTFOLIO MANAGEMENT ---
-  const portfolioForm = useForm<AddPortfolioFormData>();
+  const portfolioForm = useForm<DeveloperPortfolioFormData>();
 
-  const handleAddPortfolio = async (data: AddPortfolioFormData) => {
+  const handleAddPortfolio = async (data: DeveloperPortfolioFormData) => {
     const formData = new FormData();
-    // ... build formData
 
     const toastId = toast.loading("Adding project...");
     setIsActionInProgress(true);
     try {
-      const response = await apiClient.post<IIPortfolioItem[]>(
+      const response = await apiClient.post<IPortfolioItem[]>(
         "/users/me/portfolio",
         formData,
         { headers: { "Content-Type": "multipart/form-data" } }

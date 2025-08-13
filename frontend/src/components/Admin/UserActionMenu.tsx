@@ -2,7 +2,6 @@
 
 import { IUser } from "@/types";
 
-// Define the action type again for clarity, or import from a central types file
 type UserUpdateAction =
   | { role: "developer" | "client" | "admin" }
   | { isVerified: boolean }

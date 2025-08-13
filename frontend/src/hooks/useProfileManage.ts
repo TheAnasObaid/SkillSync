@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, ChangeEvent } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
-import { IUser, ProfileFormData } from "@/types"; // Assuming a generic ProfileFormData type
+import { IUser, DeveloperProfileFormData } from "@/types";
 import apiClient from "@/lib/apiClient";
 import toast from "react-hot-toast";
 
@@ -12,7 +12,7 @@ export const useProfileManager = (initialUser: IUser) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
-  const formMethods = useForm<ProfileFormData>();
+  const formMethods = useForm<DeveloperProfileFormData>();
   const { reset, handleSubmit } = formMethods;
 
   // Effect to pre-fill the form when entering edit mode
@@ -23,11 +23,12 @@ export const useProfileManager = (initialUser: IUser) => {
     }
   }, [isEditMode, user, reset]);
 
-  const handleFormSubmit: SubmitHandler<ProfileFormData> = async (data) => {
+  const handleFormSubmit: SubmitHandler<DeveloperProfileFormData> = async (
+    data
+  ) => {
     const toastId = toast.loading("Updating profile...");
     setIsSubmitting(true);
     try {
-      // The payload might need to be transformed (e.g., for skills)
       const response = await apiClient.put<IUser>("/users/me", data);
       setUser(response.data);
       toast.success("Profile updated!", { id: toastId });

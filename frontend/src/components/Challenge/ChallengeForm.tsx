@@ -1,4 +1,3 @@
-// ===== File: frontend\src/components/Challenge/ChallengeForm.tsx =====
 "use client";
 
 import { useChallengeForm } from "@/hooks/useChallengeForm";

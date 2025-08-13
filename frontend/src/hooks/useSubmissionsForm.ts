@@ -37,7 +37,7 @@ export const useSubmissionForm = (
         headers: { "Content-Type": "multipart/form-data" },
       });
       toast.success("Submission successful!", { id: submitToast });
-      onSuccess(); // Call the parent's success handler
+      onSuccess();
     } catch (error) {
       const message =
         error instanceof AxiosError
@@ -50,6 +50,6 @@ export const useSubmissionForm = (
   return {
     form,
     isSubmitting,
-    submitHandler: handleSubmit(onSubmit), // Pre-bind the handler
+    submitHandler: handleSubmit(onSubmit),
   };
 };

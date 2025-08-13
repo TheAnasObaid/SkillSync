@@ -1,4 +1,3 @@
-// ===== File: frontend\src\app\(public)\challenges\[id]\page.tsx =====
 "use client";
 
 import ChallengeDetailsClient from "@/components/Challenge/ChallengeDetailsClient";

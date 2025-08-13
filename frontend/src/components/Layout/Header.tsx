@@ -1,4 +1,3 @@
-// ===== File: src/components/Layout/Header.tsx =====
 "use client";
 
 import Link from "next/link";

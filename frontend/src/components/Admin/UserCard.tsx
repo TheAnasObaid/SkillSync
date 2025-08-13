@@ -5,7 +5,6 @@ import { FiMoreVertical, FiSlash } from "react-icons/fi";
 import UserActionMenu from "./UserActionMenu";
 import UserAvatar from "../Profile/UserAvatar";
 
-// The props for the card are similar to the action menu
 interface UserCardProps {
   user: IUser;
   isCurrentUser: boolean;

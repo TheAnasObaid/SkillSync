@@ -1,4 +1,3 @@
-// ===== File: frontend\src\components\Submission\SubmissionDetailsClient.tsx =====
 "use client";
 
 import { IChallenge, ISubmission, IUser } from "@/types";

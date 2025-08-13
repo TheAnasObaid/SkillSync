@@ -1,9 +1,8 @@
 import { ISubmission } from "@/types";
 import Link from "next/link";
 import UserAvatar from "../Profile/UserAvatar";
-import { FiExternalLink } from "react-icons/fi"; // Import a new icon
+import { FiExternalLink } from "react-icons/fi";
 
-// We can define the props interface at the top for clarity
 interface SubmissionInfoCardProps {
   submission: ISubmission;
 }

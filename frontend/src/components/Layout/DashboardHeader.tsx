@@ -5,7 +5,6 @@ import { useAuthStore } from "@/store/authStore";
 import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import UserAvatar from "../Profile/UserAvatar";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import { useEffect, useState } from "react";
 import ProfileDropdown from "../Common/ProfileDropdown";
