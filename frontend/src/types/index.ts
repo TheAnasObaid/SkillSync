@@ -27,6 +27,7 @@ export interface IUser {
   role: Role;
   accountStatus: AccountStatus;
   earnings: number;
+  password?: string;
   profile: {
     firstName: string;
     lastName?: string;
@@ -45,10 +46,10 @@ export interface IUser {
   isVerified: boolean;
   verificationToken?: string;
   passwordResetToken?: string;
-  passwordResetExpires?: Date; // Correct type is Date
-  lastLogin?: Date; // Correct type is Date
-  createdAt: Date; // Correct type is Date
-  updatedAt: Date; // Correct type is Date
+  passwordResetExpires?: Date;
+  lastLogin?: Date;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export type ChallengeStatus =
