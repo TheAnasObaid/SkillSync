@@ -1,3 +1,5 @@
+"use client";
+
 import DashboardHeader from "@/components/Layout/DashboardHeader";
 import DashboardLayout from "@/components/Layout/DashboardLayout";
 import {
@@ -5,34 +7,39 @@ import {
   clientSidebarLinks,
   developerSidebarLinks,
 } from "@/config/dashboard";
-import { getServerApi } from "@/lib/serverApi";
-import { IUser } from "@/types";
-import { redirect } from "next/navigation";
-
-export const dynamic = "force-dynamic";
-
-const getUser = async (): Promise<IUser | null> => {
-  try {
-    const serverApi = await getServerApi();
-    const response = await serverApi.get("/users/me");
-    return response.data;
-  } catch (error) {
-    return null;
-  }
-};
+import { useHasMounted } from "@/hooks/useHasMounted";
+import { useAuthStore } from "@/store/authStore";
+import { DashboardLink } from "@/types";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface Props {
   children: React.ReactNode;
 }
 
-const DashboardsLayout = async ({ children }: Props) => {
-  const user = await getUser();
-  if (!user) {
-    redirect("/login");
+const DashboardsLayout = ({ children }: Props) => {
+  const router = useRouter();
+  const hasMounted = useHasMounted();
+
+  const { user, token } = useAuthStore();
+
+  useEffect(() => {
+    if (hasMounted) {
+      if (!token || !user) {
+        router.push("/login");
+      }
+    }
+  }, [user, token, hasMounted, router]);
+
+  if (!hasMounted || !user) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-base-200">
+        <span className="loading loading-spinner loading-lg text-primary"></span>
+      </div>
+    );
   }
 
-  let sidebarLinks = [];
-
+  let sidebarLinks: DashboardLink[] = [];
   switch (user.role) {
     case "client":
       sidebarLinks = clientSidebarLinks;
@@ -44,7 +51,8 @@ const DashboardsLayout = async ({ children }: Props) => {
       sidebarLinks = adminSidebarLinks;
       break;
     default:
-      redirect("/login");
+      // This is a safeguard. In a real scenario, you might redirect or show an error.
+      sidebarLinks = [];
   }
 
   return (
