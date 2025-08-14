@@ -10,11 +10,10 @@ const ChallengesPage = () => {
           Find your next project and showcase your skills.
         </p>
       </div>
-
       <Suspense
         fallback={
           <div className="text-center">
-            <span className="loading loading-spinner loading-lg text-primary"></span>
+            <span className="loading loading-spinner loading-lg text-secondary"></span>
           </div>
         }
       >

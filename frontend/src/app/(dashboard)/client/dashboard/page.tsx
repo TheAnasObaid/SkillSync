@@ -1,8 +1,9 @@
 import RecentChallengePreview from "@/components/Client/RecentChallengePreview";
 import StatCardGrid, { StatItem } from "@/components/Common/StatCardGrid";
-import { getMyChallenges } from "@/services/server/challengeService";
-import { getMyClientStats } from "@/services/server/userService";
+import { getMyChallenges } from "@/lib/data/challenges";
+import { getMyClientStats } from "@/lib/data/users";
 import Link from "next/link";
+import { Suspense } from "react";
 import { FiArchive, FiCheckSquare, FiClipboard } from "react-icons/fi";
 
 const ClientDashboardPage = async () => {
@@ -48,7 +49,9 @@ const ClientDashboardPage = async () => {
         </p>
       </div>
 
-      <StatCardGrid stats={clientStats} loading={!statsData} />
+      <Suspense fallback={<StatCardGridSkeleton />}>
+        <StatCardGrid stats={clientStats} />
+      </Suspense>
 
       <div>
         <div className="flex justify-between items-center mb-4">
@@ -60,10 +63,28 @@ const ClientDashboardPage = async () => {
             View All
           </Link>
         </div>
-        <RecentChallengePreview challenges={recentChallenges} />
+        <Suspense fallback={<RecentChallengeSkeleton />}>
+          <RecentChallengePreview challenges={recentChallenges} />
+        </Suspense>
       </div>
     </div>
   );
 };
+
+const StatCardGridSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="skeleton h-40 w-full"></div>
+    <div className="skeleton h-40 w-full"></div>
+    <div className="skeleton h-40 w-full"></div>
+  </div>
+);
+
+const RecentChallengeSkeleton = () => (
+  <div className="space-y-3">
+    <div className="skeleton h-20 w-full"></div>
+    <div className="skeleton h-20 w-full"></div>
+    <div className="skeleton h-20 w-full"></div>
+  </div>
+);
 
 export default ClientDashboardPage;

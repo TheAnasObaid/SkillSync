@@ -1,75 +1,52 @@
 "use client";
 
-import { useChallengeManager } from "@/hooks/useChallengeManager";
-import apiClient from "@/lib/apiClient";
+import {
+  useDeleteChallengeMutation,
+  useFundChallengeMutation,
+} from "@/hooks/mutations/useChallengeMutations";
+import { useMyChallengesQuery } from "@/hooks/queries/useMyChallengesQuery";
 import { IChallenge } from "@/types";
 import Link from "next/link";
 import { useState } from "react";
-import toast from "react-hot-toast";
-import {
-  FiCheckCircle,
-  FiDollarSign,
-  FiEdit,
-  FiEye,
-  FiTrash2,
-} from "react-icons/fi";
+import { FiCheckCircle, FiDollarSign, FiEdit, FiTrash2 } from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import EmptyState from "../Common/EmptyState";
 
-interface Props {
-  initialChallenges: IChallenge[];
-}
+const ClientChallengeList = () => {
+  const { data: challenges, isLoading, isError } = useMyChallengesQuery();
 
-const statusStyles = {
-  draft: "badge-ghost",
-  published: "badge-info",
-  active: "badge-info",
-  judging: "badge-warning",
-  completed: "badge-success",
-};
+  const { mutate: deleteMutate, isPending: isDeleting } =
+    useDeleteChallengeMutation();
 
-const ClientChallengeList = ({ initialChallenges }: Props) => {
-  const {
-    challenges,
-    setChallenges,
-    isDeleting,
-    modalState,
-    currentUser,
-    openDeleteModal,
-    closeModal,
-  } = useChallengeManager(initialChallenges);
-  const [isFunding, setIsFunding] = useState(false);
-  const [fundModalState, setFundModalState] = useState({
+  const { mutate: fundMutate, isPending: isFunding } =
+    useFundChallengeMutation();
+
+  const [deleteModal, setDeleteModal] = useState({
+    isOpen: false,
+    challenge: null as IChallenge | null,
+  });
+  const [fundModal, setFundModal] = useState({
     isOpen: false,
     challenge: null as IChallenge | null,
   });
 
-  const openFundModal = (challenge: IChallenge) => {
-    setFundModalState({ isOpen: true, challenge });
-  };
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="skeleton h-24 w-full rounded-lg"></div>
+        ))}
+      </div>
+    );
+  }
 
-  const handleFundConfirm = async () => {
-    if (!fundModalState.challenge) return;
-    setIsFunding(true);
-    const toastId = toast.loading("Processing payment...");
-    try {
-      const res = await apiClient.patch(
-        `/challenges/${fundModalState.challenge._id}/fund`
-      );
-      // Update the state of this challenge to reflect it's now funded
-      setChallenges((prev) =>
-        prev.map((c) =>
-          c._id === fundModalState.challenge?._id ? res.data.challenge : c
-        )
-      );
-      toast.success("Challenge funded successfully!", { id: toastId });
-    } catch (error) {
-      toast.error("Funding failed.", { id: toastId });
-    } finally {
-      setIsFunding(false);
-      setFundModalState({ isOpen: false, challenge: null });
-    }
-  };
+  if (isError || !challenges) {
+    return (
+      <div className="alert alert-error alert-soft">
+        Could not load challenges. Please try again later.
+      </div>
+    );
+  }
 
   if (challenges.length === 0) {
     return (
@@ -81,6 +58,30 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
       />
     );
   }
+
+  const handleDeleteConfirm = () => {
+    if (deleteModal.challenge) {
+      deleteMutate(deleteModal.challenge._id, {
+        onSuccess: () => setDeleteModal({ isOpen: false, challenge: null }),
+      });
+    }
+  };
+
+  const handleFundConfirm = () => {
+    if (fundModal.challenge) {
+      fundMutate(fundModal.challenge._id, {
+        onSuccess: () => setFundModal({ isOpen: false, challenge: null }),
+      });
+    }
+  };
+
+  const statusStyles = {
+    draft: "badge-ghost",
+    published: "badge-info",
+    active: "badge-info",
+    judging: "badge-warning",
+    completed: "badge-success",
+  };
 
   return (
     <>
@@ -118,7 +119,7 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
                   </span>
                 ) : (
                   <button
-                    onClick={() => openFundModal(challenge)}
+                    onClick={() => setFundModal({ isOpen: true, challenge })}
                     className="btn btn-warning btn-sm"
                   >
                     <FiDollarSign /> Fund Prize
@@ -131,7 +132,7 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
                   <FiEdit /> Edit
                 </Link>
                 <button
-                  onClick={() => openDeleteModal(challenge)}
+                  onClick={() => setDeleteModal({ isOpen: true, challenge })}
                   className="btn btn-ghost btn-sm text-error"
                 >
                   <FiTrash2 /> Delete
@@ -143,28 +144,26 @@ const ClientChallengeList = ({ initialChallenges }: Props) => {
       </div>
 
       <ConfirmationModal
-        isOpen={fundModalState.isOpen}
+        isOpen={fundModal.isOpen}
         title="Fund Challenge Prize"
-        message={`You are about to fund the prize of $${fundModalState.challenge?.prize.toLocaleString()} for the challenge "${
-          fundModalState.challenge?.title
-        }". Do you want to proceed?`}
+        message={`This will initiate the secure payment process for the $${fundModal.challenge?.prize.toLocaleString()} prize. Are you sure you want to proceed?`}
         onConfirm={handleFundConfirm}
-        onCancel={() => setFundModalState({ isOpen: false, challenge: null })}
-        confirmText="Yes, Confirm Payment"
+        onCancel={() => setFundModal({ isOpen: false, challenge: null })}
+        confirmText="Yes, Proceed to Payment"
         variant="primary"
         isActionInProgress={isFunding}
         icon={<FiDollarSign size={48} />}
       />
-
       <ConfirmationModal
-        isOpen={modalState.isOpen}
-        title={modalState.title}
-        message={modalState.message}
-        onConfirm={modalState.onConfirm}
-        onCancel={closeModal}
+        isOpen={deleteModal.isOpen}
+        title="Confirm Deletion"
+        message={`Are you sure you want to delete "${deleteModal.challenge?.title}"? This cannot be undone.`}
+        onConfirm={handleDeleteConfirm}
+        onCancel={() => setDeleteModal({ isOpen: false, challenge: null })}
         confirmText="Yes, Delete"
         variant="error"
         isActionInProgress={isDeleting}
+        icon={<FiTrash2 size={48} />}
       />
     </>
   );
