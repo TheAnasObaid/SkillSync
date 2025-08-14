@@ -1,9 +1,9 @@
-import { SocketProvider } from "@/context/SocketContext";
 import "@/styles/globals.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "react-hot-toast";
-import { FiCheckCircle, FiXCircle, FiLoader } from "react-icons/fi";
+import { FiCheckCircle, FiLoader, FiXCircle } from "react-icons/fi";
+import Providers from "./Providers";
 
 export const metadata: Metadata = {
   title: "SkillSync",
@@ -24,7 +24,7 @@ export default function RootLayout({
   return (
     <html lang="en" data-theme="skillsync-pro">
       <body className={`${inter.className} ${inter.variable} antialiased`}>
-        <SocketProvider>{children}</SocketProvider>{" "}
+        <Providers>{children}</Providers>
         <Toaster
           position="top-center"
           gutter={12}
