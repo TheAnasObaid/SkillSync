@@ -21,7 +21,7 @@ const SuccessMessage = () => (
 );
 
 const ForgotPasswordForm = () => {
-  const { form, isSubmitting, isSuccess, submitHandler } = useForgotPassword();
+  const { form, isSubmitting, isSuccess, onSubmit } = useForgotPassword();
 
   return (
     <div className="grid gap-6 max-w-md w-full">
@@ -40,7 +40,7 @@ const ForgotPasswordForm = () => {
                 </p>
               </div>
               <FormProvider {...form}>
-                <form onSubmit={submitHandler} className="grid gap-4 mt-4">
+                <form onSubmit={onSubmit} className="grid gap-4 mt-4">
                   <TextInput
                     name="email"
                     label="Your Email Address"

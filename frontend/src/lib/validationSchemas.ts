@@ -17,7 +17,15 @@ export const emailSchema = z.object({
   email: z.email("Invalid email address"),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.email("Invalid email address"),
+});
+
 export const passwordSchema = z.object({
+  password: z.string().nonempty("Password is required"),
+});
+
+export const resetPasswordSchema = z.object({
   password: z.string().nonempty("Password is required"),
 });
 
@@ -58,8 +66,8 @@ export const challengeApiSchema = challengeFormSchema.transform((data) => ({
 // --- TYPE DEFINITIONS ---
 export type RegisterFormData = z.infer<typeof registerSchema>;
 export type LoginFormData = z.infer<typeof loginSchema>;
-export type ResetPasswordFormData = z.infer<typeof passwordSchema>;
-export type ForgotPasswordFormData = z.infer<typeof emailSchema>;
+export type ResetPasswordFormData = z.infer<typeof resetPasswordSchema>;
+export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 // The type for the form's state, matching the validation schema.
 export type ChallengeFormValues = z.infer<typeof challengeFormSchema>;

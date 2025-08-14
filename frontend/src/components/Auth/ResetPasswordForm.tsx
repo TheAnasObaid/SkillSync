@@ -7,7 +7,7 @@ import { FormProvider } from "react-hook-form";
 import { FiLogIn } from "react-icons/fi";
 
 const ResetPasswordForm = () => {
-  const { form, isSubmitting, submitHandler } = useResetPassword();
+  const { form, isSubmitting, onSubmit } = useResetPassword();
 
   return (
     <div className="grid gap-6 max-w-md w-full">
@@ -23,7 +23,7 @@ const ResetPasswordForm = () => {
           </div>
 
           <FormProvider {...form}>
-            <form onSubmit={submitHandler} className="grid gap-4 mt-4">
+            <form onSubmit={onSubmit} className="grid gap-4 mt-4">
               <TextInput
                 name="password"
                 label="New Password"

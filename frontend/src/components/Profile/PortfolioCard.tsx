@@ -1,13 +1,13 @@
 "use client";
 
 import useImageFallback from "@/hooks/useImageFallback";
-import { IIPortfolioItem } from "@/types";
+import { IPortfolioItem } from "@/types";
 import Link from "next/link";
 import { FiExternalLink, FiGithub, FiTrash } from "react-icons/fi";
 
 interface Props {
-  item: IIPortfolioItem;
-  onDelete: (item: IIPortfolioItem) => void;
+  item: IPortfolioItem;
+  onDelete: (item: IPortfolioItem) => void;
   isOwner: boolean;
 }
 

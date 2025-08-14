@@ -8,12 +8,12 @@ import { FiPlus, FiX } from "react-icons/fi";
 import { TextInput, Textarea, FileInput } from "../Forms/FormFields";
 import toast from "react-hot-toast";
 import apiClient from "@/lib/apiClient";
-import { IIPortfolioItem, DeveloperPortfolioFormData } from "@/types";
+import { IPortfolioItem, DeveloperPortfolioFormData } from "@/types";
 import Modal from "../Common/Modal";
 
 interface PortfolioManagerProps {
-  initialPortfolio: IIPortfolioItem[];
-  onPortfolioUpdate: (updatedPortfolio: IIPortfolioItem[]) => void;
+  initialPortfolio: IPortfolioItem[];
+  onPortfolioUpdate: (updatedPortfolio: IPortfolioItem[]) => void;
 }
 
 const PortfolioManager = ({
@@ -21,11 +21,11 @@ const PortfolioManager = ({
   onPortfolioUpdate,
 }: PortfolioManagerProps) => {
   const [portfolio, setPortfolio] =
-    useState<IIPortfolioItem[]>(initialPortfolio);
+    useState<IPortfolioItem[]>(initialPortfolio);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
-    item: null as IIPortfolioItem | null,
+    item: null as IPortfolioItem | null,
   });
   const [isActionInProgress, setIsActionInProgress] = useState(false);
 
@@ -48,7 +48,7 @@ const PortfolioManager = ({
     const toastId = toast.loading("Adding project...");
     setIsActionInProgress(true);
     try {
-      const response = await apiClient.post<IIPortfolioItem[]>(
+      const response = await apiClient.post<IPortfolioItem[]>(
         "/users/me/portfolio",
         formData
       );

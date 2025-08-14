@@ -14,14 +14,12 @@ const LoginForm = () => {
 
   const {
     form,
-    isSubmitting,
-    isUnverified,
-    isResending,
-    apiError,
     onSubmit,
+    isSubmitting,
+    unverifiedError,
+    isResending,
     handleResendVerification,
   } = useLoginForm();
-  const { handleSubmit } = form;
 
   return (
     <div className="grid gap-6 max-w-md w-full">
@@ -34,10 +32,10 @@ const LoginForm = () => {
           </h1>
 
           <FormProvider {...form}>
-            <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 mt-4">
-              {isUnverified && (
+            <form onSubmit={onSubmit} className="grid gap-4 mt-4">
+              {unverifiedError && (
                 <UnverifiedUserAlert
-                  error={apiError}
+                  error={unverifiedError}
                   onResend={handleResendVerification}
                   isResending={isResending}
                 />

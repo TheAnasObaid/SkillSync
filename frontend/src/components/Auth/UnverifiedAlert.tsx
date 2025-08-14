@@ -7,7 +7,7 @@ interface Props {
 }
 
 const UnverifiedUserAlert = ({ error, onResend, isResending }: Props) => (
-  <div className="alert alert-warning">
+  <div className="alert alert-warning alert-soft">
     <FiAlertTriangle />
     <div>
       <h3 className="font-bold">Account Not Verified</h3>

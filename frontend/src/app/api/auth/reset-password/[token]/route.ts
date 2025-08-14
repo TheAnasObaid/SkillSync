@@ -11,13 +11,14 @@ const resetPasswordSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters."),
 });
 
-export async function PATCH(
-  request: Request,
-  { params }: { params: { token: string } }
-) {
+interface Props {
+  params: Promise<{ token: string }>;
+}
+
+export async function PATCH(request: Request, { params }: Props) {
   try {
     await dbConnect();
-    const { token: resetToken } = params;
+    const { token: resetToken } = await params;
     const body = await request.json();
     const { password } = resetPasswordSchema.parse(body);
 
