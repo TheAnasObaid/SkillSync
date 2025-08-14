@@ -60,12 +60,17 @@ export const getSubmissionDetails = async (
   try {
     await dbConnect();
     const submission = await Submission.findById(submissionId)
-      .populate(
-        "developerId",
-        "profile.firstName profile.lastName profile.avatar email"
-      )
-      .populate("challengeId", "title prize deadline")
-      .lean();
+      .populate({
+        path: "developerId",
+        model: "User",
+        select: "profile email",
+      })
+      .populate({
+        path: "challengeId",
+        model: "Challenge",
+        select: "title prize deadline",
+      });
+
     return submission ? JSON.parse(JSON.stringify(submission)) : null;
   } catch (error) {
     console.error(

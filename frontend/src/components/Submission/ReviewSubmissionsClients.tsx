@@ -6,22 +6,24 @@ import {
   useSelectWinnerMutation,
 } from "@/hooks/mutations/useSubmissionMutations";
 import { useSubmissionsForReviewQuery } from "@/hooks/queries/useSubmissionQueries";
-import { ISubmission } from "@/types";
-import { useParams } from "next/navigation";
+import { IChallenge, ISubmission } from "@/types";
 import { useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FiAward } from "react-icons/fi";
 import RatingModal from "./RatingModal";
 import SubmissionsTable from "./SubmissionsTable";
 
+interface Props {
+  initialChallenge: IChallenge;
+}
+
 interface RatingFormData {
   rating: number;
   feedback: string;
 }
 
-const ReviewSubmissionsClient = () => {
-  const params = useParams();
-  const challengeId = params.id as string;
+const ReviewSubmissionsClient = ({ initialChallenge }: Props) => {
+  const challengeId = initialChallenge._id;
 
   const {
     data: submissions = [],
@@ -91,7 +93,11 @@ const ReviewSubmissionsClient = () => {
 
   if (isLoading) return <div className="skeleton h-64 w-full"></div>;
   if (isError)
-    return <div className="alert alert-error">Could not load submissions.</div>;
+    return (
+      <div className="alert alert-error">
+        Could not load submissions for this challenge.
+      </div>
+    );
 
   return (
     <>
@@ -130,11 +136,10 @@ const ReviewSubmissionsClient = () => {
         isSubmitting={isRating}
         submission={ratingModal.submission}
       />
-
       <ConfirmationModal
         isOpen={winnerModal.isOpen}
         title="Confirm Winner Selection"
-        message={`Are you sure you want to select the submission by ${winnerName} as the winner? This will complete the challenge.`}
+        message={`Are you sure you want to select the submission by ${winnerName} as the winner? This action cannot be undone.`}
         variant="primary"
         onConfirm={handleSelectWinner}
         onCancel={() => setWinnerModal({ isOpen: false, submission: null })}
