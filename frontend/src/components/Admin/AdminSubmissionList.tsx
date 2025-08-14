@@ -1,5 +1,6 @@
 "use client";
 
+import { useAllSubmissionsQuery } from "@/hooks/queries/useAdminQueries";
 import { ISubmission } from "@/types";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -8,19 +9,27 @@ import { FiChevronRight } from "react-icons/fi";
 import EmptyState from "../Common/EmptyState";
 import UserAvatar from "../Profile/UserAvatar";
 
-interface Props {
-  submissions: ISubmission[];
-}
-
-const statusStyles: { [key: string]: string } = {
-  pending: "badge-info",
-  reviewed: "badge-ghost",
-  winner: "badge-success",
-  rejected: "badge-error",
-};
-
-const AdminSubmissionList = ({ submissions }: Props) => {
+const AdminSubmissionList = () => {
   const router = useRouter();
+  const { data: submissions, isLoading, isError } = useAllSubmissionsQuery();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="skeleton h-20 w-full rounded-lg"></div>
+        ))}
+      </div>
+    );
+  }
+
+  if (isError || !submissions) {
+    return (
+      <div className="alert alert-error alert-soft">
+        Could not load submissions.
+      </div>
+    );
+  }
 
   if (submissions.length === 0) {
     return (
@@ -33,27 +42,26 @@ const AdminSubmissionList = ({ submissions }: Props) => {
     );
   }
 
-  // This handler prevents the main card's navigation when a nested link is clicked.
-  const handleNestedLinkClick = (e: MouseEvent) => {
-    e.stopPropagation();
+  const handleNestedLinkClick = (e: MouseEvent) => e.stopPropagation();
+
+  const statusStyles: { [key: string]: string } = {
+    pending: "badge-warning",
+    reviewed: "badge-info",
+    winner: "badge-success",
+    rejected: "badge-error",
   };
 
   return (
     <div className="space-y-4">
-      {submissions.map((sub) => {
-        // Safely access nested data
+      {submissions.map((sub: ISubmission) => {
         const developer =
           typeof sub.developerId === "object" ? sub.developerId : null;
         const challenge =
           typeof sub.challengeId === "object" ? sub.challengeId : null;
+        if (!developer || !challenge) return null;
 
-        if (!developer || !challenge) {
-          return null; // Don't render if data is missing
-        }
-
-        const handleCardClick = () => {
+        const handleCardClick = () =>
           router.push(`/challenges/${challenge._id}/submissions/${sub._id}`);
-        };
 
         return (
           <div
@@ -63,7 +71,6 @@ const AdminSubmissionList = ({ submissions }: Props) => {
           >
             <div className="card-body p-4">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-                {/* Developer Info (Clickable) */}
                 <Link
                   href={`/users/${developer._id}`}
                   onClick={handleNestedLinkClick}
@@ -82,20 +89,16 @@ const AdminSubmissionList = ({ submissions }: Props) => {
                     </p>
                   </div>
                 </Link>
-
-                {/* Challenge Info */}
                 <div className="flex-grow">
                   <p className="text-sm text-base-content/70">Submitted to:</p>
                   <p className="font-semibold text-base-content link-hover">
                     {challenge.title}
                   </p>
                 </div>
-
-                {/* Status and Date */}
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <span
-                      className={`badge ${
+                      className={`badge badge-soft ${
                         statusStyles[sub.status] || "badge-ghost"
                       }`}
                     >

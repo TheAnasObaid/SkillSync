@@ -1,42 +1,37 @@
 "use client";
 
+import {
+  useAddPortfolioItemMutation,
+  useDeletePortfolioItemMutation,
+} from "@/hooks/mutations/useProfileMutations";
+import { DeveloperPortfolioFormData, IPortfolioItem } from "@/types";
 import { useState } from "react";
-import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import PortfolioCard from "./PortfolioCard";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { FiPlus } from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
-import { FiPlus, FiX } from "react-icons/fi";
-import { TextInput, Textarea, FileInput } from "../Forms/FormFields";
-import toast from "react-hot-toast";
-import apiClient from "@/lib/apiClient";
-import { IPortfolioItem, DeveloperPortfolioFormData } from "@/types";
 import Modal from "../Common/Modal";
+import { FileInput, TextInput, Textarea } from "../Forms/FormFields";
+import PortfolioCard from "./PortfolioCard";
 
-interface PortfolioManagerProps {
+interface Props {
   initialPortfolio: IPortfolioItem[];
-  onPortfolioUpdate: (updatedPortfolio: IPortfolioItem[]) => void;
 }
 
-const PortfolioManager = ({
-  initialPortfolio,
-  onPortfolioUpdate,
-}: PortfolioManagerProps) => {
-  const [portfolio, setPortfolio] =
-    useState<IPortfolioItem[]>(initialPortfolio);
+const PortfolioManager = ({ initialPortfolio }: Props) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
     item: null as IPortfolioItem | null,
   });
-  const [isActionInProgress, setIsActionInProgress] = useState(false);
+
+  const { mutate: addItem, isPending: isAdding } =
+    useAddPortfolioItemMutation();
+  const { mutate: deleteItem, isPending: isDeleting } =
+    useDeletePortfolioItemMutation();
 
   const formMethods = useForm<DeveloperPortfolioFormData>();
-  const { handleSubmit, reset } = formMethods;
-  const isSubmitting = formMethods.formState.isSubmitting;
 
-  // --- API HANDLERS ---
-  const handleAddProject: SubmitHandler<DeveloperPortfolioFormData> = async (
-    data
-  ) => {
+  const handleAddSubmit: SubmitHandler<DeveloperPortfolioFormData> = (data) => {
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("description", data.description);
@@ -45,42 +40,19 @@ const PortfolioManager = ({
     if (data.portfolioImage?.[0])
       formData.append("portfolioImage", data.portfolioImage[0]);
 
-    const toastId = toast.loading("Adding project...");
-    setIsActionInProgress(true);
-    try {
-      const response = await apiClient.post<IPortfolioItem[]>(
-        "/users/me/portfolio",
-        formData
-      );
-      onPortfolioUpdate(response.data); // Update parent state
-      setPortfolio(response.data); // Update local state
-      toast.success("Project added!", { id: toastId });
-      setIsModalOpen(false);
-      reset();
-    } catch (error) {
-      toast.error("Failed to add project.", { id: toastId });
-    } finally {
-      setIsActionInProgress(false);
-    }
+    addItem(formData, {
+      onSuccess: () => {
+        setIsModalOpen(false);
+        formMethods.reset();
+      },
+    });
   };
 
-  const handleDeleteProject = async () => {
-    if (!deleteModal.item) return;
-    const toastId = toast.loading("Deleting project...");
-    setIsActionInProgress(true);
-    try {
-      await apiClient.delete(`/users/me/portfolio/${deleteModal.item._id}`);
-      const updatedPortfolio = portfolio.filter(
-        (p) => p._id !== deleteModal.item?._id
-      );
-      onPortfolioUpdate(updatedPortfolio);
-      setPortfolio(updatedPortfolio);
-      toast.success("Project deleted.", { id: toastId });
-      setDeleteModal({ isOpen: false, item: null });
-    } catch (error) {
-      toast.error("Failed to delete project.", { id: toastId });
-    } finally {
-      setIsActionInProgress(false);
+  const handleDeleteConfirm = () => {
+    if (deleteModal.item) {
+      deleteItem(deleteModal.item._id!, {
+        onSuccess: () => setDeleteModal({ isOpen: false, item: null }),
+      });
     }
   };
 
@@ -96,9 +68,9 @@ const PortfolioManager = ({
         </button>
       </div>
 
-      {portfolio.length > 0 ? (
+      {initialPortfolio.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {portfolio.map((item) => (
+          {initialPortfolio.map((item) => (
             <PortfolioCard
               key={item._id}
               item={item}
@@ -109,20 +81,20 @@ const PortfolioManager = ({
         </div>
       ) : (
         <div className="text-center p-12 bg-base-200/50 border border-base-300 rounded-lg">
-          <p className="text-base-content/60">Your portfolio is empty.</p>
+          <p className="text-base-content/60">
+            Your portfolio is empty. Add your first project!
+          </p>
         </div>
       )}
 
-      {/* Add Project Modal */}
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         title="Add New Portfolio Project"
       >
-        {/* The entire form is now the 'children' of the Modal component */}
         <FormProvider {...formMethods}>
           <form
-            onSubmit={handleSubmit(handleAddProject)}
+            onSubmit={formMethods.handleSubmit(handleAddSubmit)}
             className="grid gap-4"
           >
             <TextInput name="title" label="Project Title" required />
@@ -139,22 +111,21 @@ const PortfolioManager = ({
               type="url"
             />
             <FileInput name="portfolioImage" label="Project Image" required />
-
             <div className="modal-action mt-2">
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
                 className="btn btn-ghost"
-                disabled={isSubmitting}
+                disabled={isAdding}
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={isSubmitting}
+                disabled={isAdding}
               >
-                {isSubmitting ? (
+                {isAdding ? (
                   <span className="loading loading-spinner" />
                 ) : (
                   "Add Project"
@@ -165,16 +136,15 @@ const PortfolioManager = ({
         </FormProvider>
       </Modal>
 
-      {/* Delete Confirmation Modal */}
       <ConfirmationModal
         isOpen={deleteModal.isOpen}
         title="Delete Project"
         message={`Are you sure you want to delete "${deleteModal.item?.title}"?`}
-        onConfirm={handleDeleteProject}
+        onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteModal({ isOpen: false, item: null })}
         confirmText="Yes, Delete"
         variant="error"
-        isActionInProgress={isActionInProgress}
+        isActionInProgress={isDeleting}
       />
     </>
   );

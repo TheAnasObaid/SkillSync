@@ -1,7 +1,9 @@
 import StatCardGrid, { StatItem } from "@/components/Common/StatCardGrid";
-import { getPlatformStats } from "@/services/server/adminService";
 import Link from "next/link";
+import { Suspense } from "react";
 import { FiArchive, FiCheckSquare, FiClipboard, FiUsers } from "react-icons/fi";
+
+import { getPlatformStats } from "@/lib/data/admin";
 
 const AdminPanelPage = async () => {
   const statsData = await getPlatformStats();
@@ -42,7 +44,11 @@ const AdminPanelPage = async () => {
   return (
     <div className="space-y-8">
       <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-      {statsData && <StatCardGrid stats={adminStats} loading={!statsData} />}
+
+      <Suspense fallback={<StatCardGridSkeleton />}>
+        <StatCardGrid stats={adminStats} />
+      </Suspense>
+
       <div className="card bg-base-200/50 border border-base-300">
         <div className="card-body">
           <h2 className="card-title text-2xl">Management Actions</h2>
@@ -60,5 +66,14 @@ const AdminPanelPage = async () => {
     </div>
   );
 };
+
+const StatCardGridSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="skeleton h-40 w-full"></div>
+    <div className="skeleton h-40 w-full"></div>
+    <div className="skeleton h-40 w-full"></div>
+    <div className="skeleton h-40 w-full"></div>
+  </div>
+);
 
 export default AdminPanelPage;

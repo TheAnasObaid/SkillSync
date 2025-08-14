@@ -2,45 +2,35 @@
 
 import ConfirmationModal from "@/components/Common/ConfirmationModal";
 import UserAvatar from "@/components/Profile/UserAvatar";
-import apiClient from "@/lib/apiClient";
-import { getAllUsersClient } from "@/services/client/adminService";
+import { useUpdateUserByAdminMutation } from "@/hooks/mutations/useAdminMutations";
+import { useAllUsersQuery } from "@/hooks/queries/useAdminQueries";
 import { useAuthStore } from "@/store/authStore";
-import { IUser } from "@/types";
 import { useState } from "react";
 import { FiMoreVertical, FiSlash } from "react-icons/fi";
 import UserActionMenu from "./UserActionMenu";
 import UserCard from "./UserCard";
 
 type UserUpdateAction =
-  | { role: "developer" | "client" | "admin" }
-  | { isVerified: boolean }
-  | { accountStatus: "active" | "banned" };
+  | { role?: "developer" | "client" | "admin" }
+  | { isVerified?: boolean }
+  | { accountStatus?: "active" | "banned" };
 
-interface Props {
-  initialUsers: IUser[];
-}
-
-const UserManagementTable = ({ initialUsers }: Props) => {
-  const [users, setUsers] = useState<IUser[]>(initialUsers);
+const UserManagementTable = () => {
   const { user: currentUser } = useAuthStore();
-  const [error, setError] = useState("");
-  const [isUpdating, setIsUpdating] = useState(false);
+  const { data: users, isLoading, isError } = useAllUsersQuery();
+  const { mutate: updateUser, isPending: isUpdating } =
+    useUpdateUserByAdminMutation();
+
   const [modalState, setModalState] = useState<{
     isOpen: boolean;
     title: string;
     message: string;
-    onConfirm?: () => void;
-    variant?: "error" | "primary" | "warning" | "info";
-  }>({ isOpen: false, title: "", message: "", variant: "primary" });
+    onConfirm: () => void;
+    variant?: "error" | "primary";
+  }>({ isOpen: false, title: "", message: "", onConfirm: () => {} });
 
   const handleUpdateUser = (userId: string, updates: UserUpdateAction) => {
-    const actionKeys = Object.keys(updates) as Array<keyof UserUpdateAction>;
-    if (actionKeys.length === 0) {
-      console.error("Update action was called with an empty object.");
-      return;
-    }
-
-    const action = Object.keys(updates)[0]; // e.g., 'role', 'isVerified', 'accountStatus'
+    const action = Object.keys(updates)[0];
     const value = Object.values(updates)[0];
 
     setModalState({
@@ -49,37 +39,26 @@ const UserManagementTable = ({ initialUsers }: Props) => {
       message: `Are you sure you want to change this user's ${action} to "${value}"?`,
       variant:
         action === "accountStatus" && value === "banned" ? "error" : "primary",
-      onConfirm: async () => {
-        setIsUpdating(true);
-        try {
-          await apiClient.patch(`/admin/users/${userId}`, updates);
-          fetchUsers();
-        } catch (err) {
-          setError("Failed to update user.");
-        } finally {
-          setIsUpdating(false);
-          setModalState({
-            isOpen: false,
-            title: "",
-            message: "",
-          });
-        }
+      onConfirm: () => {
+        updateUser(
+          { userId, updates },
+          {
+            onSuccess: () =>
+              setModalState({
+                isOpen: false,
+                title: "",
+                message: "",
+                onConfirm: () => {},
+              }),
+          }
+        );
       },
     });
   };
 
-  const handleCancel = () => {
-    setModalState({
-      isOpen: false,
-      title: "",
-      message: "",
-    });
-  };
-
-  const fetchUsers = async () => {
-    const users = await getAllUsersClient();
-    setUsers(users);
-  };
+  if (isLoading) return <div className="skeleton h-96 w-full"></div>;
+  if (isError || !users)
+    return <div className="alert alert-error">Could not load users.</div>;
 
   return (
     <>
@@ -106,79 +85,77 @@ const UserManagementTable = ({ initialUsers }: Props) => {
             </tr>
           </thead>
           <tbody>
-            {users.map((user) => {
-              const isCurrentUser = currentUser?._id === user._id;
-              return (
-                <tr
-                  key={user._id}
-                  className={`hover ${
-                    user.accountStatus === "banned" ? "bg-error/10" : ""
-                  }`}
-                >
-                  <td>
-                    <div className="flex items-center gap-3">
-                      <UserAvatar
-                        name={user.profile?.firstName}
-                        avatarUrl={user.profile?.avatar}
-                      />
-                      <div className="overflow-hidden">
-                        <div className="font-bold truncate">
-                          {user.profile?.firstName} {user.profile?.lastName}
-                        </div>
-                        <div className="text-sm text-base-content/40 truncate">
-                          {user.email}
-                        </div>
+            {users.map((user) => (
+              <tr
+                key={user._id}
+                className={`hover ${
+                  user.accountStatus === "banned" ? "bg-error/10" : ""
+                }`}
+              >
+                <td>
+                  <div className="flex items-center gap-3">
+                    <UserAvatar
+                      name={user.profile?.firstName}
+                      avatarUrl={user.profile?.avatar}
+                    />
+                    <div>
+                      <div className="font-bold">
+                        {user.profile?.firstName} {user.profile?.lastName}
+                      </div>
+                      <div className="text-sm text-base-content/40">
+                        {user.email}
                       </div>
                     </div>
-                  </td>
-                  <td>
-                    <span className="badge badge-ghost badge-sm">
-                      {user.role}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="flex flex-col items-start gap-1">
-                      {user.accountStatus === "active" ? (
-                        <div className="badge badge-xs badge-success badge-soft">
-                          Active
-                        </div>
+                  </div>
+                </td>
+                <td>
+                  <span className="badge badge-ghost badge-sm">
+                    {user.role}
+                  </span>
+                </td>
+                <td>
+                  <div className="flex flex-col items-start gap-1">
+                    {user.accountStatus === "active" ? (
+                      <div className="badge badge-xs badge-success badge-soft">
+                        Active
+                      </div>
+                    ) : (
+                      <div className="badge badge-xs badge-error badge-soft">
+                        Banned
+                      </div>
+                    )}
+                    {user.isVerified ? (
+                      <div className="badge badge-xs badge-info badge-soft">
+                        Verified
+                      </div>
+                    ) : (
+                      <div className="badge badge-xs badge-warning badge-soft">
+                        Not Verified
+                      </div>
+                    )}
+                  </div>
+                </td>
+                <td>{new Date(user.createdAt).toLocaleDateString()}</td>
+                <th>
+                  <div className="dropdown dropdown-end">
+                    <button
+                      tabIndex={0}
+                      className="btn btn-ghost btn-xs"
+                      disabled={currentUser?._id === user._id}
+                    >
+                      {currentUser?._id === user._id ? (
+                        <FiSlash />
                       ) : (
-                        <div className="badge badge-xs badge-error badge-soft">
-                          Banned
-                        </div>
+                        <FiMoreVertical />
                       )}
-                      {user.isVerified ? (
-                        <div className="badge badge-xs badge-info badge-soft">
-                          Verified
-                        </div>
-                      ) : (
-                        <div className="badge badge-xs badge-warning badge-soft">
-                          Not Verified
-                        </div>
-                      )}
-                    </div>
-                  </td>
-                  <td>{new Date(user.createdAt).toLocaleDateString()}</td>
-                  <th>
-                    <div className="dropdown dropdown-end">
-                      <button
-                        tabIndex={0}
-                        className="btn btn-ghost btn-xs"
-                        disabled={isCurrentUser}
-                      >
-                        {isCurrentUser ? <FiSlash /> : <FiMoreVertical />}
-                      </button>
-                      {!isCurrentUser && (
-                        <UserActionMenu
-                          user={user}
-                          onUpdate={handleUpdateUser}
-                        />
-                      )}
-                    </div>
-                  </th>
-                </tr>
-              );
-            })}
+                    </button>
+                    {currentUser?._id !== user._id && (
+                      <UserActionMenu user={user} onUpdate={handleUpdateUser} />
+                    )}
+                  </div>
+                </th>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -187,8 +164,8 @@ const UserManagementTable = ({ initialUsers }: Props) => {
         isOpen={modalState.isOpen}
         title={modalState.title}
         message={modalState.message}
-        onConfirm={modalState.onConfirm!}
-        onCancel={handleCancel}
+        onConfirm={modalState.onConfirm}
+        onCancel={() => setModalState({ ...modalState, isOpen: false })}
         variant={modalState.variant}
         isActionInProgress={isUpdating}
       />

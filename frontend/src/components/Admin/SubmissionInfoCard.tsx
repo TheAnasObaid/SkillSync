@@ -15,8 +15,6 @@ const statusStyles: { [key: string]: string } = {
 };
 
 const SubmissionInfoCard = ({ submission }: SubmissionInfoCardProps) => {
-  // --- 1. ROBUST DATA HANDLING ---
-  // Safely destructure nested properties with fallbacks.
   const { developerId: developer, challengeId: challenge } = submission;
 
   const developerName =
@@ -32,11 +30,8 @@ const SubmissionInfoCard = ({ submission }: SubmissionInfoCardProps) => {
   const challengeId = typeof challenge === "object" ? challenge._id : null;
 
   return (
-    // --- 2. CONSISTENT STYLING ---
-    // Use the same hover effects and transitions as our other cards.
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
       <div className="card-body p-4">
-        {/* --- 3. IMPROVED HIERARCHY & LAYOUT --- */}
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
             <UserAvatar
@@ -53,7 +48,6 @@ const SubmissionInfoCard = ({ submission }: SubmissionInfoCardProps) => {
               )}
             </div>
           </div>
-          {/* Status badge moved to the top right for better visibility */}
           <div
             className={`badge badge-outline ${
               statusStyles[submission.status] || "badge-ghost"
@@ -65,7 +59,6 @@ const SubmissionInfoCard = ({ submission }: SubmissionInfoCardProps) => {
 
         <div className="divider my-2"></div>
 
-        {/* Challenge title is now the main "hero" content of the card */}
         <div className="space-y-1">
           <p className="text-sm text-base-content/70">Submitted to:</p>
           <h3 className="font-semibold text-base-content text-lg leading-tight">
@@ -73,7 +66,6 @@ const SubmissionInfoCard = ({ submission }: SubmissionInfoCardProps) => {
           </h3>
         </div>
 
-        {/* --- 4. ADDED ACTIONABILITY --- */}
         {challengeId && (
           <div className="card-actions justify-end mt-2">
             <Link

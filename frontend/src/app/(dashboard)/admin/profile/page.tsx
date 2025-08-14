@@ -1,15 +1,19 @@
 import AdminProfileClient from "@/components/Admin/AdminProfileClient";
-import { getMyProfileServer } from "@/services/server/userService";
-import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
-const AdminProfilePage = async () => {
-  const user = await getMyProfileServer();
-
-  if (!user) {
-    redirect("/login");
-  }
-
-  return <AdminProfileClient initialUser={user} />;
+const AdminProfilePage = () => {
+  return (
+    <Suspense fallback={<ProfileSkeleton />}>
+      <AdminProfileClient />
+    </Suspense>
+  );
 };
+
+const ProfileSkeleton = () => (
+  <div className="space-y-6">
+    <div className="skeleton h-24 w-full"></div>
+    <div className="skeleton h-48 w-full"></div>
+  </div>
+);
 
 export default AdminProfilePage;

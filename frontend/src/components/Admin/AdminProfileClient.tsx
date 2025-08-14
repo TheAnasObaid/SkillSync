@@ -1,82 +1,65 @@
+// ===== File: src/componens/Admin/AdminProfileClient.tsx =====
 "use client";
 
-import apiClient from "@/lib/apiClient";
-import { IUser } from "@/types";
+import {
+  useUpdateProfileMutation,
+  useUploadAvatarMutation,
+} from "@/hooks/mutations/useProfileMutations";
+import { useMyProfileQuery } from "@/hooks/queries/useUserQueries";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 import { FiEdit, FiX } from "react-icons/fi";
 import FormCard from "../Common/FormCard";
 import { TextInput } from "../Forms/FormFields";
 import ProfileView from "../Profile/ProfileView";
-
-interface Props {
-  initialUser: IUser;
-}
 
 interface AdminProfileFormData {
   name: string;
   profile: { lastName: string };
 }
 
-const AdminProfileClient = ({ initialUser }: Props) => {
-  const [user, setUser] = useState<IUser | null>(initialUser);
+const AdminProfileClient = () => {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
+  const { data: user, isLoading, isError } = useMyProfileQuery();
+
+  const { mutate: updateProfile, isPending: isUpdating } =
+    useUpdateProfileMutation();
+  const { mutate: uploadAvatar, isPending: isUploading } =
+    useUploadAvatarMutation();
+
   const formMethods = useForm<AdminProfileFormData>();
-  const { reset, handleSubmit } = formMethods;
 
   useEffect(() => {
-    if (isEditMode && user) {
-      reset({
+    if (user && isEditMode) {
+      formMethods.reset({
         name: user.profile.firstName,
         profile: { lastName: user.profile.lastName || "" },
       });
     }
-  }, [isEditMode, user, reset]);
+  }, [user, isEditMode, formMethods]);
 
-  const handleFormSubmit: SubmitHandler<AdminProfileFormData> = async (
-    data
-  ) => {
-    const toastId = toast.loading("Updating profile...");
-    setIsSubmitting(true);
-    try {
-      const response = await apiClient.put<IUser>("/users/me", data);
-      setUser(response.data);
-      toast.success("Profile updated!", { id: toastId });
-      setIsEditMode(false);
-    } catch (error) {
-      toast.error("Failed to update profile.", { id: toastId });
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleFormSubmit: SubmitHandler<AdminProfileFormData> = (data) => {
+    updateProfile(data, {
+      onSuccess: () => setIsEditMode(false),
+    });
   };
 
-  const handleAvatarUpload = async (event: ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarUpload = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
     const formData = new FormData();
     formData.append("file", file);
-
-    const toastId = toast.loading("Uploading avatar...");
-    try {
-      // FIX: Corrected the API endpoint for avatar upload
-      const response = await apiClient.post("/users/me/avatar", formData);
-      setUser(
-        (prevUser) =>
-          prevUser && {
-            ...prevUser,
-            profile: { ...prevUser.profile, avatar: response.data.avatarUrl },
-          }
-      );
-      toast.success("Avatar updated successfully!", { id: toastId });
-    } catch (error) {
-      toast.error("Failed to upload avatar.", { id: toastId });
-    }
+    uploadAvatar(formData);
   };
+
+  // 3. RENDER STATES
+  if (isLoading) return <div className="skeleton h-64 w-full"></div>;
+  if (isError || !user)
+    return (
+      <div className="alert alert-error">Could not load your profile.</div>
+    );
 
   return (
     <>
@@ -101,8 +84,8 @@ const AdminProfileClient = ({ initialUser }: Props) => {
       {isEditMode ? (
         <FormProvider {...formMethods}>
           <FormCard
-            onSubmit={handleSubmit(handleFormSubmit)}
-            isSubmitting={isSubmitting}
+            onSubmit={formMethods.handleSubmit(handleFormSubmit)}
+            isSubmitting={isUpdating}
           >
             <div className="grid md:grid-cols-2 gap-4">
               <TextInput name="name" label="First Name" />
@@ -122,6 +105,7 @@ const AdminProfileClient = ({ initialUser }: Props) => {
             onChange={handleAvatarUpload}
             className="hidden"
             accept="image/*"
+            disabled={isUploading}
           />
         </>
       )}

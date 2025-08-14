@@ -1,50 +1,53 @@
 "use client";
 
-import apiClient from "@/lib/apiClient";
-import { DeveloperProfileFormData, IPortfolioItem, IUser } from "@/types";
-import { useState } from "react";
+import {
+  useUpdateProfileMutation,
+  useUploadAvatarMutation,
+} from "@/hooks/mutations/useProfileMutations";
+import { useMyProfileQuery } from "@/hooks/queries/useUserQueries";
+import { DeveloperProfileFormData } from "@/types";
+import { ChangeEvent, useRef, useState } from "react";
 import { SubmitHandler } from "react-hook-form";
-import toast from "react-hot-toast";
 import { FiEdit, FiX } from "react-icons/fi";
 import ProfileEditor from "../Developer/ProfileEditor";
-import ProfileView from "../Profile/ProfileView";
 import PortfolioManager from "./PortfolioManager";
+import ProfileView from "./ProfileView";
 
-const DeveloperProfile = ({ initialUser }: { initialUser: IUser }) => {
-  const [user, setUser] = useState<IUser>(initialUser);
+const DeveloperProfile = () => {
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
-  const handleProfileUpdate: SubmitHandler<DeveloperProfileFormData> = async (
+  const { data: user, isLoading, isError } = useMyProfileQuery();
+
+  const { mutate: updateProfile, isPending: isUpdating } =
+    useUpdateProfileMutation();
+  const { mutate: uploadAvatar, isPending: isUploadingAvatar } =
+    useUploadAvatarMutation();
+
+  const handleProfileUpdate: SubmitHandler<DeveloperProfileFormData> = (
     data
   ) => {
-    const toastId = toast.loading("Updating profile...");
-    setIsSubmitting(true);
-    try {
-      const payload = {
-        ...data,
-        profile: {
-          ...data.profile,
-          skills: data.profile.skills.split(",").map((s) => s.trim()),
-        },
-      };
-      const response = await apiClient.put<IUser>("/users/me", payload);
-      setUser(response.data);
-      toast.success("Profile updated!", { id: toastId });
-      setIsEditMode(false);
-    } catch (error) {
-      toast.error("Failed to update profile.", { id: toastId });
-    } finally {
-      setIsSubmitting(false);
-    }
+    const payload = {
+      ...data,
+      profile: {
+        ...data.profile,
+        skills: data.profile.skills.split(",").map((s) => s.trim()),
+      },
+    };
+    updateProfile(payload, { onSuccess: () => setIsEditMode(false) });
   };
 
-  const onPortfolioUpdate = (updatedPortfolio: IPortfolioItem[]) => {
-    setUser((prev) => ({
-      ...prev!,
-      profile: { ...prev!.profile, portfolio: updatedPortfolio },
-    }));
+  const handleAvatarUpload = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    const formData = new FormData();
+    formData.append("file", file);
+    uploadAvatar(formData);
   };
+
+  if (isLoading) return <div className="skeleton h-96 w-full"></div>;
+  if (isError || !user)
+    return <div className="alert alert-error">Could not load profile.</div>;
 
   return (
     <div className="space-y-12">
@@ -70,18 +73,28 @@ const DeveloperProfile = ({ initialUser }: { initialUser: IUser }) => {
           <ProfileEditor
             currentUser={user}
             onSubmit={handleProfileUpdate}
-            isSubmitting={isSubmitting}
+            isSubmitting={isUpdating}
           />
         ) : (
-          <ProfileView user={user} />
+          <>
+            <ProfileView
+              user={user}
+              onAvatarClick={() => avatarInputRef.current?.click()}
+            />
+            <input
+              type="file"
+              ref={avatarInputRef}
+              onChange={handleAvatarUpload}
+              className="hidden"
+              accept="image/*"
+              disabled={isUploadingAvatar}
+            />
+          </>
         )}
       </section>
 
       <section>
-        <PortfolioManager
-          initialPortfolio={user.profile.portfolio}
-          onPortfolioUpdate={onPortfolioUpdate}
-        />
+        <PortfolioManager initialPortfolio={user.profile.portfolio} />
       </section>
     </div>
   );

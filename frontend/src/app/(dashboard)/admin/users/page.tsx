@@ -1,13 +1,13 @@
 import UserManagementTable from "@/components/Admin/UserManagementTable";
-import { getAllUsers } from "@/services/server/adminService";
+import { Suspense } from "react";
 
-const ManageUsersPage = async () => {
-  const initialUsers = await getAllUsers();
-
+const ManageUsersPage = () => {
   return (
     <div className="grid gap-6">
       <h1 className="text-3xl font-bold mb-6">Manage Users</h1>
-      <UserManagementTable initialUsers={initialUsers} />
+      <Suspense fallback={<div className="skeleton h-96 w-full"></div>}>
+        <UserManagementTable />
+      </Suspense>
     </div>
   );
 };
