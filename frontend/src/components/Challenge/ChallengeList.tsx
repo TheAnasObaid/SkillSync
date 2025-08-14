@@ -1,9 +1,10 @@
-import { getAllChallenges } from "@/services/server/challengeService";
-import ChallengeCard from "./ChallengeCard";
+import { getAllChallenges } from "@/lib/data/challenges";
+import { IChallenge } from "@/types";
 import EmptyState from "../Common/EmptyState";
+import ChallengeCard from "./ChallengeCard";
 
 const ChallengeList = async () => {
-  const challenges = await getAllChallenges();
+  const challenges: IChallenge[] = await getAllChallenges();
 
   if (!challenges || challenges.length === 0) {
     return (

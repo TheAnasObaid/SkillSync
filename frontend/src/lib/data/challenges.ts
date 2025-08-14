@@ -9,13 +9,13 @@ export const getAllChallenges = async (): Promise<IChallenge[]> => {
   noStore(); // Opts out of static rendering, ensures data is fresh
   try {
     await dbConnect();
+    
     const challenges = await Challenge.find({ status: "published" })
       .populate(
         "createdBy",
         "profile.firstName profile.companyName profile.avatar"
       )
-      .sort({ createdAt: -1 })
-      .lean();
+      .sort({ createdAt: -1 });
     return JSON.parse(JSON.stringify(challenges));
   } catch (error) {
     console.error("Database Error: Failed to fetch all challenges.", error);

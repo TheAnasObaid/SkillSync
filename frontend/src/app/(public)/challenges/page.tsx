@@ -1,8 +1,6 @@
 import ChallengeList from "@/components/Challenge/ChallengeList";
 import { Suspense } from "react";
 
-export const dynamic = "force-dynamic";
-
 const ChallengesPage = () => {
   return (
     <div className="max-w-7xl mx-auto py-12 px-4">
@@ -16,7 +14,7 @@ const ChallengesPage = () => {
       <Suspense
         fallback={
           <div className="text-center">
-            <span className="loading loading-spinner loading-lg"></span>
+            <span className="loading loading-spinner loading-lg text-primary"></span>
           </div>
         }
       >
