@@ -1,19 +1,18 @@
 import StatCardGrid, { StatItem } from "@/components/Common/StatCardGrid";
 import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionList";
-import { getMySubmissions } from "@/services/server/submissionService";
-import {
-  getMyDeveloperStats,
-  getMyProfileServer,
-} from "@/services/server/userService";
+import { getMySubmissions } from "@/lib/data/submissions";
+import { getMyDeveloperStats, getMyProfile } from "@/lib/data/users";
 import Link from "next/link";
+import { Suspense } from "react";
 import { FiAward, FiClipboard, FiClock, FiDollarSign } from "react-icons/fi";
 
 const DeveloperDashboardPage = async () => {
-  const [statsData, recentSubmissions, userProfile] = await Promise.all([
+  const [statsData, allSubmissions, userProfile] = await Promise.all([
     getMyDeveloperStats(),
     getMySubmissions(),
-    getMyProfileServer(),
+    getMyProfile(),
   ]);
+  const recentSubmissions = allSubmissions.slice(0, 3);
 
   const developerStats: StatItem[] = statsData
     ? [
@@ -50,14 +49,18 @@ const DeveloperDashboardPage = async () => {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold">Welcome back!</h1>
+        <h1 className="text-3xl font-bold">
+          Welcome back, {userProfile?.profile.firstName}!
+        </h1>
         <p className="text-base-content/70 mt-1">
           Here's a summary of your activity on SkillSync.
         </p>
       </div>
-      {statsData && (
-        <StatCardGrid stats={developerStats} loading={!statsData} />
-      )}
+
+      <Suspense fallback={<StatCardGridSkeleton />}>
+        <StatCardGrid stats={developerStats} />
+      </Suspense>
+
       <div className="mt-8">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Recent Submissions</h2>
@@ -68,10 +71,20 @@ const DeveloperDashboardPage = async () => {
             View All
           </Link>
         </div>
-        <DeveloperSubmissionList submissions={recentSubmissions} />
+
+        <DeveloperSubmissionList initialSubmissions={recentSubmissions} />
       </div>
     </div>
   );
 };
+
+const StatCardGridSkeleton = () => (
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="skeleton h-40 w-full"></div>
+    <div className="skeleton h-40 w-full"></div>
+    <div className="skeleton h-40 w-full"></div>
+    <div className="skeleton h-40 w-full"></div>
+  </div>
+);
 
 export default DeveloperDashboardPage;

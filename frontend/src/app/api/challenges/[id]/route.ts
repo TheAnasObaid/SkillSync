@@ -7,7 +7,7 @@ import Submission from "@/models/Submission";
 import { NextResponse } from "next/server";
 
 interface Params {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function DELETE(request: Request, { params }: Params) {
@@ -17,8 +17,9 @@ export async function DELETE(request: Request, { params }: Params) {
 
     await dbConnect();
 
+    const { id } = await params;
     const challenge = await Challenge.findOneAndDelete({
-      _id: params.id,
+      _id: id,
       createdBy: session.user._id, // Ensure only the owner can delete
     });
 
@@ -29,7 +30,7 @@ export async function DELETE(request: Request, { params }: Params) {
     }
 
     // Also delete associated submissions
-    await Submission.deleteMany({ challengeId: params.id });
+    await Submission.deleteMany({ challengeId: id });
 
     return NextResponse.json({ message: "Challenge deleted successfully." });
   } catch (error) {

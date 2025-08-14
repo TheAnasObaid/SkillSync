@@ -5,7 +5,7 @@ import Challenge from "@/models/Challenge";
 import dbConnect from "@/config/dbConnect";
 
 interface Params {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -15,8 +15,9 @@ export async function PATCH(request: Request, { params }: Params) {
 
     await dbConnect();
 
+    const { id } = await params;
     const challenge = await Challenge.findOneAndUpdate(
-      { _id: params.id, createdBy: session.user._id }, // Security check
+      { _id: id, createdBy: session.user._id }, // Security check
       { isFunded: true },
       { new: true, runValidators: true }
     );

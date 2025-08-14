@@ -1,8 +1,15 @@
 "use client";
 
-import { FormProvider } from "react-hook-form";
-import { TextInput, Textarea, FileInput } from "../Forms/FormFields";
-import { useSubmissionForm } from "@/hooks/useSubmissionsForm";
+import { useSubmitSolutionMutation } from "@/hooks/mutations/useSubmissionMutations";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import { FileInput, TextInput, Textarea } from "../Forms/FormFields";
+
+interface SubmissionFormData {
+  githubRepo: string;
+  liveDemo?: string;
+  description: string;
+  file?: FileList;
+}
 
 interface Props {
   challengeId: string;
@@ -10,14 +17,36 @@ interface Props {
 }
 
 const SubmissionForm = ({ challengeId, onSuccess }: Props) => {
-  const { form, isSubmitting, submitHandler } = useSubmissionForm(
-    challengeId,
-    onSuccess
-  );
+  const { mutate: submit, isPending: isSubmitting } =
+    useSubmitSolutionMutation();
+  const formMethods = useForm<SubmissionFormData>();
+
+  const onSubmit: SubmitHandler<SubmissionFormData> = (data) => {
+    const formData = new FormData();
+    formData.append("githubRepo", data.githubRepo);
+    formData.append("description", data.description);
+    if (data.liveDemo) formData.append("liveDemo", data.liveDemo);
+    if (data.file && data.file.length > 0) {
+      formData.append("file", data.file[0]);
+    }
+
+    submit(
+      { challengeId, formData },
+      {
+        onSuccess: () => {
+          formMethods.reset();
+          onSuccess();
+        },
+      }
+    );
+  };
 
   return (
-    <FormProvider {...form}>
-      <form onSubmit={submitHandler} className="grid gap-4">
+    <FormProvider {...formMethods}>
+      <form
+        onSubmit={formMethods.handleSubmit(onSubmit)}
+        className="grid gap-4"
+      >
         <TextInput
           name="githubRepo"
           label="GitHub Repository URL"
@@ -34,14 +63,14 @@ const SubmissionForm = ({ challengeId, onSuccess }: Props) => {
         <Textarea
           name="description"
           label="Description"
-          placeholder="Briefly describe your approach and key features."
+          placeholder="Briefly describe your approach..."
           rows={5}
           required
         />
         <FileInput
           name="file"
           label="Submission File (Optional)"
-          helperText="You can upload a .zip of your source code or other relevant files."
+          helperText="Upload a .zip or other relevant files."
         />
         <button
           type="submit"
@@ -49,7 +78,7 @@ const SubmissionForm = ({ challengeId, onSuccess }: Props) => {
           disabled={isSubmitting}
         >
           {isSubmitting ? (
-            <span className="loading loading-spinner"></span>
+            <span className="loading loading-spinner" />
           ) : (
             "Submit for Review"
           )}
