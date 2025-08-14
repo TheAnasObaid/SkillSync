@@ -1,19 +1,19 @@
 import PortfolioList from "@/components/Profile/PortfolioList";
 import ProfileView from "@/components/Profile/ProfileView";
 import Reputation from "@/components/Profile/Reputation";
-import { Suspense } from "react";
-
 import { getPublicUserProfile } from "@/lib/data/users";
 import { IUser } from "@/types";
+import { Suspense } from "react";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-const UserProfilePage = ({ params }: Props) => {
+const UserProfilePage = async ({ params }: Props) => {
+  const { id } = await params;
   return (
     <Suspense fallback={<UserProfileSkeleton />}>
-      <ProfileDataLoader userId={params.id} />
+      <ProfileDataLoader userId={id} />
     </Suspense>
   );
 };

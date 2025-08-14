@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import crypto from "crypto";
 import { z } from "zod";
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
 import { generateToken } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";

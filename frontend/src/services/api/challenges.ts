@@ -47,3 +47,10 @@ export const fundChallenge = async (
   const { data } = await apiClient.patch(`/challenges/${id}/fund`);
   return data;
 };
+
+export const getPublicChallengeById = async (
+  id: string
+): Promise<IChallenge> => {
+  const { data } = await apiClient.get<IChallenge>(`/challenges/${id}`);
+  return data;
+};

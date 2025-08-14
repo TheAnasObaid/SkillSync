@@ -4,11 +4,11 @@ import { IChallenge } from "@/types";
 import { Suspense } from "react";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 const ReviewSubmissionsPage = async ({ params }: Props) => {
-  const { id } = params;
+  const { id } = await params;
   const challenge = await getChallengeById(id);
 
   if (!challenge) {

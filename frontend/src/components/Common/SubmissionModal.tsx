@@ -1,28 +1,25 @@
 "use client";
 
 import { useState } from "react";
-import Modal from "../Common/Modal";
-import SuccessDisplay from "../Common/SuccessDisplay";
 import SubmissionForm from "../Submission/SubmissionForm";
+import Modal from "./Modal";
+import SuccessDisplay from "./SuccessDisplay";
 
 interface SubmissionModalProps {
   isOpen: boolean;
   onClose: () => void;
   challengeId: string;
-  onSubmissionSuccess: () => void;
 }
 
 const SubmissionModal = ({
   isOpen,
   onClose,
   challengeId,
-  onSubmissionSuccess,
 }: SubmissionModalProps) => {
   const [submissionSuccess, setSubmissionSuccess] = useState(false);
 
   const handleSuccess = () => {
     setSubmissionSuccess(true);
-    onSubmissionSuccess();
   };
 
   const handleClose = () => {

@@ -4,13 +4,15 @@ import { IChallenge, ISubmission, IUser } from "@/types";
 import { Suspense } from "react";
 
 interface Props {
-  params: { submissionId: string };
+  params: Promise<{ submissionId: string }>;
 }
 
-const SubmissionDetailsPage = ({ params }: Props) => {
+const SubmissionDetailsPage = async ({ params }: Props) => {
+  const { submissionId } = await params;
+
   return (
     <Suspense fallback={<SubmissionSkeleton />}>
-      <SubmissionDataLoader submissionId={params.submissionId} />
+      <SubmissionDataLoader submissionId={submissionId} />
     </Suspense>
   );
 };

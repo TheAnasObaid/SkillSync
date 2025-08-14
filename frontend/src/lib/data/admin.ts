@@ -1,4 +1,4 @@
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import Challenge from "@/models/Challenge";
 import Submission from "@/models/Submission";
 import User from "@/models/User";

@@ -1,4 +1,4 @@
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import { ISubmission } from "@/types";
 import { unstable_noStore as noStore } from "next/cache";
 import "server-only";
@@ -78,5 +78,22 @@ export const getSubmissionDetails = async (
       error
     );
     throw new Error("Could not fetch submission details.");
+  }
+};
+
+export const getPublicSubmissionsForChallenge = async (
+  challengeId: string
+): Promise<ISubmission[]> => {
+  noStore();
+  try {
+    await dbConnect();
+    const submissions = await Submission.find({ challengeId })
+      .populate("developerId", "profile.firstName profile.avatar")
+      .sort({ createdAt: -1 })
+      .lean();
+    return JSON.parse(JSON.stringify(submissions));
+  } catch (error) {
+    console.error("Database Error: Failed to fetch public submissions.", error);
+    throw new Error("Could not fetch submissions.");
   }
 };

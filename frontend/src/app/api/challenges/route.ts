@@ -1,4 +1,4 @@
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";
 import { challengeApiSchema } from "@/lib/validationSchemas";

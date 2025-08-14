@@ -1,5 +1,5 @@
 // ===== File:/app/api/challenges/[id]/route.ts =====
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";
 import Challenge from "@/models/Challenge";

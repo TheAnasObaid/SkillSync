@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import Submission from "@/models/Submission";
 
 export async function GET() {

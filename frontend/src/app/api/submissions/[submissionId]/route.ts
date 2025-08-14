@@ -1,4 +1,4 @@
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";
 import Challenge from "@/models/Challenge";
@@ -49,8 +49,10 @@ export async function DELETE(request: Request, { params }: Params) {
     if (!session?.user) throw new Error("Authentication required.");
 
     await dbConnect();
+
+    const { submissionId } = await params;
     const deletedSubmission = await Submission.findOneAndDelete({
-      _id: params.submissionId,
+      _id: submissionId,
       developerId: session.user._id, // Security check
     });
 

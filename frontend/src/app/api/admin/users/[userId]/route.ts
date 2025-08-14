@@ -1,11 +1,11 @@
-import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
+import dbConnect from "@/lib/dbConnect";
 import { handleError } from "@/lib/handleError";
-import dbConnect from "@/config/dbConnect";
 import User from "@/models/User";
+import { NextResponse } from "next/server";
 
 interface Params {
-  params: { userId: string };
+  params: Promise<{ userId: string }>;
 }
 
 export async function PATCH(request: Request, { params }: Params) {
@@ -18,8 +18,10 @@ export async function PATCH(request: Request, { params }: Params) {
     const body = await request.json();
 
     await dbConnect();
+
+    const { userId } = await params;
     const updatedUser = await User.findByIdAndUpdate(
-      params.userId,
+      userId,
       { $set: body },
       { new: true }
     ).select("-password");

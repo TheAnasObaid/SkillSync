@@ -1,20 +1,21 @@
 import ChallengeForm from "@/components/Challenge/ChallengeForm";
+import { getChallengeById } from "@/lib/data/challenges";
 import { IChallenge } from "@/types";
 import { Suspense } from "react";
 
-import { getChallengeById } from "@/lib/data/challenges";
-
 interface EditChallengePageProps {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-const EditChallengePage = ({ params }: EditChallengePageProps) => {
+const EditChallengePage = async ({ params }: EditChallengePageProps) => {
+  const { id } = await params;
+
   return (
     <div>
       <h2 className="text-3xl font-bold mb-6">Edit Challenge</h2>
 
       <Suspense fallback={<ChallengeFormSkeleton />}>
-        <EditChallengeDataLoader challengeId={params.id} />
+        <EditChallengeDataLoader challengeId={id} />
       </Suspense>
     </div>
   );

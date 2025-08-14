@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
 
 interface Params {
-  params: { itemId: string };
+  params: Promise<{ itemId: string }>;
 }
 
 export async function DELETE(request: Request, { params }: Params) {
@@ -14,8 +14,10 @@ export async function DELETE(request: Request, { params }: Params) {
     if (!session?.user) throw new Error("Authentication required.");
 
     await dbConnect();
+
+    const { itemId } = await params;
     await User.findByIdAndUpdate(session.user._id, {
-      $pull: { "profile.portfolio": { _id: params.itemId } },
+      $pull: { "profile.portfolio": { _id: itemId } },
     });
 
     return NextResponse.json({ message: "Portfolio item deleted." });

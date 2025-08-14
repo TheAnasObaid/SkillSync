@@ -5,10 +5,10 @@ import Submission from "@/models/Submission";
 import Challenge from "@/models/Challenge";
 import { writeFile } from "fs/promises";
 import path from "path";
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 
 interface Params {
-  params: { challengeId: string };
+  params: Promise<{ challengeId: string }>;
 }
 
 export async function POST(request: Request, { params }: Params) {
@@ -20,8 +20,9 @@ export async function POST(request: Request, { params }: Params) {
 
     await dbConnect();
 
+    const { challengeId } = await params;
     const existingSubmission = await Submission.findOne({
-      challengeId: params.challengeId,
+      challengeId: challengeId,
       developerId: session.user._id,
     });
     if (existingSubmission) {
@@ -40,7 +41,7 @@ export async function POST(request: Request, { params }: Params) {
       githubRepo: formData.get("githubRepo"),
       description: formData.get("description"),
       liveDemo: formData.get("liveDemo") || undefined,
-      challengeId: params.challengeId,
+      challengeId: challengeId,
       developerId: session.user._id,
     };
 
@@ -57,7 +58,7 @@ export async function POST(request: Request, { params }: Params) {
 
     const newSubmission = await Submission.create(submissionData);
 
-    await Challenge.findByIdAndUpdate(params.challengeId, {
+    await Challenge.findByIdAndUpdate(challengeId, {
       $push: { submissions: newSubmission._id },
     });
 

@@ -1,4 +1,4 @@
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import Challenge from "@/models/Challenge";
 import { IChallenge } from "@/types";
 import { unstable_noStore as noStore } from "next/cache";

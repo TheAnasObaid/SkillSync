@@ -1,5 +1,5 @@
 import config from "@/config/config";
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
 import crypto from "crypto";
 import { NextResponse } from "next/server";

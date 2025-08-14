@@ -1,7 +1,7 @@
 "use client";
 
 import apiClient from "@/lib/apiClient";
-import { ISubmission } from "@/types";
+import { IChallenge, ISubmission } from "@/types";
 
 export const submitSolution = async ({
   challengeId,
@@ -78,6 +78,22 @@ export const getSubmissionsForReview = async (
 ): Promise<ISubmission[]> => {
   const { data } = await apiClient.get<ISubmission[]>(
     `/submissions/challenge/${challengeId}/review`
+  );
+  return data;
+};
+
+export const getPublicChallengeById = async (
+  id: string
+): Promise<IChallenge> => {
+  const { data } = await apiClient.get<IChallenge>(`/challenges/${id}`);
+  return data;
+};
+
+export const getPublicSubmissions = async (
+  challengeId: string
+): Promise<ISubmission[]> => {
+  const { data } = await apiClient.get<ISubmission[]>(
+    `/submissions/challenge/${challengeId}`
   );
   return data;
 };

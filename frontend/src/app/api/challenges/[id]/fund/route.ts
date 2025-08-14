@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";
 import Challenge from "@/models/Challenge";
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 
 interface Params {
   params: Promise<{ id: string }>;

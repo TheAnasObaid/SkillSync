@@ -1,5 +1,5 @@
 import config from "@/config/config";
-import dbConnect from "@/config/dbConnect";
+import dbConnect from "@/lib/dbConnect";
 import { createBrandedEmail, sendEmail } from "@/lib/email";
 import { handleError } from "@/lib/handleError";
 import { registerSchema } from "@/lib/validationSchemas";
