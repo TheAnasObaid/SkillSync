@@ -12,12 +12,7 @@ const Workflow = () => {
         </p>
       </div>
 
-      {/* 
-        We use a flex container to easily place the arrows between cards.
-        It stacks vertically on mobile and becomes a row on medium screens and up.
-      */}
       <div className="flex flex-col md:flex-row items-stretch justify-center gap-8">
-        {/* --- Step 1 Card --- */}
         <div
           className="card bg-base-200/50 border border-base-300 shadow-md transition-all duration-300 hover:border-primary/50 hover:-translate-y-1 relative opacity-0 [animation:fade-in-up_0.6s_ease-out_forwards]"
           style={{ animationDelay: "0.1s" }}

@@ -2,13 +2,11 @@ import Link from "next/link";
 import { FiArrowRight, FiStar } from "react-icons/fi";
 
 const ChallengePreview = () => (
-  // The entire card is a link for better UX, with our consistent hover effect + a subtle lift
   <Link
     href="/challenges"
     className="card bg-base-200/50 shadow-lg border border-base-300 text-left transition-all duration-300 hover:border-primary/50 hover:shadow-primary/20 hover:-translate-y-1 group"
   >
     <div className="card-body">
-      {/* A more professional "Featured" badge */}
       <div className="flex items-center gap-2">
         <FiStar className="text-primary" />
         <h3 className="font-semibold text-primary">Featured Challenge</h3>
@@ -20,14 +18,14 @@ const ChallengePreview = () => (
         rooms and user authentication.
       </p>
 
-      {/* Using the consistent mono font for tags */}
       <div className="mt-4 flex flex-wrap gap-2">
-        <div className="badge badge-outline font-mono text-xs">React</div>
-        <div className="badge badge-outline font-mono text-xs">TypeScript</div>
-        <div className="badge badge-outline font-mono text-xs">Sockets</div>
+        <div className="badge badge-secondary font-mono text-xs">React</div>
+        <div className="badge badge-secondary font-mono text-xs">
+          TypeScript
+        </div>
+        <div className="badge badge-secondary font-mono text-xs">Sockets</div>
       </div>
 
-      {/* Divider for better separation */}
       <div className="divider my-3"></div>
 
       <div className="card-actions justify-between items-center">

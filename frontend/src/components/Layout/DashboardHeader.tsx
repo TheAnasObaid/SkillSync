@@ -5,18 +5,12 @@ import { useAuthStore } from "@/store/authStore";
 import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import ConfirmationModal from "../Common/ConfirmationModal";
 import { useEffect, useState } from "react";
+import { FiLogOut } from "react-icons/fi";
+import ConfirmationModal from "../Common/ConfirmationModal";
+import Logo from "../Common/Logo";
 import ProfileDropdown from "../Common/ProfileDropdown";
 import NotificationBell from "./NotificationBell";
-import { FiLogOut } from "react-icons/fi";
-
-const spaceMono = Space_Mono({
-  subsets: ["latin"],
-  display: "swap",
-  weight: ["400", "700"],
-  variable: "--font-space-mono",
-});
 
 const DashboardHeader = () => {
   const router = useRouter();
@@ -42,12 +36,7 @@ const DashboardHeader = () => {
       <header className="w-full px-4 py-3">
         <div className="navbar max-w-screen-xl mx-auto bg-base-200/50 border border-base-300 p-4 rounded-lg">
           <div className="navbar-start">
-            <Link
-              href="/"
-              className={`${spaceMono.className} font-bold text-lg`}
-            >
-              Skill<span className="text-primary">Sync</span>
-            </Link>
+            <Logo />
           </div>
 
           <div className="navbar-end flex items-center gap-4">

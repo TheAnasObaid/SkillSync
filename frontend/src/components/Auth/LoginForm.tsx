@@ -4,13 +4,14 @@ import { useLoginForm } from "@/hooks/useLoginForm";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { FormProvider } from "react-hook-form";
+import { FiAlertTriangle, FiCheckCircle } from "react-icons/fi";
 import { TextInput } from "../Forms/FormFields";
-import SuccessAlert from "./SuccessAlert";
-import UnverifiedUserAlert from "./UnverifiedAlert";
+import AuthCardLayout from "./AuthCardLayout";
+import AuthCardHeader from "./AuthCardHeader";
 
 const LoginForm = () => {
   const searchParams = useSearchParams();
-  const isRegistered = searchParams.get("registered");
+  const isVerified = searchParams.get("verified") === "true";
 
   const {
     form,
@@ -22,74 +23,99 @@ const LoginForm = () => {
   } = useLoginForm();
 
   return (
-    <div className="grid gap-6 max-w-md w-full">
-      {isRegistered && <SuccessAlert />}
-
-      <div className="card bg-base-200/50 border border-base-300 w-full shadow-lg">
-        <div className="card-body p-8">
-          <h1 className="card-title text-2xl font-bold justify-center">
-            Welcome Back
-          </h1>
-
-          <FormProvider {...form}>
-            <form onSubmit={onSubmit} className="grid gap-4 mt-4">
-              {unverifiedError && (
-                <UnverifiedUserAlert
-                  error={unverifiedError}
-                  onResend={handleResendVerification}
-                  isResending={isResending}
-                />
-              )}
-
-              <TextInput
-                name="email"
-                label="Email"
-                type="email"
-                placeholder="name@example.com"
-              />
-
-              <TextInput
-                name="password"
-                label="Password"
-                type="password"
-                placeholder="6+ characters"
-              />
-
-              <div className="text-right">
-                <Link
-                  href="/forgot-password"
-                  className="text-sm link link-hover text-primary"
-                >
-                  Forgot Password?
-                </Link>
-              </div>
-
-              <button
-                type="submit"
-                className="btn btn-primary w-full"
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? (
-                  <span className="loading loading-spinner" />
-                ) : (
-                  "Sign In"
-                )}
-              </button>
-            </form>
-          </FormProvider>
-        </div>
-      </div>
-
-      <div className="text-center text-sm text-base-content/70">
-        <p>
-          Don't have an account?{" "}
-          <Link href="/register" className="link link-primary font-semibold">
-            Sign Up
-          </Link>
-        </p>
-      </div>
-    </div>
+    <AuthCardLayout
+      footerText="Don't have an account?"
+      footerLinkText="Sign Up"
+      footerHref="/register"
+    >
+      {isVerified && (
+        <SuccessAlert message="Email verified! You can now sign in." />
+      )}
+      <AuthCardHeader
+        title="Welcome Back"
+        subtitle="Sign in to continue your journey on SkillSync."
+      />
+      <FormProvider {...form}>
+        <form onSubmit={onSubmit} className="grid gap-4">
+          {unverifiedError && (
+            <UnverifiedUserAlert
+              error={unverifiedError}
+              onResend={handleResendVerification}
+              isResending={isResending}
+            />
+          )}
+          <TextInput
+            name="email"
+            label="Email"
+            type="email"
+            placeholder="name@example.com"
+          />
+          <TextInput
+            name="password"
+            label="Password"
+            type="password"
+            placeholder="6+ characters"
+          />
+          <div className="text-right -mt-2">
+            <Link
+              href="/forgot-password"
+              className="text-sm link link-hover text-primary"
+            >
+              Forgot Password?
+            </Link>
+          </div>
+          <button
+            type="submit"
+            className="btn btn-primary w-full"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <span className="loading loading-spinner" />
+            ) : (
+              "Sign In"
+            )}
+          </button>
+        </form>
+      </FormProvider>
+    </AuthCardLayout>
   );
 };
 
 export default LoginForm;
+
+interface Props {
+  error: string;
+  onResend: () => void;
+  isResending: boolean;
+}
+
+const UnverifiedUserAlert = ({ error, onResend, isResending }: Props) => (
+  <div className="alert alert-warning alert-soft">
+    <FiAlertTriangle />
+    <div>
+      <h3 className="font-bold">Account Not Verified</h3>
+      <div className="text-xs">{error}</div>
+    </div>
+    <div className="flex-none">
+      <button
+        type="button"
+        className="btn btn-sm btn-warning"
+        onClick={onResend}
+        disabled={isResending}
+      >
+        {isResending ? (
+          <span className="loading loading-spinner loading-xs" />
+        ) : (
+          "Resend Email"
+        )}
+      </button>
+    </div>
+  </div>
+);
+
+const SuccessAlert = ({ message }: { message: string }) => (
+  <div className="alert alert-success">
+    <FiCheckCircle />
+    <span>{message}</span>
+  </div>
+);

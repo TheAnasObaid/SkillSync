@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { FiGithub, FiTwitter, FiLinkedin } from "react-icons/fi";
+import { FiGithub, FiLinkedin, FiTwitter } from "react-icons/fi";
+import Logo from "../Common/Logo";
 
 const Footer = () => {
   return (
@@ -8,9 +9,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-center md:text-left">
           {/* --- Column 1: Branding --- */}
           <aside className="md:col-span-2 lg:col-span-1 flex flex-col items-center md:items-start">
-            <Link href="/" className="text-2xl font-bold">
-              Skill<span className="text-primary">Sync</span>
-            </Link>
+            <Logo />
             <p className="text-base-content/70 mt-2">
               Connecting talent with opportunity through code.
             </p>

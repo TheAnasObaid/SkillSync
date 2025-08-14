@@ -8,7 +8,6 @@ import {
   FiZap,
 } from "react-icons/fi";
 
-// A small, reusable component for each benefit/pain point to keep the code DRY
 const BenefitItem = ({
   icon,
   text,
@@ -35,9 +34,7 @@ const Benefits = () => {
         </p>
       </div>
 
-      {/* The main grid layout remains effective */}
       <div className="grid md:grid-cols-2 gap-8 text-left">
-        {/* CARD 1: The Old Way (Muted and less appealing) */}
         <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all duration-300">
           <div className="card-body">
             <h3 className="card-title text-error/80 flex items-center gap-2">
@@ -61,8 +58,6 @@ const Benefits = () => {
           </div>
         </div>
 
-        {/* CARD 2: The SkillSync Way (Vibrant and elevated) */}
-        {/* The hover effect here is more pronounced to draw attention */}
         <div className="card bg-base-200/50 border border-base-300 shadow-lg transition-all duration-300 hover:border-primary hover:shadow-primary/20 hover:-translate-y-2">
           <div className="card-body">
             <h3 className="card-title text-primary flex items-center gap-2">

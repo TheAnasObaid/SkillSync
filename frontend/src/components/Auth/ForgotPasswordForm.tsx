@@ -1,10 +1,12 @@
 "use client";
 
+import { TextInput } from "@/components/Forms/FormFields";
+import { useForgotPassword } from "@/hooks/useForgetPassword";
 import Link from "next/link";
 import { FormProvider } from "react-hook-form";
-import { TextInput } from "@/components/Forms/FormFields";
 import { FiCheckCircle, FiLogIn } from "react-icons/fi";
-import { useForgotPassword } from "@/hooks/useForgetPassword";
+import AuthCardHeader from "./AuthCardHeader";
+import AuthCardLayout from "./AuthCardLayout";
 
 const SuccessMessage = () => (
   <div className="text-center space-y-4">
@@ -24,57 +26,49 @@ const ForgotPasswordForm = () => {
   const { form, isSubmitting, isSuccess, onSubmit } = useForgotPassword();
 
   return (
-    <div className="grid gap-6 max-w-md w-full">
-      <div className="card bg-base-200/50 border border-base-300 w-full shadow-lg">
-        <div className="card-body p-8">
-          {isSuccess ? (
-            <SuccessMessage />
-          ) : (
-            <>
-              <div className="text-center">
-                <h1 className="card-title text-2xl font-bold justify-center">
-                  Forgot Password?
-                </h1>
-                <p className="text-base-content/70 mt-2">
-                  No problem. Enter your email and we'll send a reset link.
-                </p>
-              </div>
-              <FormProvider {...form}>
-                <form onSubmit={onSubmit} className="grid gap-4 mt-4">
-                  <TextInput
-                    name="email"
-                    label="Your Email Address"
-                    type="email"
-                    placeholder="name@example.com"
-                  />
-                  <button
-                    type="submit"
-                    className="btn btn-primary w-full"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? (
-                      <span className="loading loading-spinner" />
-                    ) : (
-                      "Send Reset Link"
-                    )}
-                  </button>
-                </form>
-              </FormProvider>
-            </>
-          )}
-        </div>
-      </div>
-      {!isSuccess && (
-        <div className="text-center text-sm text-base-content/70">
-          <p>
-            Remembered your password?{" "}
-            <Link href="/login" className="link link-primary font-semibold">
-              Sign In
-            </Link>
+    <AuthCardLayout
+      footerText="Remembered your password?"
+      footerLinkText="Sign In"
+      footerHref="/login"
+    >
+      {isSuccess ? (
+        <div className="text-center space-y-4 grid justify-items-center">
+          <FiCheckCircle className="text-success text-6xl" />
+          <h2 className="text-xl font-bold">Check Your Inbox</h2>
+          <p className="text-base-content/70">
+            If an account exists for that email, a reset link has been sent.
           </p>
         </div>
+      ) : (
+        <>
+          <AuthCardHeader
+            title="Forgot Password?"
+            subtitle="Enter your email and we'll send you a link to reset it."
+          />
+          <FormProvider {...form}>
+            <form onSubmit={onSubmit} className="grid gap-4">
+              <TextInput
+                name="email"
+                label="Your Email Address"
+                type="email"
+                placeholder="name@example.com"
+              />
+              <button
+                type="submit"
+                className="btn btn-primary w-full"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="loading loading-spinner" />
+                ) : (
+                  "Send Reset Link"
+                )}
+              </button>
+            </form>
+          </FormProvider>
+        </>
       )}
-    </div>
+    </AuthCardLayout>
   );
 };
 
