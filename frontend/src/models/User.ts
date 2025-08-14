@@ -36,7 +36,7 @@ const UserSchema = new Schema<IUser>(
       lastName: { type: String, trim: true },
       companyName: { type: String, trim: true },
       avatar: String,
-      bio: String,
+      bio: { type: String, trim: true },
       skills: [String],
       experience: String,
       portfolio: [PortfolioItemSchema],
