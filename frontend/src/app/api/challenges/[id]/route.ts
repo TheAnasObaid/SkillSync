@@ -1,10 +1,12 @@
-// ===== File:/app/api/challenges/[id]/route.ts =====
 import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";
 import Challenge from "@/models/Challenge";
 import Submission from "@/models/Submission";
 import { NextResponse } from "next/server";
+import { writeFile } from "fs";
+import path from "path";
+import { challengeApiSchema } from "@/lib/validationSchemas";
 
 interface Params {
   params: Promise<{ id: string }>;
@@ -39,8 +41,49 @@ export async function DELETE(request: Request, { params }: Params) {
 }
 
 export async function PUT(request: Request, { params }: Params) {
-  // This will be similar to the POST handler for creation.
-  // For now, let's add a placeholder to prevent 404s on the Edit page.
-  // We will fully implement this when we refactor the ChallengeForm component's update logic.
-  return NextResponse.json({ message: "Update endpoint is ready." });
+  try {
+    const session = await getSession();
+    if (!session?.user || session.user.role !== "client") {
+      throw new Error("Authentication required.");
+    }
+
+    const formData = await request.formData();
+    const file = formData.get("file") as File | null;
+
+    const formObject: { [key: string]: any } = {};
+    formData.forEach((value, key) => {
+      formObject[key] = value;
+    });
+
+    const validatedData = challengeApiSchema.parse(formObject);
+
+    const updatePayload: any = { ...validatedData };
+
+    if (file) {
+      const bytes = await file.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      const filename = `${Date.now()}-${file.name}`;
+      const filePath = path.join(process.cwd(), "public", "uploads", filename);
+      writeFile(filePath, buffer);
+      updatePayload.files = [{ name: file.name, path: `/uploads/${filename}` }];
+    }
+
+    await dbConnect();
+    const { id } = await params;
+    const updatedChallenge = await Challenge.findOneAndUpdate(
+      { _id: id, createdBy: session.user._id }, // Security Check
+      { $set: updatePayload },
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedChallenge) {
+      throw new Error(
+        "Forbidden: Challenge not found or you are not the owner."
+      );
+    }
+
+    return NextResponse.json(updatedChallenge);
+  } catch (error) {
+    return handleError(error);
+  }
 }
