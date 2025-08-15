@@ -1,10 +1,10 @@
 "use client";
 
+import { useLogoutMutation } from "@/hooks/mutations/useLogoutMutation";
 import { useHasMounted } from "@/hooks/useHasMounted";
 import { getDashboardPath } from "@/lib/helper";
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
@@ -14,15 +14,15 @@ import ProfileDropdown from "../Common/ProfileDropdown";
 import NotificationBell from "./NotificationBell";
 
 const Header = () => {
-  const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
   const [isModalOpen, setModalOpen] = useState(false);
   const hasMounted = useHasMounted();
+
+  const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation();
 
   const handleLogout = () => {
     logout();
     setModalOpen(false);
-    router.push("/");
   };
 
   const dashboardHref = getDashboardPath(user?.role || null);
@@ -167,6 +167,7 @@ const Header = () => {
         onCancel={() => setModalOpen(false)}
         confirmText="Yes, Logout"
         icon={<FiLogOut size={48} />}
+        isActionInProgress={isLoggingOut}
       />
     </>
   );

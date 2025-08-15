@@ -9,28 +9,21 @@ import toast from "react-hot-toast";
 
 export const useLoginMutation = () => {
   const router = useRouter();
-  const { setToken, setUser } = useAuthStore();
+  const { setAuth } = useAuthStore.getState();
 
   return useMutation({
     mutationFn: loginUser,
     onSuccess: (data) => {
-      setToken(data.token);
-      setUser(data.user);
+      setAuth({ user: data.user, token: data.token });
 
       toast.success("Login successful!");
-
-      // Redirect to the appropriate dashboard
-      router.push(getDashboardPath(data.user.role));
-
-      // Refresh server components to reflect logged-in state
+      const dashboardPath = getDashboardPath(data.user.role);
+      router.push(dashboardPath);
       router.refresh();
     },
     onError: (error: any) => {
       if (!error.response?.data?.message.includes("verify your email")) {
-        toast.error(
-          error.response?.data?.message ||
-            "Invalid credentials. Please try again."
-        );
+        toast.error(error.response?.data?.message || "Invalid credentials.");
       }
     },
   });

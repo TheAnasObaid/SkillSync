@@ -6,12 +6,13 @@ import { useSearchParams } from "next/navigation";
 import { FormProvider } from "react-hook-form";
 import { FiAlertTriangle, FiCheckCircle } from "react-icons/fi";
 import { TextInput } from "../Forms/FormFields";
-import AuthCardLayout from "./AuthCardLayout";
 import AuthCardHeader from "./AuthCardHeader";
+import AuthCardLayout from "./AuthCardLayout";
 
 const LoginForm = () => {
   const searchParams = useSearchParams();
   const isVerified = searchParams.get("verified") === "true";
+  const verificationError = searchParams.get("error");
 
   const {
     form,
@@ -31,6 +32,11 @@ const LoginForm = () => {
       {isVerified && (
         <SuccessAlert message="Email verified! You can now sign in." />
       )}
+
+      {verificationError && (
+        <div className="alert alert-error">{verificationError}</div>
+      )}
+
       <AuthCardHeader
         title="Welcome Back"
         subtitle="Sign in to continue your journey on SkillSync."

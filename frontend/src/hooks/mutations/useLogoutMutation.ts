@@ -13,14 +13,12 @@ export const useLogoutMutation = () => {
   return useMutation({
     mutationFn: logoutUser,
     onSuccess: () => {
-      // On success, clear the client-side state
       logoutFromStore();
       toast.success("You have been logged out.");
       router.push("/");
       router.refresh();
     },
     onError: (error: any) => {
-      // Even on error, force logout on the client as a fallback
       logoutFromStore();
       router.push("/");
       router.refresh();

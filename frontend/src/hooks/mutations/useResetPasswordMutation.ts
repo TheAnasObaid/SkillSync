@@ -15,27 +15,21 @@ interface ResetPasswordVariables {
 
 export const useResetPasswordMutation = () => {
   const router = useRouter();
-  const { setToken, setUser } = useAuthStore();
+  const { setAuth } = useAuthStore.getState();
 
   return useMutation({
-    mutationFn: (variables: ResetPasswordVariables) =>
-      resetPassword({ token: variables.token, formData: variables.formData }),
+    mutationFn: (variables: ResetPasswordVariables) => resetPassword(variables),
     onSuccess: (data) => {
-      setToken(data.token);
-      setUser(data.user);
+      setAuth({ user: data.user, token: data.token });
 
-      toast.success("Password reset successfully! You are now logged in.", {
+      toast.success("Password reset! You are now logged in.", {
         duration: 4000,
       });
-
       router.push(getDashboardPath(data.user.role));
       router.refresh();
     },
     onError: (error: any) => {
-      toast.error(
-        error.response?.data?.message ||
-          "Failed to reset password. The link may be invalid or expired."
-      );
+      toast.error(error.response?.data?.message || "Password reset failed.");
     },
   });
 };

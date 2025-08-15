@@ -2,7 +2,6 @@
 
 import { getDashboardPath } from "@/lib/helper";
 import { useAuthStore } from "@/store/authStore";
-import { Space_Mono } from "next/font/google";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
