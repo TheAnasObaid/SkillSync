@@ -4,7 +4,7 @@ import { handleError } from "@/lib/handleError";
 import Challenge from "@/models/Challenge";
 import Submission from "@/models/Submission";
 import { NextResponse } from "next/server";
-import { writeFile } from "fs";
+import { writeFile } from "fs/promises";
 import path from "path";
 import { challengeApiSchema } from "@/lib/validationSchemas";
 
@@ -40,7 +40,7 @@ export async function DELETE(request: Request, { params }: Params) {
   }
 }
 
-export async function PUT(request: Request, { params }: Params) {
+export async function POST(request: Request) {
   try {
     const session = await getSession();
     if (!session?.user || session.user.role !== "client") {
@@ -57,32 +57,28 @@ export async function PUT(request: Request, { params }: Params) {
 
     const validatedData = challengeApiSchema.parse(formObject);
 
-    const updatePayload: any = { ...validatedData };
+    await dbConnect();
+
+    const newChallengeData: any = {
+      ...validatedData,
+      createdBy: session.user._id,
+      status: "published",
+    };
 
     if (file) {
       const bytes = await file.arrayBuffer();
       const buffer = Buffer.from(bytes);
       const filename = `${Date.now()}-${file.name}`;
       const filePath = path.join(process.cwd(), "public", "uploads", filename);
-      writeFile(filePath, buffer);
-      updatePayload.files = [{ name: file.name, path: `/uploads/${filename}` }];
+
+      await writeFile(filePath, buffer); // This will now work correctly
+      newChallengeData.files = [
+        { name: file.name, path: `/uploads/${filename}` },
+      ];
     }
 
-    await dbConnect();
-    const { id } = await params;
-    const updatedChallenge = await Challenge.findOneAndUpdate(
-      { _id: id, createdBy: session.user._id }, // Security Check
-      { $set: updatePayload },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedChallenge) {
-      throw new Error(
-        "Forbidden: Challenge not found or you are not the owner."
-      );
-    }
-
-    return NextResponse.json(updatedChallenge);
+    const newChallenge = await Challenge.create(newChallengeData);
+    return NextResponse.json(newChallenge, { status: 201 });
   } catch (error) {
     return handleError(error);
   }
