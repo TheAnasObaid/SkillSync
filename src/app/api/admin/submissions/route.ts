@@ -2,6 +2,8 @@ import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";
 import Submission from "@/models/Submission";
+import User from "@/models/User";
+import Challenge from "@/models/Challenge";
 import { NextResponse } from "next/server";
 
 export async function GET() {

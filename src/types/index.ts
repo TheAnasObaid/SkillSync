@@ -11,6 +11,7 @@ export interface IFile {
 
 export type Role = "developer" | "client" | "admin";
 export type AccountStatus = "active" | "banned";
+export type Gender = "male" | "female" | "other";
 
 export interface IPortfolioItem {
   _id?: string;
@@ -25,6 +26,7 @@ export interface IUser {
   _id: string;
   email: string;
   role: Role;
+  gender?: Gender;
   accountStatus: AccountStatus;
   earnings: number;
   password?: string;

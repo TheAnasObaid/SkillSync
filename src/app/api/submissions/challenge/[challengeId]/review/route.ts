@@ -2,6 +2,7 @@ import { getSession } from "@/lib/auth";
 import dbConnect from "@/lib/dbConnect";
 import { handleError } from "@/lib/handleError";
 import Challenge from "@/models/Challenge";
+import User from "@/models/User";
 import Submission from "@/models/Submission";
 import { NextResponse } from "next/server";
 
