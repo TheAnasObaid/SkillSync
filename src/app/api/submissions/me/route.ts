@@ -3,6 +3,8 @@ import { getSession } from "@/lib/auth";
 import { handleError } from "@/lib/handleError";
 import dbConnect from "@/lib/dbConnect";
 import Submission from "@/models/Submission";
+import "@/models/Challenge";
+import "@/models/User";
 
 export async function GET() {
   try {
