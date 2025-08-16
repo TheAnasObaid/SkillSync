@@ -1,5 +1,8 @@
 "use client";
 
+import FormCard from "@/components/Common/FormCard";
+import { TextInput, Textarea } from "@/components/Forms/FormFields";
+import ProfileView from "@/components/Profile/ProfileView";
 import {
   useUpdateProfileMutation,
   useUploadAvatarMutation,
@@ -9,10 +12,6 @@ import { ClientProfileFormData } from "@/types";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { FiEdit, FiX } from "react-icons/fi";
-
-import FormCard from "@/components/Common/FormCard";
-import { TextInput, Textarea } from "@/components/Forms/FormFields";
-import ProfileView from "@/components/Profile/ProfileView";
 
 const ClientProfilePage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -58,7 +57,7 @@ const ClientProfilePage = () => {
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold">Client Profile</h2>
+        <h2 className="text-3xl font-bold">My Profile</h2>
         <button
           className="btn btn-ghost"
           onClick={() => setIsEditMode(!isEditMode)}

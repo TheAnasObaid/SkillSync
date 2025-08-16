@@ -102,7 +102,7 @@ const ClientChallengeList = () => {
                     {challenge.status}
                   </span>
                   <Link
-                    href={`/challenges/${challenge._id}/review`}
+                    href={`/client/dashboard/challenges/review/${challenge._id}`}
                     className="font-bold text-lg link link-hover"
                   >
                     {challenge.title}

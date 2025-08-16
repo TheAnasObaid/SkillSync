@@ -5,6 +5,8 @@ import { unstable_noStore as noStore } from "next/cache";
 import "server-only";
 import { getSession } from "../auth";
 
+import "@/models/User"; // Eagerly import the User model to register it with Mongoose
+
 export const getAllChallenges = async (): Promise<IChallenge[]> => {
   noStore(); // Opts out of static rendering, ensures data is fresh
   try {

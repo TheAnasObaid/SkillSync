@@ -33,8 +33,10 @@ const ReviewSubmissionsClient = ({ initialChallenge }: Props) => {
 
   const { mutate: rateMutate, isPending: isRating } =
     useRateSubmissionMutation();
+
   const { mutate: selectWinnerMutate, isPending: isSelectingWinner } =
     useSelectWinnerMutation();
+
   const isUpdating = isRating || isSelectingWinner;
 
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -65,6 +67,7 @@ const ReviewSubmissionsClient = ({ initialChallenge }: Props) => {
     () => submissions.some((s) => s.status === "winner"),
     [submissions]
   );
+
   const winnerName =
     winnerModal.submission &&
     typeof winnerModal.submission.developerId === "object"
@@ -92,9 +95,10 @@ const ReviewSubmissionsClient = ({ initialChallenge }: Props) => {
   };
 
   if (isLoading) return <div className="skeleton h-64 w-full"></div>;
+
   if (isError)
     return (
-      <div className="alert alert-error">
+      <div className="alert alert-error alert-soft">
         Could not load submissions for this challenge.
       </div>
     );
@@ -102,7 +106,7 @@ const ReviewSubmissionsClient = ({ initialChallenge }: Props) => {
   return (
     <>
       {isChallengeCompleted && (
-        <div className="alert alert-success mb-6">
+        <div className="alert alert-success alert-soft mb-6">
           <FiAward /> A winner has been selected for this challenge!
         </div>
       )}

@@ -41,7 +41,7 @@ const RecentChallengePreview = ({ challenges }: Props) => {
       {challenges.map((challenge) => (
         <Link
           key={challenge._id}
-          href={`/challenges/${challenge._id}/review`}
+          href={`/client/dashboard/challenges/review/${challenge._id}`}
           className="card bg-base-200/50 border border-base-300 shadow-sm transition-all duration-200 ease-in-out hover:border-primary/50 hover:shadow-md hover:-translate-y-px"
         >
           <div className="card-body p-4">

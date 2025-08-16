@@ -1,28 +1,42 @@
 "use client";
 
-import { logoutUser } from "@/services/api/auth";
-import { useAuthStore } from "@/store/authStore";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { logoutUser } from "@/services/api/auth";
+import { useAuthStore } from "@/store/authStore";
+
+interface LogoutVariables {
+  onSuccessCallback?: () => void;
+}
 
 export const useLogoutMutation = () => {
   const router = useRouter();
-  const { logout: logoutFromStore } = useAuthStore();
+  const queryClient = useQueryClient();
+  const { logout: logoutFromStore } = useAuthStore.getState();
 
   return useMutation({
-    mutationFn: logoutUser,
-    onSuccess: () => {
+    // The mutation function now accepts our variables object
+    mutationFn: (variables?: LogoutVariables) => logoutUser(),
+    onSuccess: (data, variables) => {
       logoutFromStore();
+      queryClient.clear();
       toast.success("You have been logged out.");
       router.push("/");
       router.refresh();
+
+      // --- THE FIX ---
+      // If a success callback was provided, call it now.
+      variables?.onSuccessCallback?.();
     },
-    onError: (error: any) => {
+    onError: (error, variables) => {
       logoutFromStore();
+      queryClient.clear();
+      toast.error("Logout failed, but client state was cleared.");
       router.push("/");
       router.refresh();
-      toast.error("Could not log out properly, but client state was cleared.");
+      // Also call the callback on error to ensure the modal always closes
+      variables?.onSuccessCallback?.();
     },
   });
 };

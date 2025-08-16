@@ -26,7 +26,6 @@ interface Props {
   onSelectWinner: (submission: ISubmission) => void;
 }
 
-// Main component remains the same, but the rendered output is completely refactored.
 const SubmissionsTable = ({
   submissions = [],
   expandedId,
@@ -48,7 +47,6 @@ const SubmissionsTable = ({
 
   return (
     <div className="space-y-6">
-      {/* --- Filter and Sort Controls --- */}
       <div className="card bg-base-200/50 border border-base-300">
         <div className="card-body p-4 flex-col sm:flex-row justify-between items-center gap-4">
           <h2 className="card-title text-lg">
@@ -80,7 +78,6 @@ const SubmissionsTable = ({
         </div>
       </div>
 
-      {/* --- Submissions List or Empty State --- */}
       {submissions.length === 0 ? (
         <div className="text-center py-12 card bg-base-200/50 border border-base-300">
           <FiInfo className="mx-auto text-4xl text-base-content/50 mb-4" />
@@ -104,7 +101,6 @@ const SubmissionsTable = ({
                   isExpanded ? "border-primary/50" : ""
                 } ${sub.status === "winner" ? "bg-success/10" : ""}`}
               >
-                {/* --- Main, always-visible card header --- */}
                 <div
                   className="card-body p-4 flex flex-row items-start md:items-center justify-between gap-4 cursor-pointer"
                   onClick={() => onExpand(isExpanded ? null : sub._id)}

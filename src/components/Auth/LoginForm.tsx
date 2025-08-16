@@ -120,7 +120,7 @@ const UnverifiedUserAlert = ({ error, onResend, isResending }: Props) => (
 );
 
 const SuccessAlert = ({ message }: { message: string }) => (
-  <div className="alert alert-success">
+  <div className="alert alert-success alert-soft">
     <FiCheckCircle />
     <span>{message}</span>
   </div>

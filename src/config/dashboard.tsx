@@ -33,6 +33,11 @@ export const developerSidebarLinks: DashboardLink[] = [
     icon: <TbBriefcase2 />,
   },
   {
+    href: "/challenges",
+    label: "Find Challenge",
+    icon: <FiArchive />,
+  },
+  {
     href: "/developer/dashboard/profile",
     label: "My Profile",
     icon: <FiUser />,

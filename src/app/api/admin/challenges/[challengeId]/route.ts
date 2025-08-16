@@ -9,7 +9,7 @@ interface Params {
   params: Promise<{ challengeId: string }>;
 }
 
-export async function DELETE(request: Request, { params }: Params) {
+export async function DELETE(_: Request, { params }: Params) {
   try {
     const session = await getSession();
     if (!session?.user || session.user.role !== "admin") {

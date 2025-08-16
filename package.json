@@ -6,7 +6,8 @@
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "seed": "ts-node --project tsconfig.scripts.json data/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.1",
@@ -38,8 +39,10 @@
     "@types/react-dom": "^19",
     "autoprefixer": "^10.4.21",
     "daisyui": "^5.0.46",
+    "dotenv": "^17.2.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^4",
+    "ts-node": "^10.9.2",
     "typescript": "^5"
   }
 }

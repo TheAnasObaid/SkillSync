@@ -5,6 +5,7 @@ import { useHasMounted } from "@/hooks/useHasMounted";
 import { getDashboardPath } from "@/lib/helper";
 import { useAuthStore } from "@/store/authStore";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FiLogOut, FiMenu, FiX } from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
@@ -14,37 +15,44 @@ import ProfileDropdown from "../Common/ProfileDropdown";
 import NotificationBell from "./NotificationBell";
 
 const Header = () => {
+  const router = useRouter();
   const { user } = useAuthStore();
-  const [isModalOpen, setModalOpen] = useState(false);
   const hasMounted = useHasMounted();
-
+  const [isModalOpen, setModalOpen] = useState(false);
   const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation();
 
   const handleLogout = () => {
-    logout();
+    router.push("/");
     setModalOpen(false);
+    logout({
+      onSuccessCallback: () => setModalOpen(false),
+    });
   };
 
   const dashboardHref = getDashboardPath(user?.role || null);
 
-  const closeDrawer = () => {
+  // 3. CREATE THE NAVIGATION HANDLER FUNCTION
+  const handleDrawerNavigation = (path: string) => {
+    // First, find the checkbox and uncheck it to close the drawer
     const checkbox = document.getElementById("main-drawer") as HTMLInputElement;
     if (checkbox) {
       checkbox.checked = false;
     }
+    // Then, navigate to the new page
+    router.push(path);
   };
 
   return (
     <>
-      <div className="drawer sticky top-0 z-50 bg-base-100/80 backdrop-blur-md">
+      <div className="drawer sticky top-0 z-50 bg-base-100/80 backdrop-blur-lg mb-5">
         <input id="main-drawer" type="checkbox" className="drawer-toggle" />
         <div className="drawer-content flex flex-col">
-          <header className="w-full px-4 py-3">
-            <div className="navbar max-w-screen-xl mx-auto bg-base-200/50 border border-base-300 p-4 rounded-lg">
+          {/* Header Navbar (No changes here) */}
+          <header className="w-full px-4 pt-3">
+            <div className="navbar max-w-screen-xl mx-auto bg-base-100/80 backdrop-blur-lg border border-base-300 p-4 rounded-lg">
               <div className="navbar-start">
                 <Logo />
               </div>
-
               <div className="navbar-end flex gap-2">
                 <div>
                   {hasMounted && (
@@ -69,7 +77,6 @@ const Header = () => {
                     <div className="skeleton h-10 w-10 rounded-full"></div>
                   )}
                 </div>
-
                 <label
                   htmlFor="main-drawer"
                   className="btn btn-ghost btn-circle drawer-button"
@@ -80,13 +87,11 @@ const Header = () => {
             </div>
           </header>
         </div>
-
         <div className="drawer-side">
           <label
             htmlFor="main-drawer"
             aria-label="close sidebar"
             className="drawer-overlay"
-            onClick={closeDrawer}
           ></label>
           <div className="menu p-4 w-80 min-h-full bg-base-200 text-base-content">
             <div className="flex justify-between items-center mb-4">
@@ -96,16 +101,27 @@ const Header = () => {
               </label>
             </div>
 
+            {/* --- 4. THE FIX: USE ONCLICK ON BUTTONS INSTEAD OF LINKS/LABELS --- */}
             <nav className="flex flex-col gap-2">
-              <div onClick={closeDrawer}>
+              {/* We now use buttons that look like links */}
+              <button
+                onClick={() => handleDrawerNavigation("/challenges")}
+                className="btn btn-ghost justify-start"
+              >
                 <NavLink href="/challenges">Challenges</NavLink>
-              </div>
-              <div onClick={closeDrawer}>
+              </button>
+              <button
+                onClick={() => handleDrawerNavigation("/pricing")}
+                className="btn btn-ghost justify-start"
+              >
                 <NavLink href="/pricing">Pricing</NavLink>
-              </div>
-              <div onClick={closeDrawer}>
+              </button>
+              <button
+                onClick={() => handleDrawerNavigation("/about")}
+                className="btn btn-ghost justify-start"
+              >
                 <NavLink href="/about">About Us</NavLink>
-              </div>
+              </button>
             </nav>
 
             <div className="divider my-4"></div>
@@ -114,16 +130,15 @@ const Header = () => {
               <div className="flex flex-col gap-2">
                 {user ? (
                   <>
-                    <Link
-                      href={dashboardHref}
-                      className="btn btn-primary"
-                      onClick={closeDrawer}
+                    <button
+                      onClick={() => handleDrawerNavigation(dashboardHref)}
+                      className="btn btn-primary w-full"
                     >
                       Go to Dashboard
-                    </Link>
+                    </button>
                     <button
                       onClick={() => {
-                        closeDrawer();
+                        handleDrawerNavigation("/"); // Navigate home first or decide where to go
                         setModalOpen(true);
                       }}
                       className="btn btn-ghost text-error"
@@ -133,20 +148,18 @@ const Header = () => {
                   </>
                 ) : (
                   <>
-                    <Link
-                      href="/register"
-                      className="btn btn-primary"
-                      onClick={closeDrawer}
+                    <button
+                      onClick={() => handleDrawerNavigation("/register")}
+                      className="btn btn-primary w-full"
                     >
                       Sign Up
-                    </Link>
-                    <Link
-                      href="/login"
-                      className="btn btn-ghost"
-                      onClick={closeDrawer}
+                    </button>
+                    <button
+                      onClick={() => handleDrawerNavigation("/login")}
+                      className="btn btn-ghost w-full"
                     >
                       Sign In
-                    </Link>
+                    </button>
                   </>
                 )}
               </div>
@@ -157,7 +170,6 @@ const Header = () => {
           </div>
         </div>
       </div>
-
       <ConfirmationModal
         isOpen={isModalOpen}
         title="Confirm Logout"

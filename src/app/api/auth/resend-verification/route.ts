@@ -28,7 +28,7 @@ export async function POST(request: Request) {
         .digest("hex");
       await user.save({ validateBeforeSave: false });
 
-      const verificationURL = `${config.clientUrl}/verify-email/${verificationToken}`;
+      const verificationURL = `${config.clientUrl}/api/auth/verify-email/${verificationToken}`;
 
       const emailHtml = createBrandedEmail({
         title: "Resend Verification Email",

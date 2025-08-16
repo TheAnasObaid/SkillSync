@@ -1,6 +1,7 @@
-import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
+import dbConnect from "@/lib/dbConnect";
 import { handleError } from "@/lib/handleError";
+import Challenge from "@/models/Challenge";
 import Submission from "@/models/Submission";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
@@ -33,7 +34,9 @@ export async function POST(request: Request, { params }: Params) {
 
     if (!submission) throw new Error("Submission not found.");
 
-    // Security: Ensure the user rating is the one who created the challenge
+    const challenge = await Challenge.findById(submission.challengeId);
+    if (!challenge) throw new Error("Associated challenge not found.");
+
     if (
       (submission.challengeId as any).createdBy.toString() !== session.user._id
     ) {
@@ -42,7 +45,10 @@ export async function POST(request: Request, { params }: Params) {
 
     submission.ratings = { overall: rating };
     submission.feedback = feedback;
-    submission.status = "reviewed";
+
+    if (challenge.status !== "completed") {
+      submission.status = "reviewed";
+    }
     await submission.save();
 
     const developer = await User.findById(submission.developerId);
@@ -50,6 +56,7 @@ export async function POST(request: Request, { params }: Params) {
       const oldTotalRating =
         developer.reputation.rating * developer.reputation.totalRatings;
       const newTotalRatings = developer.reputation.totalRatings + 1;
+
       developer.reputation.rating = (oldTotalRating + rating) / newTotalRatings;
       developer.reputation.totalRatings = newTotalRatings;
       await developer.save();

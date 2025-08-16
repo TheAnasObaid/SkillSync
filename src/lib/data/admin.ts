@@ -5,6 +5,9 @@ import User from "@/models/User";
 import { ISubmission, IUser, PlatformStats } from "@/types";
 import "server-only"; // Ensures this code only runs on the server
 
+import "@/src/models/User";
+import "@/src/models/Challenge";
+
 export const getPlatformStats = async (): Promise<PlatformStats> => {
   try {
     await dbConnect();

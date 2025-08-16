@@ -1,10 +1,12 @@
 import dbConnect from "@/lib/dbConnect";
+import "@/models/Challenge";
+import Challenge from "@/models/Challenge";
+import Submission from "@/models/Submission";
+import "@/models/User";
 import { ISubmission } from "@/types";
 import { unstable_noStore as noStore } from "next/cache";
 import "server-only";
 import { getSession } from "../auth";
-import Challenge from "@/models/Challenge";
-import Submission from "@/models/Submission";
 
 export const getMySubmissions = async (): Promise<ISubmission[]> => {
   noStore();

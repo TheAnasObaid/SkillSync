@@ -10,7 +10,7 @@ const PublicLayout = ({ children }: Props) => {
     <div className="grid min-h-screen">
       <Header />
       <main className="flex-grow">
-        <div className="max-w-6xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8">
           {children}
         </div>
       </main>
