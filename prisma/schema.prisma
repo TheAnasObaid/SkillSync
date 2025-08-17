@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS ---
+// Enums provide type-safety for fields with a limited set of options.
+enum Role {
+  DEVELOPER
+  CLIENT
+  ADMIN
+}
+
+enum AccountStatus {
+  ACTIVE
+  BANNED
+}
+
+enum ChallengeDifficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+enum ChallengeStatus {
+  DRAFT
+  PUBLISHED
+  ACTIVE
+  JUDGING
+  COMPLETED
+}
+
+enum SubmissionStatus {
+  PENDING
+  REVIEWED
+  WINNER
+  REJECTED
+}
+
+// --- MODELS ---
+
+model User {
+  id                    String          @id @default(cuid())
+  email                 String          @unique
+  password              String
+  role                  Role            @default(DEVELOPER)
+  accountStatus         AccountStatus   @default(ACTIVE)
+  isVerified            Boolean         @default(false)
+  
+  // Profile Information (embedded-like structure)
+  firstName             String
+  lastName              String?
+  companyName           String?
+  avatarUrl             String?
+  bio                   String?
+  skills                String[]
+  experience            String?
+  
+  // Reputation & Earnings
+  rating                Float           @default(0)
+  totalRatings          Int             @default(0)
+  completedChallenges   Int             @default(0)
+  earnings              Float           @default(0)
+
+  // Authentication Tokens (handled by NextAuth/Supabase Auth later, but good to have)
+  verificationToken     String?         @unique
+  passwordResetToken    String?         @unique
+  passwordResetExpires  DateTime?
+
+  lastLogin             DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  // --- RELATIONS ---
+  challenges            Challenge[]     // A User can create many Challenges
+  submissions           Submission[]    // A User can have many Submissions
+  portfolio             PortfolioItem[] // A User can have many Portfolio Items
+}
+
+model PortfolioItem {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  imageUrl    String
+  liveUrl     String?
+  githubUrl   String?
+  
+  // Relation to User
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+}
+
+model Challenge {
+  id            String              @id @default(cuid())
+  title         String
+  description   String
+  requirements  String
+  prize         Float
+  category      String
+  difficulty    ChallengeDifficulty
+  status        ChallengeStatus     @default(PUBLISHED)
+  tags          String[]
+  isFunded      Boolean             @default(false)
+  deadline      DateTime
+
+  // Relation to User (Creator)
+  createdBy     User                @relation(fields: [createdById], references: [id])
+  createdById   String
+
+  // Other Relations & Data
+  submissions   Submission[]
+  files         Json[] // Use Json type for flexible file object storage
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+}
+
+model Submission {
+  id          String           @id @default(cuid())
+  githubRepo  String
+  description String
+  liveDemo    String?
+  status      SubmissionStatus @default(PENDING)
+
+  // Feedback from Client
+  rating      Int?
+  feedback    String?
+  
+  // Relation to Challenge
+  challenge   Challenge        @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  challengeId String
+  
+  // Relation to User (Developer)
+  developer   User             @relation(fields: [developerId], references: [id], onDelete: Cascade)
+  developerId String
+  
+  files       Json[]
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+}
