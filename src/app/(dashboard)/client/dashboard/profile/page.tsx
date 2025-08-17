@@ -8,10 +8,18 @@ import {
   useUploadAvatarMutation,
 } from "@/hooks/mutations/useProfileMutations";
 import { useMyProfileQuery } from "@/hooks/queries/useUserQueries";
-import { ClientProfileFormData } from "@/types";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import { FiEdit, FiX } from "react-icons/fi";
+
+// 1. Define the form's data shape directly in the component.
+//    This matches the flattened fields in our Prisma schema.
+interface ClientProfileFormData {
+  firstName: string;
+  lastName: string;
+  companyName: string;
+  bio: string;
+}
 
 const ClientProfilePage = () => {
   const [isEditMode, setIsEditMode] = useState(false);
@@ -27,18 +35,18 @@ const ClientProfilePage = () => {
 
   useEffect(() => {
     if (user && isEditMode) {
+      // 2. Reset the form using the flattened properties from the Prisma User object.
       formMethods.reset({
-        name: user.profile.firstName,
-        profile: {
-          lastName: user.profile.lastName || "",
-          companyName: user.profile.companyName || "",
-          bio: user.profile.bio || "",
-        },
+        firstName: user.firstName || "",
+        lastName: user.lastName || "",
+        companyName: user.companyName || "",
+        bio: user.bio || "",
       });
     }
-  }, [user, isEditMode, formMethods.reset]);
+  }, [user, isEditMode, formMethods]); // formMethods was missing from dependency array
 
   const handleFormSubmit: SubmitHandler<ClientProfileFormData> = (data) => {
+    // The `data` object from the form now perfectly matches the shape our API expects.
     updateProfile(data, { onSuccess: () => setIsEditMode(false) });
   };
 
@@ -81,11 +89,11 @@ const ClientProfilePage = () => {
             isSubmitting={isUpdating}
           >
             <div className="grid md:grid-cols-2 gap-4">
-              <TextInput name="name" label="First Name" />
-              <TextInput name="profile.lastName" label="Last Name" />
+              <TextInput name="firstName" label="First Name" />
+              <TextInput name="lastName" label="Last Name" />
             </div>
-            <TextInput name="profile.companyName" label="Company Name" />
-            <Textarea name="profile.bio" label="Bio / Company Details" />
+            <TextInput name="companyName" label="Company Name" />
+            <Textarea name="bio" label="Bio / Company Details" />
           </FormCard>
         </FormProvider>
       ) : (

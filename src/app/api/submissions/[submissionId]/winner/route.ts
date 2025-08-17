@@ -1,62 +1,87 @@
-import dbConnect from "@/lib/dbConnect";
-import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import Challenge from "@/models/Challenge";
-import Submission from "@/models/Submission";
-import User from "@/models/User";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+import { ChallengeStatus, Role, SubmissionStatus } from "@prisma/client";
 
 interface Params {
   params: Promise<{ submissionId: string }>;
 }
 
 export async function PATCH(request: Request, { params }: Params) {
+  const { submissionId } = await params;
+
   try {
     const session = await getSession();
-    if (!session?.user || session.user.role !== "client") {
-      throw new Error("Authentication required: Must be a client.");
+    if (!session?.user || session.user.role !== Role.CLIENT) {
+      return NextResponse.json(
+        { message: "Authentication required: Must be a client." },
+        { status: 401 }
+      );
     }
 
-    await dbConnect();
+    // Use a transaction to ensure all database updates succeed or fail together
+    const winningSubmission = await prisma.$transaction(async (tx) => {
+      const submissionToWin = await tx.submission.findUnique({
+        where: { id: submissionId },
+        include: { challenge: true },
+      });
 
-    const { submissionId } = await params;
-    const winningSubmission = await Submission.findById(submissionId);
-    if (!winningSubmission) throw new Error("Submission not found.");
+      if (!submissionToWin) throw new Error("Submission not found.");
 
-    const challenge = await Challenge.findById(winningSubmission.challengeId);
-    if (!challenge) throw new Error("Challenge not found.");
+      const challenge = submissionToWin.challenge;
 
-    // Security checks
-    if (challenge.createdBy.toString() !== session.user._id)
-      throw new Error("Forbidden: You are not the owner of this challenge.");
-    if (!challenge.isFunded)
-      throw new Error("Cannot select a winner for an unfunded challenge.");
-    if (challenge.status === "completed")
-      throw new Error("A winner has already been selected for this challenge.");
+      // Security Checks
+      if (challenge.createdById !== session.user.id)
+        throw new Error("Forbidden: You are not the owner of this challenge.");
+      if (!challenge.isFunded)
+        throw new Error("Cannot select a winner for an unfunded challenge.");
+      if (challenge.status === ChallengeStatus.COMPLETED)
+        throw new Error(
+          "A winner has already been selected for this challenge."
+        );
 
-    // Update challenge and winning submission
-    challenge.status = "completed";
-    winningSubmission.status = "winner";
+      // 1. Update other submissions to 'REJECTED'
+      await tx.submission.updateMany({
+        where: {
+          challengeId: challenge.id,
+          id: { not: submissionId },
+        },
+        data: { status: SubmissionStatus.REJECTED },
+      });
 
-    // Update other submissions to 'rejected'
-    await Submission.updateMany(
-      { challengeId: challenge._id, _id: { $ne: winningSubmission._id } },
-      { status: "rejected" }
-    );
+      // 2. Update the winning submission
+      const winnerSubmission = await tx.submission.update({
+        where: { id: submissionId },
+        data: { status: SubmissionStatus.WINNER },
+      });
 
-    // Update winner's earnings and reputation
-    const winner = await User.findById(winningSubmission.developerId);
-    if (winner) {
-      winner.earnings += challenge.prize;
-      winner.reputation.completedChallenges += 1;
-      await winner.save();
-    }
+      // 3. Update the challenge status to 'COMPLETED'
+      await tx.challenge.update({
+        where: { id: challenge.id },
+        data: { status: ChallengeStatus.COMPLETED },
+      });
 
-    await challenge.save();
-    await winningSubmission.save();
+      // 4. Update the winner's earnings and reputation
+      await tx.user.update({
+        where: { id: submissionToWin.developerId },
+        data: {
+          earnings: { increment: challenge.prize },
+          completedChallenges: { increment: 1 },
+        },
+      });
+
+      return winnerSubmission;
+    });
 
     return NextResponse.json(winningSubmission);
-  } catch (error) {
-    return handleError(error);
+  } catch (error: any) {
+    console.error(
+      `PATCH /api/submissions/${submissionId}/winner Error:`,
+      error
+    );
+    return NextResponse.json(
+      { message: error.message || "Failed to select winner." },
+      { status: 400 }
+    );
   }
 }

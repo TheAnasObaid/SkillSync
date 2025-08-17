@@ -8,7 +8,12 @@ import { useRegisterMutation } from "./mutations/useRegisterMutation";
 export const useRegisterForm = () => {
   const form = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: { name: "", email: "", password: "", role: "developer" },
+    defaultValues: {
+      firstName: "",
+      email: "",
+      password: "",
+      role: "developer",
+    },
   });
 
   const { mutate: register, isPending: isSubmitting } = useRegisterMutation();

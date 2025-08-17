@@ -14,8 +14,8 @@ import { TextInput } from "../Forms/FormFields";
 import ProfileView from "../Profile/ProfileView";
 
 interface AdminProfileFormData {
-  name: string;
-  profile: { lastName: string };
+  firstName: string;
+  lastName: string;
 }
 
 const AdminProfileClient = () => {
@@ -34,8 +34,8 @@ const AdminProfileClient = () => {
   useEffect(() => {
     if (user && isEditMode) {
       formMethods.reset({
-        name: user.profile.firstName,
-        profile: { lastName: user.profile.lastName || "" },
+        firstName: user.firstName,
+        lastName: user.lastName || "",
       });
     }
   }, [user, isEditMode, formMethods]);

@@ -1,11 +1,10 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import crypto from "crypto";
-import { z } from "zod";
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
 import { generateToken } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
+import prisma from "@/lib/prisma";
+import bcrypt from "bcrypt";
+import crypto from "crypto";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
 const resetPasswordSchema = z.object({
   password: z.string().min(6, "Password must be at least 6 characters."),
@@ -17,7 +16,6 @@ interface Props {
 
 export async function PATCH(request: Request, { params }: Props) {
   try {
-    await dbConnect();
     const { token: resetToken } = await params;
     const body = await request.json();
     const { password } = resetPasswordSchema.parse(body);
@@ -27,24 +25,30 @@ export async function PATCH(request: Request, { params }: Props) {
       .update(resetToken)
       .digest("hex");
 
-    const user = await User.findOne({
-      passwordResetToken: hashedToken,
-      passwordResetExpires: { $gt: Date.now() },
+    const user = await prisma.user.findFirst({
+      where: {
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { gt: new Date() },
+      },
     });
 
     if (!user) {
       throw new Error("Token is invalid or has expired.");
     }
 
-    user.password = password; // Pre-save hook will hash it
-    user.passwordResetToken = undefined;
-    user.passwordResetExpires = undefined;
-    await user.save();
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Log the user in automatically for a better UX
-    const token = generateToken(user);
-    const userPayload = user.toObject();
-    delete userPayload.password;
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        password: hashedPassword,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+      },
+    });
+
+    const token = generateToken(updatedUser);
+    const { password: _, ...userPayload } = updatedUser;
 
     (await cookies()).set("authToken", token, {
       httpOnly: true,
@@ -55,7 +59,11 @@ export async function PATCH(request: Request, { params }: Props) {
     });
 
     return NextResponse.json({ user: userPayload, token });
-  } catch (error) {
-    return handleError(error);
+  } catch (error: any) {
+    console.error(error);
+    return NextResponse.json(
+      { message: error.message || "An internal server error occurred." },
+      { status: 400 }
+    );
   }
 }

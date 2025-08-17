@@ -5,7 +5,7 @@ import {
   useWithdrawSubmissionMutation,
 } from "@/hooks/mutations/useSubmissionMutations";
 import { useMySubmissionsQuery } from "@/hooks/queries/useSubmissionQueries";
-import { ISubmission } from "@/types";
+import { Submission } from "@prisma/client";
 import { useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
@@ -16,48 +16,50 @@ import EditSubmissionModal, {
 import SubmissionCard from "./SubmissionCard";
 
 interface Props {
-  initialSubmissions?: ISubmission[];
+  initialSubmissions?: Submission[]; // Allow passing initial data for dashboard preview
 }
 
 const DeveloperSubmissionList = ({ initialSubmissions }: Props) => {
-  const {
-    data: submissionsFromQuery,
-    isLoading,
-    isError,
-  } = useMySubmissionsQuery();
-
-  const submissions = initialSubmissions || submissionsFromQuery;
+  const { data: submissions, isLoading, isError } = useMySubmissionsQuery();
 
   const { mutate: updateMutate, isPending: isUpdating } =
     useUpdateSubmissionMutation();
   const { mutate: withdrawMutate, isPending: isWithdrawing } =
     useWithdrawSubmissionMutation();
 
-  const [editModal, setEditModal] = useState({
-    isOpen: false,
-    submission: null as ISubmission | null,
-  });
-  const [deleteModal, setDeleteModal] = useState({
-    isOpen: false,
-    submission: null as ISubmission | null,
-  });
+  const [editModal, setEditModal] = useState<{
+    isOpen: boolean;
+    submission: Submission | null;
+  }>({ isOpen: false, submission: null });
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    submission: Submission | null;
+  }>({ isOpen: false, submission: null });
 
-  if (isLoading) {
-    return <div className="skeleton h-48 w-full"></div>;
-  }
-
-  if (isError || !submissions) {
+  if (isLoading && !initialSubmissions) {
     return (
-      <div className="alert alert-error">Could not load your submissions.</div>
+      <div className="space-y-4">
+        {[...Array(5)].map((_, i) => (
+          <div key={i} className="skeleton h-20 w-full rounded-lg"></div>
+        ))}
+      </div>
     );
   }
 
-  if (submissions.length === 0) {
+  if (isError) {
+    return (
+      <div className="alert alert-error alert-soft">
+        Could not load submissions.
+      </div>
+    );
+  }
+
+  if (!submissions || submissions.length === 0) {
     return (
       <EmptyState
         title="No Submissions Yet"
-        message="Your journey to prove your skills starts with the first challenge."
-        ctaText="Find a Challenge to Solve"
+        message="Your journey starts with the first challenge."
+        ctaText="Find a Challenge"
         ctaLink="/challenges"
       />
     );
@@ -66,7 +68,7 @@ const DeveloperSubmissionList = ({ initialSubmissions }: Props) => {
   const handleUpdateSubmit = (formData: EditSubmissionFormData) => {
     if (editModal.submission) {
       updateMutate(
-        { submissionId: editModal.submission._id, formData },
+        { submissionId: editModal.submission.id, formData },
         { onSuccess: () => setEditModal({ isOpen: false, submission: null }) }
       );
     }
@@ -74,7 +76,7 @@ const DeveloperSubmissionList = ({ initialSubmissions }: Props) => {
 
   const handleDeleteConfirm = () => {
     if (deleteModal.submission) {
-      withdrawMutate(deleteModal.submission._id, {
+      withdrawMutate(deleteModal.submission.id, {
         onSuccess: () => setDeleteModal({ isOpen: false, submission: null }),
       });
     }
@@ -85,14 +87,13 @@ const DeveloperSubmissionList = ({ initialSubmissions }: Props) => {
       <div className="space-y-4">
         {submissions.map((sub) => (
           <SubmissionCard
-            key={sub._id}
+            key={sub.id}
             submission={sub}
             onEdit={() => setEditModal({ isOpen: true, submission: sub })}
             onDelete={() => setDeleteModal({ isOpen: true, submission: sub })}
           />
         ))}
       </div>
-
       <EditSubmissionModal
         isOpen={editModal.isOpen}
         onClose={() => setEditModal({ isOpen: false, submission: null })}
@@ -100,11 +101,10 @@ const DeveloperSubmissionList = ({ initialSubmissions }: Props) => {
         isSubmitting={isUpdating}
         submission={editModal.submission}
       />
-
       <ConfirmationModal
         isOpen={deleteModal.isOpen}
         title="Withdraw Submission"
-        message="Are you sure you want to withdraw this submission? This action cannot be undone."
+        message="Are you sure you want to withdraw this submission?"
         onConfirm={handleDeleteConfirm}
         onCancel={() => setDeleteModal({ isOpen: false, submission: null })}
         confirmText="Yes, Withdraw"

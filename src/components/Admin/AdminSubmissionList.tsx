@@ -1,7 +1,7 @@
 "use client";
 
 import { useAllSubmissionsQuery } from "@/hooks/queries/useAdminQueries";
-import { ISubmission } from "@/types";
+import { SubmissionStatus } from "@prisma/client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { MouseEvent } from "react";
@@ -41,48 +41,42 @@ const AdminSubmissionList = () => {
       />
     );
   }
-
   const handleNestedLinkClick = (e: MouseEvent) => e.stopPropagation();
 
-  const statusStyles: { [key: string]: string } = {
-    pending: "badge-warning",
-    reviewed: "badge-info",
-    winner: "badge-success",
-    rejected: "badge-error",
+  const statusStyles: Record<SubmissionStatus, string> = {
+    PENDING: "badge-warning",
+    REVIEWED: "badge-info",
+    WINNER: "badge-success",
+    REJECTED: "badge-error",
   };
 
   return (
     <div className="space-y-4">
-      {submissions.map((sub: ISubmission) => {
-        const developer =
-          typeof sub.developerId === "object" ? sub.developerId : null;
-        const challenge =
-          typeof sub.challengeId === "object" ? sub.challengeId : null;
-        if (!developer || !challenge) return null;
-
+      {submissions.map((sub) => {
+        const { developer, challenge } = sub;
         const handleCardClick = () =>
-          router.push(`/challenges/${challenge._id}/submissions/${sub._id}`);
+          router.push(`/challenges/${challenge.id}/submissions/${sub.id}`);
 
         return (
           <div
-            key={sub._id}
+            key={sub.id}
             onClick={handleCardClick}
-            className="card bg-base-200/50 border border-base-300 shadow-sm transition-all duration-200 ease-in-out hover:border-primary/50 hover:shadow-md hover:-translate-y-px cursor-pointer"
+            className="card bg-base-200/50 border border-base-300 shadow-sm transition-all hover:border-primary/50 hover:shadow-md cursor-pointer"
           >
             <div className="card-body p-4">
               <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                 <Link
-                  href={`/users/${developer._id}`}
+                  href={`/users/${developer.id}`}
                   onClick={handleNestedLinkClick}
                   className="flex items-center gap-3 group/userlink"
                 >
                   <UserAvatar
-                    name={developer.profile.firstName}
-                    avatarUrl={developer.profile.avatar}
+                    name={developer.firstName}
+                    avatarUrl={developer.avatarUrl}
                   />
                   <div>
                     <p className="font-bold group-hover/userlink:link">
-                      {developer.profile.firstName}
+                      {developer.firstName}
                     </p>
                     <p className="text-sm text-base-content/60">
                       {developer.email}
@@ -98,11 +92,11 @@ const AdminSubmissionList = () => {
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <span
-                      className={`badge badge-soft ${
+                      className={`badge badge-soft capitalize ${
                         statusStyles[sub.status] || "badge-ghost"
                       }`}
                     >
-                      {sub.status}
+                      {sub.status.toLowerCase()}
                     </span>
                     <p className="text-xs text-base-content/60 mt-1">
                       {new Date(sub.createdAt).toLocaleDateString()}

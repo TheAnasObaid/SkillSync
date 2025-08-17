@@ -1,69 +1,74 @@
-import { getSession } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect";
-import { handleError } from "@/lib/handleError";
-import Challenge from "@/models/Challenge";
-import Submission from "@/models/Submission";
-import User from "@/models/User";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
+import { ChallengeStatus, Role } from "@prisma/client";
 
 interface Params {
   params: Promise<{ submissionId: string }>;
 }
 
 export async function POST(request: Request, { params }: Params) {
+  const { submissionId } = await params;
+
   try {
     const session = await getSession();
-    if (!session?.user || session.user.role !== "client") {
-      throw new Error("Authentication required: Must be a client.");
+    if (!session?.user || session.user.role !== Role.CLIENT) {
+      return NextResponse.json(
+        { message: "Authentication required: Must be a client." },
+        { status: 401 }
+      );
     }
 
     const { rating, feedback } = await request.json();
-    if (!rating)
+    if (!rating) {
       return NextResponse.json(
         { message: "Rating is required." },
         { status: 400 }
       );
+    }
 
-    await dbConnect();
-
-    const { submissionId } = await params;
-    const submission = await Submission.findById(submissionId).populate({
-      path: "challengeId",
-      select: "createdBy",
+    const submission = await prisma.submission.findUnique({
+      where: { id: submissionId },
+      include: { challenge: { select: { createdById: true, status: true } } },
     });
 
-    if (!submission) throw new Error("Submission not found.");
-
-    const challenge = await Challenge.findById(submission.challengeId);
-    if (!challenge) throw new Error("Associated challenge not found.");
-
-    if (
-      (submission.challengeId as any).createdBy.toString() !== session.user._id
-    ) {
-      throw new Error("Forbidden: You are not the owner of this challenge.");
+    if (!submission) {
+      return NextResponse.json(
+        { message: "Submission not found." },
+        { status: 404 }
+      );
     }
 
-    submission.ratings = { overall: rating };
-    submission.feedback = feedback;
-
-    if (challenge.status !== "completed") {
-      submission.status = "reviewed";
-    }
-    await submission.save();
-
-    const developer = await User.findById(submission.developerId);
-    if (developer) {
-      const oldTotalRating =
-        developer.reputation.rating * developer.reputation.totalRatings;
-      const newTotalRatings = developer.reputation.totalRatings + 1;
-
-      developer.reputation.rating = (oldTotalRating + rating) / newTotalRatings;
-      developer.reputation.totalRatings = newTotalRatings;
-      await developer.save();
+    // Security check: ensure the user rating is the one who created the challenge
+    if (submission.challenge.createdById !== session.user.id) {
+      return NextResponse.json(
+        { message: "Forbidden: You are not the owner of this challenge." },
+        { status: 403 }
+      );
     }
 
-    return NextResponse.json(submission);
+    const updateData: any = {
+      rating: rating,
+      feedback: feedback,
+    };
+
+    if (submission.challenge.status !== ChallengeStatus.COMPLETED) {
+      updateData.status = "REVIEWED";
+    }
+
+    const updatedSubmission = await prisma.submission.update({
+      where: { id: submissionId },
+      data: updateData,
+    });
+
+    // TODO: Add logic to recalculate developer's average rating.
+
+    return NextResponse.json(updatedSubmission);
   } catch (error) {
-    return handleError(error);
+    console.error(`POST /api/submissions/${submissionId}/rate Error:`, error);
+    return NextResponse.json(
+      { message: "Failed to rate submission." },
+      { status: 500 }
+    );
   }
 }

@@ -1,7 +1,6 @@
-import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import User from "@/models/User";
+import prisma from "@/lib/prisma";
+import fs from "fs";
 import { writeFile } from "fs/promises";
 import { NextResponse } from "next/server";
 import path from "path";
@@ -9,7 +8,12 @@ import path from "path";
 export async function POST(request: Request) {
   try {
     const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: "Authentication required." },
+        { status: 401 }
+      );
+    }
 
     const formData = await request.formData();
     const file = formData.get("portfolioImage") as File | null;
@@ -21,9 +25,10 @@ export async function POST(request: Request) {
       );
     }
 
+    // --- File Upload Logic ---
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const filename = `${session.user._id}-portfolio-${Date.now()}${path.extname(
+    const filename = `${session.user.id}-portfolio-${Date.now()}${path.extname(
       file.name
     )}`;
     const uploadsDir = path.join(
@@ -34,31 +39,31 @@ export async function POST(request: Request) {
     );
     const filePath = path.join(uploadsDir, filename);
 
-    const fs = require("fs");
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
 
     await writeFile(filePath, buffer);
-    const imageUrl = `uploads/portfolio/${filename}`;
+    const imageUrl = `/uploads/portfolio/${filename}`; // Use a relative path
 
-    const newItem = {
-      title: formData.get("title"),
-      description: formData.get("description"),
-      liveUrl: formData.get("liveUrl"),
-      githubUrl: formData.get("githubUrl"),
-      imageUrl: imageUrl,
-    };
+    // --- Prisma Relational Create ---
+    const newItem = await prisma.portfolioItem.create({
+      data: {
+        title: formData.get("title") as string,
+        description: formData.get("description") as string,
+        liveUrl: formData.get("liveUrl") as string | null,
+        githubUrl: formData.get("githubUrl") as string | null,
+        imageUrl: imageUrl,
+        userId: session.user.id, // Connect to the user
+      },
+    });
 
-    await dbConnect();
-    const user = await User.findByIdAndUpdate(
-      session.user._id,
-      { $push: { "profile.portfolio": newItem } },
-      { new: true }
-    ).select("profile.portfolio");
-
-    return NextResponse.json(user?.profile.portfolio);
+    return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
-    return handleError(error);
+    console.error("POST /api/users/me/portfolio Error:", error);
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }

@@ -1,30 +1,31 @@
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import Submission from "@/models/Submission";
-import Challenge from "@/models/Challenge";
-import { writeFile } from "fs/promises";
-import path from "path";
-import dbConnect from "@/lib/dbConnect";
+import { Role } from "@prisma/client";
 
 interface Params {
   params: Promise<{ challengeId: string }>;
 }
 
 export async function POST(request: Request, { params }: Params) {
+  const { challengeId } = await params;
+
   try {
     const session = await getSession();
-    if (!session?.user || session.user.role !== "developer") {
-      throw new Error("Authentication required: Must be a developer.");
+    if (!session?.user || session.user.role !== Role.DEVELOPER) {
+      return NextResponse.json(
+        { message: "Authentication required: Must be a developer." },
+        { status: 401 }
+      );
     }
 
-    await dbConnect();
-
-    const { challengeId } = await params;
-    const existingSubmission = await Submission.findOne({
-      challengeId: challengeId,
-      developerId: session.user._id,
+    const existingSubmission = await prisma.submission.findFirst({
+      where: {
+        challengeId: challengeId,
+        developerId: session.user.id,
+      },
     });
+
     if (existingSubmission) {
       return NextResponse.json(
         {
@@ -35,35 +36,28 @@ export async function POST(request: Request, { params }: Params) {
     }
 
     const formData = await request.formData();
-    const file = formData.get("file") as File | null;
+    // File upload logic will be added in the Supabase Storage phase.
 
-    const submissionData: any = {
-      githubRepo: formData.get("githubRepo"),
-      description: formData.get("description"),
-      liveDemo: formData.get("liveDemo") || undefined,
-      challengeId: challengeId,
-      developerId: session.user._id,
-    };
-
-    if (file) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const filename = `${Date.now()}-${file.name.replace(/\s/g, "_")}`;
-      const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      const filePath = path.join(uploadsDir, filename);
-
-      await writeFile(filePath, buffer);
-      submissionData.files = [{ name: file.name, path: `uploads/${filename}` }];
-    }
-
-    const newSubmission = await Submission.create(submissionData);
-
-    await Challenge.findByIdAndUpdate(challengeId, {
-      $push: { submissions: newSubmission._id },
+    const newSubmission = await prisma.submission.create({
+      data: {
+        githubRepo: formData.get("githubRepo") as string,
+        description: formData.get("description") as string,
+        liveDemo: formData.get("liveDemo") as string | null,
+        challengeId: challengeId,
+        developerId: session.user.id,
+        // files: [] // Will be handled later
+      },
     });
 
     return NextResponse.json(newSubmission, { status: 201 });
   } catch (error) {
-    return handleError(error);
+    console.error(
+      `POST /api/submissions/challenge/${challengeId} Error:`,
+      error
+    );
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }

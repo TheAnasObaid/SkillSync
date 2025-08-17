@@ -6,7 +6,8 @@ import {
   useSelectWinnerMutation,
 } from "@/hooks/mutations/useSubmissionMutations";
 import { useSubmissionsForReviewQuery } from "@/hooks/queries/useSubmissionQueries";
-import { IChallenge, ISubmission } from "@/types";
+import { SubmissionWithDeveloper } from "@/services/api/submissions";
+import { Challenge } from "@prisma/client";
 import { useMemo, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { FiAward } from "react-icons/fi";
@@ -14,7 +15,7 @@ import RatingModal from "./RatingModal";
 import SubmissionsTable from "./SubmissionsTable";
 
 interface Props {
-  initialChallenge: IChallenge;
+  initialChallenge: Challenge;
 }
 
 interface RatingFormData {
@@ -23,62 +24,40 @@ interface RatingFormData {
 }
 
 const ReviewSubmissionsClient = ({ initialChallenge }: Props) => {
-  const challengeId = initialChallenge._id;
-
   const {
     data: submissions = [],
     isLoading,
     isError,
-  } = useSubmissionsForReviewQuery(challengeId);
+  } = useSubmissionsForReviewQuery(initialChallenge.id);
 
   const { mutate: rateMutate, isPending: isRating } =
     useRateSubmissionMutation();
-
   const { mutate: selectWinnerMutate, isPending: isSelectingWinner } =
     useSelectWinnerMutation();
 
-  const isUpdating = isRating || isSelectingWinner;
-
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [sortOrder, setSortOrder] = useState("desc");
-  const [ratingModal, setRatingModal] = useState({
-    isOpen: false,
-    submission: null as ISubmission | null,
-  });
-  const [winnerModal, setWinnerModal] = useState({
-    isOpen: false,
-    submission: null as ISubmission | null,
-  });
+  const [ratingModal, setRatingModal] = useState<{
+    isOpen: boolean;
+    submission: SubmissionWithDeveloper | null;
+  }>({ isOpen: false, submission: null });
+  const [winnerModal, setWinnerModal] = useState<{
+    isOpen: boolean;
+    submission: SubmissionWithDeveloper | null;
+  }>({ isOpen: false, submission: null });
 
   const ratingForm = useForm<RatingFormData>();
 
-  const filteredAndSortedSubmissions = useMemo(() => {
-    return submissions
-      .filter((sub) => statusFilter === "all" || sub.status === statusFilter)
-      .sort((a, b) => {
-        const dateA = new Date(a.createdAt).getTime();
-        const dateB = new Date(b.createdAt).getTime();
-        return sortOrder === "asc" ? dateA - dateB : dateB - dateA;
-      });
-  }, [submissions, statusFilter, sortOrder]);
-
   const isChallengeCompleted = useMemo(
-    () => submissions.some((s) => s.status === "winner"),
+    () => submissions.some((s) => s.status === "WINNER"),
     [submissions]
   );
-
   const winnerName =
-    winnerModal.submission &&
-    typeof winnerModal.submission.developerId === "object"
-      ? winnerModal.submission.developerId.profile.firstName
-      : "this developer";
+    winnerModal.submission?.developer.firstName || "this developer";
 
   const handleRateSubmit: SubmitHandler<RatingFormData> = (data) => {
     if (ratingModal.submission) {
       rateMutate(
         {
-          submissionId: ratingModal.submission._id,
+          submissionId: ratingModal.submission.id,
           payload: { rating: data.rating, feedback: data.feedback },
         },
         { onSuccess: () => setRatingModal({ isOpen: false, submission: null }) }
@@ -88,40 +67,28 @@ const ReviewSubmissionsClient = ({ initialChallenge }: Props) => {
 
   const handleSelectWinner = () => {
     if (winnerModal.submission) {
-      selectWinnerMutate(winnerModal.submission._id, {
+      selectWinnerMutate(winnerModal.submission.id, {
         onSuccess: () => setWinnerModal({ isOpen: false, submission: null }),
       });
     }
   };
 
   if (isLoading) return <div className="skeleton h-64 w-full"></div>;
-
   if (isError)
-    return (
-      <div className="alert alert-error alert-soft">
-        Could not load submissions for this challenge.
-      </div>
-    );
+    return <div className="alert alert-error">Could not load submissions.</div>;
 
   return (
     <>
       {isChallengeCompleted && (
         <div className="alert alert-success alert-soft mb-6">
-          <FiAward /> A winner has been selected for this challenge!
+          <FiAward /> A winner has been selected!
         </div>
       )}
-
       <SubmissionsTable
-        submissions={filteredAndSortedSubmissions}
-        statusFilter={statusFilter}
-        onStatusChange={setStatusFilter}
-        sortOrder={sortOrder}
-        onSortChange={setSortOrder}
-        expandedId={expandedId}
-        onExpand={setExpandedId}
+        submissions={submissions}
         onRate={(sub) => {
           ratingForm.reset({
-            rating: sub.ratings?.overall || 0,
+            rating: sub.rating || 0,
             feedback: sub.feedback || "",
           });
           setRatingModal({ isOpen: true, submission: sub });
@@ -143,7 +110,7 @@ const ReviewSubmissionsClient = ({ initialChallenge }: Props) => {
       <ConfirmationModal
         isOpen={winnerModal.isOpen}
         title="Confirm Winner Selection"
-        message={`Are you sure you want to select the submission by ${winnerName} as the winner? This action cannot be undone.`}
+        message={`Are you sure you want to select ${winnerName} as the winner?`}
         variant="primary"
         onConfirm={handleSelectWinner}
         onCancel={() => setWinnerModal({ isOpen: false, submission: null })}

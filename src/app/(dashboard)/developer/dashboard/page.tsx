@@ -1,56 +1,57 @@
 import StatCardGrid, { StatItem } from "@/components/Common/StatCardGrid";
 import DeveloperSubmissionList from "@/components/Developer/DeveloperSubmissionList";
-import { getMySubmissions } from "@/lib/data/submissions";
 import { getMyDeveloperStats, getMyProfile } from "@/lib/data/users";
 import Link from "next/link";
 import { Suspense } from "react";
 import { FiAward, FiClipboard, FiClock, FiDollarSign } from "react-icons/fi";
 
 const DeveloperDashboardPage = async () => {
-  const [statsData, allSubmissions, userProfile] = await Promise.all([
+  const [statsData, userProfile] = await Promise.all([
     getMyDeveloperStats(),
-    getMySubmissions(),
     getMyProfile(),
   ]);
+
+  const allSubmissions = userProfile?.submissions || [];
   const recentSubmissions = allSubmissions.slice(0, 3);
 
-  const developerStats: StatItem[] = statsData
-    ? [
-        {
-          icon: <FiClipboard size={24} />,
-          label: "Total Submissions",
-          value: statsData.totalSubmissions,
-          color: "green",
-          link: "/developer/dashboard/submissions",
-        },
-        {
-          icon: <FiAward size={24} />,
-          label: "Challenges Won",
-          value: statsData.winningSubmissions,
-          color: "blue",
-          link: "/developer/dashboard/submissions",
-        },
-        {
-          icon: <FiClock size={24} />,
-          label: "Pending Reviews",
-          value: statsData.pendingReviews,
-          color: "orange",
-          link: "/developer/dashboard/submissions",
-        },
-        {
-          icon: <FiDollarSign size={24} />,
-          label: "Total Earnings",
-          value: `$${(userProfile?.earnings || 0).toLocaleString()}`,
-          color: "green",
-        },
-      ]
-    : [];
+  const developerStats: StatItem[] =
+    statsData && userProfile
+      ? [
+          {
+            icon: <FiClipboard size={24} />,
+            label: "Total Submissions",
+            value: statsData.totalSubmissions,
+            color: "green",
+            link: "/developer/dashboard/submissions",
+          },
+          {
+            icon: <FiAward size={24} />,
+            label: "Challenges Won",
+            value: statsData.winningSubmissions,
+            color: "blue",
+            link: "/developer/dashboard/submissions",
+          },
+          {
+            icon: <FiClock size={24} />,
+            label: "Pending Reviews",
+            value: statsData.pendingReviews,
+            color: "orange",
+            link: "/developer/dashboard/submissions",
+          },
+          {
+            icon: <FiDollarSign size={24} />,
+            label: "Total Earnings",
+            value: `$${(userProfile.earnings || 0).toLocaleString()}`,
+            color: "green",
+          },
+        ]
+      : [];
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold">
-          Welcome back, {userProfile?.profile.firstName}!
+          Welcome back, {userProfile?.firstName}!
         </h1>
         <p className="text-base-content/70 mt-1">
           Here's a summary of your activity on SkillSync.

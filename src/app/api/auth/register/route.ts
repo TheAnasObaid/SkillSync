@@ -1,38 +1,53 @@
 import config from "@/config/config";
-import dbConnect from "@/lib/dbConnect";
 import { createBrandedEmail, sendEmail } from "@/lib/email";
-import { handleError } from "@/lib/handleError";
+import prisma from "@/lib/prisma";
 import { registerSchema } from "@/lib/validationSchemas";
-import User from "@/models/User";
+import { Gender, Role } from "@prisma/client";
+import bcrypt from "bcrypt";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    await dbConnect();
     const body = await request.json();
+    const { firstName, email, password, role, gender } =
+      registerSchema.parse(body);
 
-    const { name, email, password, role } = registerSchema.parse(body);
+    const existingUser = await prisma.user.findUnique({ where: { email } });
+    if (existingUser) {
+      return NextResponse.json(
+        { message: "An account with that email already exists." },
+        { status: 409 }
+      );
+    }
 
-    const user = await User.create({
-      "profile.firstName": name,
-      email,
-      password,
-      role,
-    });
-
+    const hashedPassword = await bcrypt.hash(password, 10);
     const verificationToken = crypto.randomBytes(32).toString("hex");
-    user.verificationToken = crypto
+    const hashedVerificationToken = crypto
       .createHash("sha256")
       .update(verificationToken)
       .digest("hex");
-    await user.save({ validateBeforeSave: false });
+
+    const user = await prisma.user.create({
+      data: {
+        firstName,
+        email,
+        password: hashedPassword,
+        role: role === "developer" ? Role.DEVELOPER : Role.CLIENT,
+        gender:
+          gender === "male"
+            ? Gender.MALE
+            : gender === "female"
+            ? Gender.FEMALE
+            : Gender.OTHER,
+        verificationToken: hashedVerificationToken,
+      },
+    });
 
     const verificationURL = `${config.clientUrl}/api/auth/verify-email/${verificationToken}`;
-
     const emailHtml = createBrandedEmail({
       title: "Welcome to SkillSync!",
-      name,
+      name: firstName,
       body: "Thank you for registering. Please click the button below to verify your email address and activate your account.",
       buttonLink: verificationURL,
       buttonText: "Verify Your Email",
@@ -52,6 +67,11 @@ export async function POST(request: Request) {
       { status: 201 }
     );
   } catch (error) {
-    return handleError(error);
+    // Basic error handling, can be expanded
+    console.error(error);
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }

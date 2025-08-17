@@ -1,73 +1,73 @@
-import { IChallenge } from "@/types";
 import Link from "next/link";
-import { FiArrowRight, FiClock, FiAward } from "react-icons/fi";
+import { FiArrowRight, FiClock, FiAward, FiUsers } from "react-icons/fi";
 import UserAvatar from "../Profile/UserAvatar";
+import { Prisma, ChallengeDifficulty } from "@prisma/client";
 
-interface ChallengeCardProps {
-  challenge: IChallenge;
-}
+const challengeCardData = Prisma.validator<Prisma.ChallengeDefaultArgs>()({
+  include: {
+    createdBy: {
+      select: { firstName: true, companyName: true, avatarUrl: true },
+    },
+    _count: {
+      select: { submissions: true },
+    },
+  },
+});
 
-const difficultyStyles = {
-  beginner: "badge-success",
-  intermediate: "badge-warning",
-  advanced: "badge-error",
+type ChallengeCardProps = {
+  challenge: Prisma.ChallengeGetPayload<typeof challengeCardData>;
+};
+
+const difficultyStyles: Record<ChallengeDifficulty, string> = {
+  BEGINNER: "badge-success",
+  INTERMEDIATE: "badge-warning",
+  ADVANCED: "badge-error",
 };
 
 const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
   const formattedDeadline = new Date(challenge.deadline).toLocaleDateString(
     undefined,
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }
+    { year: "numeric", month: "long", day: "numeric" }
   );
 
-  const client =
-    typeof challenge.createdBy === "object" ? challenge.createdBy : null;
+  const client = challenge.createdBy;
 
   return (
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:shadow-xl hover:-translate-y-1 group">
       <div className="card-body p-6">
-        {/* --- 3. CARD HEADER: Client Info & Prize --- */}
         <div className="flex justify-between items-center">
           {client ? (
             <div className="flex items-center gap-3">
               <UserAvatar
-                name={client.profile.firstName}
-                avatarUrl={client.profile.avatar}
+                name={client.firstName}
+                avatarUrl={client.avatarUrl}
                 className="w-8 h-8"
               />
               <div>
-                <p className="text-sm font-semibold">
-                  {client.profile.firstName}
-                </p>
+                <p className="text-sm font-semibold">{client.firstName}</p>
                 <p className="text-xs text-base-content/60">
-                  {client.profile.companyName}
+                  {client.companyName}
                 </p>
               </div>
             </div>
           ) : (
-            <div></div> // Empty div to keep the prize on the right
+            <div></div>
           )}
           <div className="flex items-center gap-2 text-primary font-bold text-xl">
             <FiAward />
-            {/* FIX: Use challenge.prize which is now a number */}
             <span>${challenge.prize.toLocaleString()}</span>
           </div>
         </div>
 
         <div className="divider my-3"></div>
 
-        {/* --- 4. CARD BODY: Title and Description --- */}
         <h2 className="card-title text-2xl font-bold group-hover:text-primary transition-colors">
-          <Link href={`/challenges/${challenge._id}`}>{challenge.title}</Link>
+          <Link href={`/challenges/${challenge.id}`}>{challenge.title}</Link>
         </h2>
         <p className="text-base-content/70 mt-1 line-clamp-2">
           {challenge.description}
         </p>
 
-        {/* --- 5. CARD FOOTER: Tags, Deadline, and CTA --- */}
         <div className="mt-4 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             <div
@@ -87,12 +87,18 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
             ))}
           </div>
           <div className="card-actions justify-between items-center">
-            <div className="flex items-center gap-2 text-sm text-base-content/70">
-              <FiClock />
-              <span>{formattedDeadline}</span>
+            <div className="flex items-center gap-4 text-sm text-base-content/70">
+              <div className="flex items-center gap-2">
+                <FiClock />
+                <span>{formattedDeadline}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FiUsers />
+                <span>{challenge._count.submissions} Submissions</span>
+              </div>
             </div>
             <Link
-              href={`/challenges/${challenge._id}`}
+              href={`/challenges/${challenge.id}`}
               className="btn btn-primary btn-sm"
             >
               View Details <FiArrowRight className="ml-1" />

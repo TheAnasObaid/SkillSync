@@ -1,11 +1,11 @@
+import { User } from "@prisma/client";
 import { create } from "zustand";
-import { persist, createJSONStorage } from "zustand/middleware";
-import { IUser } from "@/types";
+import { createJSONStorage, persist } from "zustand/middleware";
 
 interface AuthState {
   token: string | null;
-  user: IUser | null;
-  setAuth: (data: { user: IUser; token: string }) => void;
+  user: User | null;
+  setAuth: (data: { user: User; token: string }) => void;
   logout: () => void;
 }
 

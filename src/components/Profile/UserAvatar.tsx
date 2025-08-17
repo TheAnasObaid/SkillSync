@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 const avatarColors = [
   "bg-secondary/20 text-secondary-content",
   "bg-primary/20 text-primary",
@@ -9,30 +11,29 @@ const avatarColors = [
 ];
 
 interface Props {
-  name?: string;
+  name?: string | null;
   avatarUrl?: string | null;
   className?: string;
 }
 
 const UserAvatar = ({ name, avatarUrl, className = "w-10 h-10" }: Props) => {
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-
   if (avatarUrl) {
     return (
       <div className={`avatar ${className}`}>
         <div className="w-full h-full rounded-full relative overflow-hidden">
-          <img
-            src={`${API_BASE_URL}/${avatarUrl.replace(/\\/g, "/")}`}
+          <Image
+            src={avatarUrl}
             alt={name || "User Avatar"}
+            fill
             className="object-cover"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
         </div>
       </div>
     );
   }
 
-  // Fallback logic for initials (this is already correct)
-  const getInitials = (nameStr?: string): string => {
+  const getInitials = (nameStr?: string | null): string => {
     if (!nameStr) return "?";
     const parts = nameStr.trim().split(" ").filter(Boolean);
     if (parts.length === 0) return "?";
@@ -48,11 +49,11 @@ const UserAvatar = ({ name, avatarUrl, className = "w-10 h-10" }: Props) => {
   const colorClasses = avatarColors[colorIndex];
 
   return (
-    <div className={`placeholder ${className}`}>
+    <div className={`avatar placeholder ${className}`}>
       <div
         className={`w-full h-full rounded-full bg-base-content/10 text-base-content flex items-center justify-center ${colorClasses}`}
       >
-        {initials}
+        <span className="font-bold">{initials}</span>
       </div>
     </div>
   );

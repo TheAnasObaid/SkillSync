@@ -1,28 +1,40 @@
-import { ISubmission } from "@/types";
+"use client";
+
 import { FiInbox } from "react-icons/fi";
 import SubmissionCard from "./SubmissionCard";
+import { Prisma } from "@prisma/client";
+
+//    Define the exact data shape for a submission that this component needs.
+//    This includes the nested 'developer' object with the fields we selected.
+const submissionWithDeveloper =
+  Prisma.validator<Prisma.SubmissionDefaultArgs>()({
+    include: {
+      developer: {
+        select: {
+          id: true,
+          firstName: true,
+          avatarUrl: true,
+        },
+      },
+    },
+  });
+
+type SubmissionWithDeveloper = Prisma.SubmissionGetPayload<
+  typeof submissionWithDeveloper
+>;
 
 interface Props {
-  submissions: (ISubmission & { isNew?: boolean })[];
-  isLoading: boolean;
+  submissions: SubmissionWithDeveloper[];
 }
 
-const SubmissonList = ({ submissions, isLoading }: Props) => {
-  if (isLoading) {
-    return (
-      <div className="flex justify-center p-10">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    );
-  }
-
+const PublicSubmissionList = ({ submissions }: Props) => {
   if (submissions.length === 0) {
     return (
       <div className="text-center p-12 bg-base-200/50 border border-base-300 rounded-lg">
         <FiInbox className="mx-auto text-5xl text-base-content/40 mb-4" />
-        <h3 className="text-2xl font-bold">No Submissions Yet</h3>
+        <h3 className="text-2xl font-bold">No Public Submissions</h3>
         <p className="text-base-content/70 mt-2">
-          Be the first to submit a solution for this challenge!
+          Submissions for this challenge are not publicly visible yet.
         </p>
       </div>
     );
@@ -31,10 +43,10 @@ const SubmissonList = ({ submissions, isLoading }: Props) => {
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {submissions.map((sub) => (
-        <SubmissionCard key={sub._id} submission={sub} />
+        <SubmissionCard key={sub.id} submission={sub} />
       ))}
     </div>
   );
 };
 
-export default SubmissonList;
+export default PublicSubmissionList;

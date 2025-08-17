@@ -1,28 +1,46 @@
-import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import Submission from "@/models/Submission";
-import User from "@/models/User";
-import Challenge from "@/models/Challenge";
+import prisma from "@/lib/prisma";
+import { Role } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     const session = await getSession();
-    if (!session?.user || session.user.role !== "admin") {
-      throw new Error("Forbidden: Admin access required.");
+    if (!session?.user || session.user.role !== Role.ADMIN) {
+      return NextResponse.json(
+        { message: "Forbidden: Admin access required." },
+        { status: 403 }
+      );
     }
 
-    await dbConnect();
-
-    const submissions = await Submission.find({})
-      .populate("developerId", "profile.firstName email profile.avatar")
-      .populate("challengeId", "title")
-      .sort({ createdAt: -1 })
-      .lean();
+    const submissions = await prisma.submission.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        developer: {
+          select: {
+            id: true,
+            firstName: true,
+            email: true,
+            avatarUrl: true,
+          },
+        },
+        challenge: {
+          select: {
+            id: true,
+            title: true,
+          },
+        },
+      },
+    });
 
     return NextResponse.json(submissions);
   } catch (error) {
-    return handleError(error);
+    console.error("ADMIN GET /api/admin/submissions Error:", error);
+    return NextResponse.json(
+      { message: "An internal server error occurred" },
+      { status: 500 }
+    );
   }
 }

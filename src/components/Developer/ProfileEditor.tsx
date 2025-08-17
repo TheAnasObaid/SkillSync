@@ -1,13 +1,21 @@
 "use client";
 
+import { Select, TextInput, Textarea } from "@/components/Forms/FormFields";
+import { User } from "@prisma/client";
 import { useEffect } from "react";
-import { FormProvider, useForm, SubmitHandler } from "react-hook-form";
-import { TextInput, Textarea, Select } from "@/components/Forms/FormFields";
-import { IUser, DeveloperProfileFormData } from "@/types";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
 import FormCard from "../Common/FormCard";
 
+export interface DeveloperProfileFormData {
+  firstName: string;
+  lastName: string;
+  bio: string;
+  skills: string;
+  experience: string;
+}
+
 interface Props {
-  currentUser: IUser;
+  currentUser: User;
   onSubmit: SubmitHandler<DeveloperProfileFormData>;
   isSubmitting: boolean;
 }
@@ -19,14 +27,11 @@ const ProfileEditor = ({ currentUser, onSubmit, isSubmitting }: Props) => {
   useEffect(() => {
     if (currentUser) {
       reset({
-        name: currentUser.profile.firstName,
-        email: currentUser.email,
-        profile: {
-          lastName: currentUser.profile.lastName || "",
-          bio: currentUser.profile.bio || "",
-          skills: (currentUser.profile.skills || []).join(", "),
-          experience: currentUser.profile.experience || "",
-        },
+        firstName: currentUser.firstName || "",
+        lastName: currentUser.lastName || "",
+        bio: currentUser.bio || "",
+        skills: (currentUser.skills || []).join(", "),
+        experience: currentUser.experience || "",
       });
     }
   }, [currentUser, reset]);
@@ -35,17 +40,16 @@ const ProfileEditor = ({ currentUser, onSubmit, isSubmitting }: Props) => {
     <FormProvider {...formMethods}>
       <FormCard onSubmit={handleSubmit(onSubmit)} isSubmitting={isSubmitting}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <TextInput name="name" label="First Name" />
-          <TextInput name="profile.lastName" label="Last Name" />
+          <TextInput name="firstName" label="First Name" />
+          <TextInput name="lastName" label="Last Name" />
         </div>
-        <TextInput name="email" label="Email Address" />
-        <Textarea name="profile.bio" label="Bio" rows={4} />
+        <Textarea name="bio" label="Bio" rows={4} />
         <TextInput
-          name="profile.skills"
+          name="skills"
           label="Skills"
           helperText="Enter skills separated by commas."
         />
-        <Select name="profile.experience" label="Experience Level">
+        <Select name="experience" label="Experience Level">
           <option value="">Select Level</option>
           <option value="Beginner">Beginner</option>
           <option value="Intermediate">Intermediate</option>

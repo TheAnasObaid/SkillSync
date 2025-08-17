@@ -9,7 +9,7 @@ export default function Providers({ children }: { children: ReactNode }) {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* <ThemeController /> */}
+      <ThemeController />
       {children}
       <ReactQueryDevtools initialIsOpen={false} />
     </QueryClientProvider>

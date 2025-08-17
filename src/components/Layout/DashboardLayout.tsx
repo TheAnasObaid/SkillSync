@@ -1,6 +1,6 @@
 "use client";
 
-import { DashboardLink } from "@/types";
+import { DashboardLink } from "@/config/dashboard";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FiHome } from "react-icons/fi";

@@ -1,101 +1,48 @@
-import dbConnect from "@/lib/dbConnect";
-import "@/models/Challenge";
-import Challenge from "@/models/Challenge";
-import Submission from "@/models/Submission";
-import "@/models/User";
-import { ISubmission } from "@/types";
+import prisma from "@/lib/prisma";
+import { SubmissionStatus } from "@prisma/client";
 import { unstable_noStore as noStore } from "next/cache";
 import "server-only";
-import { getSession } from "../auth";
 
-export const getMySubmissions = async (): Promise<ISubmission[]> => {
+export const getPublicSubmissionsForChallenge = async (challengeId: string) => {
   noStore();
   try {
-    const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
-
-    await dbConnect();
-    const submissions = await Submission.find({ developerId: session.user._id })
-      .populate("challengeId", "title status prize")
-      .sort({ createdAt: -1 })
-      .lean();
-    return JSON.parse(JSON.stringify(submissions));
-  } catch (error) {
-    console.error("Database Error: Failed to fetch user's submissions.", error);
-    throw new Error("Could not fetch your submissions.");
-  }
-};
-
-export const getSubmissionsForReview = async (
-  challengeId: string
-): Promise<ISubmission[]> => {
-  noStore();
-  try {
-    const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
-
-    await dbConnect();
-    const challenge = await Challenge.findById(challengeId).select("createdBy");
-    if (!challenge || challenge.createdBy.toString() !== session.user._id) {
-      throw new Error(
-        "Forbidden: You are not authorized to view these submissions."
-      );
-    }
-
-    const submissions = await Submission.find({ challengeId })
-      .populate("developerId", "profile.firstName email profile.avatar")
-      .lean();
-    return JSON.parse(JSON.stringify(submissions));
-  } catch (error) {
-    console.error(
-      `Database Error: Failed to fetch submissions for review for challenge ${challengeId}.`,
-      error
-    );
-    throw new Error("Could not fetch submissions for review.");
-  }
-};
-
-export const getSubmissionDetails = async (
-  submissionId: string
-): Promise<ISubmission | null> => {
-  noStore();
-  try {
-    await dbConnect();
-    const submission = await Submission.findById(submissionId)
-      .populate({
-        path: "developerId",
-        model: "User",
-        select: "profile email",
-      })
-      .populate({
-        path: "challengeId",
-        model: "Challenge",
-        select: "title prize deadline",
-      });
-
-    return submission ? JSON.parse(JSON.stringify(submission)) : null;
-  } catch (error) {
-    console.error(
-      `Database Error: Failed to fetch submission details for ${submissionId}.`,
-      error
-    );
-    throw new Error("Could not fetch submission details.");
-  }
-};
-
-export const getPublicSubmissionsForChallenge = async (
-  challengeId: string
-): Promise<ISubmission[]> => {
-  noStore();
-  try {
-    await dbConnect();
-    const submissions = await Submission.find({ challengeId })
-      .populate("developerId", "profile.firstName profile.avatar")
-      .sort({ createdAt: -1 })
-      .lean();
-    return JSON.parse(JSON.stringify(submissions));
+    const submissions = await prisma.submission.findMany({
+      where: {
+        challengeId: challengeId,
+        // For public view, you might only want to show winners, or all non-pending
+        status: { in: [SubmissionStatus.WINNER, SubmissionStatus.REJECTED] },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        developer: {
+          select: {
+            id: true,
+            firstName: true,
+            avatarUrl: true,
+          },
+        },
+      },
+    });
+    return submissions;
   } catch (error) {
     console.error("Database Error: Failed to fetch public submissions.", error);
     throw new Error("Could not fetch submissions.");
+  }
+};
+
+export const getSubmissionDetails = async (submissionId: string) => {
+  noStore();
+  try {
+    const submission = await prisma.submission.findUnique({
+      where: { id: submissionId },
+      include: {
+        developer: true,
+        challenge: true,
+      },
+    });
+    return submission;
+  } catch (error) {
+    console.error("Database Error: Failed to fetch submission details.", error);
+    throw new Error("Could not fetch submission details.");
   }
 };

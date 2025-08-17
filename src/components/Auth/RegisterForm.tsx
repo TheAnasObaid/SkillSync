@@ -39,6 +39,11 @@ const RegisterForm = () => {
             type="password"
             placeholder="6+ characters"
           />
+          <Select name="gender" label="Gender">
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="other">Other</option>
+          </Select>
           <Select name="role" label="I am a...">
             <option value="developer">Developer</option>
             <option value="client">Client</option>

@@ -1,6 +1,5 @@
 "use client";
 
-import { ISubmission } from "@/types";
 import Link from "next/link";
 import {
   FiAward,
@@ -9,31 +8,45 @@ import {
   FiExternalLink,
   FiTrash2,
 } from "react-icons/fi";
+import { Prisma, SubmissionStatus } from "@prisma/client";
+
+const submissionWithChallenge =
+  Prisma.validator<Prisma.SubmissionDefaultArgs>()({
+    include: {
+      challenge: { select: { id: true, title: true, prize: true } },
+    },
+  });
+
+type SubmissionWithChallenge = Prisma.SubmissionGetPayload<
+  typeof submissionWithChallenge
+>;
 
 interface Props {
-  submission: ISubmission;
-  onEdit: (submission: ISubmission) => void;
-  onDelete: (submission: ISubmission) => void;
+  submission: SubmissionWithChallenge;
+  onEdit: (submission: SubmissionWithChallenge) => void;
+  onDelete: (submission: SubmissionWithChallenge) => void;
 }
 
-const statusStyles: { [key: string]: string } = {
-  pending: "badge-info",
-  reviewed: "badge-warning",
-  winner: "badge-success",
-  rejected: "badge-error",
+const statusStyles: Record<SubmissionStatus, string> = {
+  PENDING: "badge-info",
+  REVIEWED: "badge-warning",
+  WINNER: "badge-success",
+  REJECTED: "badge-error",
 };
 
 const SubmissionCard = ({ submission, onEdit, onDelete }: Props) => {
-  const challenge =
-    typeof submission.challengeId === "object" ? submission.challengeId : null;
+  const { challenge } = submission;
 
-  if (!challenge) return null;
+  if (!challenge) {
+    return null;
+  }
 
   const canTakeAction =
-    submission.status === "pending" || submission.status === "reviewed";
+    submission.status === SubmissionStatus.PENDING ||
+    submission.status === SubmissionStatus.REVIEWED;
 
   return (
-    <div className="card bg-base-200/50 border border-base-300 shadow-md">
+    <div className="card bg-base-200/ ৫০ border border-base-300 shadow-md">
       <div className="card-body p-6">
         <div className="flex justify-between items-start gap-4">
           <div className="min-w-0">
@@ -42,11 +55,11 @@ const SubmissionCard = ({ submission, onEdit, onDelete }: Props) => {
             </h3>
           </div>
           <div
-            className={`badge badge-outline flex-shrink-0 ${
+            className={`badge badge-outline flex-shrink-0 capitalize ${
               statusStyles[submission.status]
             }`}
           >
-            {submission.status}
+            {submission.status.toLowerCase()}
           </div>
         </div>
         <div className="flex justify-between items-end mt-4">
@@ -64,7 +77,7 @@ const SubmissionCard = ({ submission, onEdit, onDelete }: Props) => {
           </div>
           <div className="flex items-center gap-2">
             <Link
-              href={`/challenges/${challenge._id}`}
+              href={`/challenges/${challenge.id}`}
               className="btn btn-ghost btn-sm"
             >
               <FiExternalLink /> View Challenge

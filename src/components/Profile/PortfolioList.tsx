@@ -2,30 +2,30 @@
 
 import { useDeletePortfolioItemMutation } from "@/hooks/mutations/useProfileMutations";
 import { useAuthStore } from "@/store/authStore";
-import { IPortfolioItem } from "@/types";
 import { useState } from "react";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import PortfolioCard from "./PortfolioCard";
+import { PortfolioItem } from "@prisma/client";
 
 interface Props {
-  initialPortfolio: IPortfolioItem[];
+  initialPortfolio: PortfolioItem[];
   profileOwnerId: string;
 }
 
 const PortfolioList = ({ initialPortfolio, profileOwnerId }: Props) => {
   const { user: loggedInUser } = useAuthStore();
-  const isOwner = loggedInUser?._id === profileOwnerId;
+  const isOwner = loggedInUser?.id === profileOwnerId;
 
   const [deleteModal, setDeleteModal] = useState({
     isOpen: false,
-    item: null as IPortfolioItem | null,
+    item: null as PortfolioItem | null,
   });
   const { mutate: deleteItem, isPending: isDeleting } =
     useDeletePortfolioItemMutation();
 
   const handleDeleteConfirm = () => {
     if (deleteModal.item) {
-      deleteItem(deleteModal.item._id!, {
+      deleteItem(deleteModal.item.id!, {
         onSuccess: () => setDeleteModal({ isOpen: false, item: null }),
       });
     }
@@ -39,7 +39,7 @@ const PortfolioList = ({ initialPortfolio, profileOwnerId }: Props) => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {initialPortfolio.map((item) => (
               <PortfolioCard
-                key={item._id}
+                key={item.id}
                 item={item}
                 isOwner={isOwner}
                 onDelete={() => setDeleteModal({ isOpen: true, item })}

@@ -7,10 +7,10 @@ import {
   RegisterFormData,
   ResetPasswordFormData,
 } from "@/lib/validationSchemas";
-import { IUser } from "@/types";
+import { User } from "@prisma/client";
 
 interface LoginResponse {
-  user: IUser;
+  user: User;
   token: string;
 }
 

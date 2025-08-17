@@ -8,15 +8,19 @@ import {
   withdrawSubmission,
 } from "@/services/api/submissions";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
+import { Submission } from "@prisma/client";
 
 // --- FOR DEVELOPERS ---
 
+interface SubmitSolutionVars {
+  challengeId: string;
+  formData: FormData;
+}
 export const useSubmitSolutionMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: submitSolution,
+    mutationFn: (vars: SubmitSolutionVars) => submitSolution(vars),
     onSuccess: (data) => {
       toast.success("Solution submitted successfully!");
       queryClient.invalidateQueries({
@@ -30,15 +34,21 @@ export const useSubmitSolutionMutation = () => {
   });
 };
 
+interface UpdateSubmissionVars {
+  submissionId: string;
+  formData: {
+    githubRepo: string;
+    liveDemo?: string;
+    description: string;
+  };
+}
 export const useUpdateSubmissionMutation = () => {
   const queryClient = useQueryClient();
-  const router = useRouter();
   return useMutation({
-    mutationFn: updateSubmission,
+    mutationFn: (vars: UpdateSubmissionVars) => updateSubmission(vars),
     onSuccess: () => {
       toast.success("Submission updated!");
       queryClient.invalidateQueries({ queryKey: ["submissions", "my"] });
-      router.refresh();
     },
     onError: (error: any) => {
       toast.error(error.response?.data?.message || "Update failed.");
@@ -48,13 +58,11 @@ export const useUpdateSubmissionMutation = () => {
 
 export const useWithdrawSubmissionMutation = () => {
   const queryClient = useQueryClient();
-  const router = useRouter();
   return useMutation({
-    mutationFn: withdrawSubmission,
+    mutationFn: (submissionId: string) => withdrawSubmission(submissionId),
     onSuccess: () => {
       toast.success("Submission withdrawn.");
       queryClient.invalidateQueries({ queryKey: ["submissions", "my"] });
-      router.refresh();
     },
     onError: (error: any) => {
       toast.error(
@@ -66,18 +74,18 @@ export const useWithdrawSubmissionMutation = () => {
 
 // --- FOR CLIENTS ---
 
+interface RateSubmissionVars {
+  submissionId: string;
+  payload: { rating: number; feedback: string };
+}
 export const useRateSubmissionMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: rateSubmission,
-    onSuccess: (data) => {
+    mutationFn: (vars: RateSubmissionVars) => rateSubmission(vars),
+    onSuccess: (data: Submission) => {
       toast.success("Review saved!");
-      const challengeId =
-        typeof data.challengeId === "string"
-          ? data.challengeId
-          : (data.challengeId as any)._id;
       queryClient.invalidateQueries({
-        queryKey: ["submissions", "review", challengeId],
+        queryKey: ["submissions", "review", data.challengeId],
       });
     },
     onError: (error: any) => {
@@ -89,15 +97,11 @@ export const useRateSubmissionMutation = () => {
 export const useSelectWinnerMutation = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: selectWinner,
-    onSuccess: (data) => {
+    mutationFn: (submissionId: string) => selectWinner(submissionId),
+    onSuccess: (data: Submission) => {
       toast.success("Winner selected successfully!");
-      const challengeId =
-        typeof data.challengeId === "string"
-          ? data.challengeId
-          : (data.challengeId as any)._id;
       queryClient.invalidateQueries({
-        queryKey: ["submissions", "review", challengeId],
+        queryKey: ["submissions", "review", data.challengeId],
       });
     },
     onError: (error: any) => {

@@ -1,73 +1,74 @@
-import dbConnect from "@/lib/dbConnect";
-import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import Challenge from "@/models/Challenge";
-import Submission from "@/models/Submission";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 
 interface Params {
   params: Promise<{ submissionId: string }>;
 }
 
-// --- UPDATE A SUBMISSION (by owner) ---
+// UPDATE a submission (by the developer who owns it)
 export async function PUT(request: Request, { params }: Params) {
+  const { submissionId } = await params;
+
   try {
     const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: "Authentication required." },
+        { status: 401 }
+      );
+    }
 
     const body = await request.json();
 
-    await dbConnect();
-
-    const { submissionId } = await params;
-    const updatedSubmission = await Submission.findOneAndUpdate(
-      { _id: submissionId, developerId: session.user._id }, // Security check
-      {
+    const updatedSubmission = await prisma.submission.update({
+      where: {
+        id: submissionId,
+        developerId: session.user.id, // Security check
+      },
+      data: {
         githubRepo: body.githubRepo,
         description: body.description,
         liveDemo: body.liveDemo,
       },
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedSubmission) {
-      throw new Error(
-        "Forbidden: Submission not found or you are not the owner."
-      );
-    }
+    });
 
     return NextResponse.json(updatedSubmission);
   } catch (error) {
-    return handleError(error);
+    console.error(`PUT /api/submissions/${submissionId} Error:`, error);
+    return NextResponse.json(
+      { message: "Failed to update submission." },
+      { status: 500 }
+    );
   }
 }
 
-// --- DELETE A SUBMISSION (by owner) ---
+// DELETE/WITHDRAW a submission (by the developer who owns it)
 export async function DELETE(request: Request, { params }: Params) {
+  const { submissionId } = await params;
+
   try {
     const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
-
-    await dbConnect();
-
-    const { submissionId } = await params;
-    const deletedSubmission = await Submission.findOneAndDelete({
-      _id: submissionId,
-      developerId: session.user._id, // Security check
-    });
-
-    if (!deletedSubmission) {
-      throw new Error(
-        "Forbidden: Submission not found or you are not the owner."
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: "Authentication required." },
+        { status: 401 }
       );
     }
 
-    await Challenge.findByIdAndUpdate(deletedSubmission.challengeId, {
-      $pull: { submissions: deletedSubmission._id },
+    await prisma.submission.delete({
+      where: {
+        id: submissionId,
+        developerId: session.user.id, // Security check
+      },
     });
 
     return NextResponse.json({ message: "Submission withdrawn successfully." });
   } catch (error) {
-    return handleError(error);
+    console.error(`DELETE /api/submissions/${submissionId} Error:`, error);
+    return NextResponse.json(
+      { message: "Failed to withdraw submission." },
+      { status: 500 }
+    );
   }
 }

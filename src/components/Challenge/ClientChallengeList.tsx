@@ -4,8 +4,9 @@ import {
   useDeleteChallengeMutation,
   useFundChallengeMutation,
 } from "@/hooks/mutations/useChallengeMutations";
-import { useMyChallengesQuery } from "@/hooks/queries/useMyChallengesQuery";
-import { IChallenge } from "@/types";
+import { getMyChallengesAsClient } from "@/services/api/challenges";
+import { Challenge, ChallengeStatus } from "@prisma/client";
+import { useQuery } from "@tanstack/react-query";
 import Link from "next/link";
 import { useState } from "react";
 import { FiCheckCircle, FiDollarSign, FiEdit, FiTrash2 } from "react-icons/fi";
@@ -13,22 +14,28 @@ import ConfirmationModal from "../Common/ConfirmationModal";
 import EmptyState from "../Common/EmptyState";
 
 const ClientChallengeList = () => {
-  const { data: challenges, isLoading, isError } = useMyChallengesQuery();
+  const {
+    data: challenges,
+    isLoading,
+    isError,
+  } = useQuery({
+    queryKey: ["challenges", "my-client"],
+    queryFn: getMyChallengesAsClient,
+  });
 
   const { mutate: deleteMutate, isPending: isDeleting } =
     useDeleteChallengeMutation();
-
   const { mutate: fundMutate, isPending: isFunding } =
     useFundChallengeMutation();
 
-  const [deleteModal, setDeleteModal] = useState({
-    isOpen: false,
-    challenge: null as IChallenge | null,
-  });
-  const [fundModal, setFundModal] = useState({
-    isOpen: false,
-    challenge: null as IChallenge | null,
-  });
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    challenge: Challenge | null;
+  }>({ isOpen: false, challenge: null });
+  const [fundModal, setFundModal] = useState<{
+    isOpen: boolean;
+    challenge: Challenge | null;
+  }>({ isOpen: false, challenge: null });
 
   if (isLoading) {
     return (
@@ -61,7 +68,7 @@ const ClientChallengeList = () => {
 
   const handleDeleteConfirm = () => {
     if (deleteModal.challenge) {
-      deleteMutate(deleteModal.challenge._id, {
+      deleteMutate(deleteModal.challenge.id, {
         onSuccess: () => setDeleteModal({ isOpen: false, challenge: null }),
       });
     }
@@ -69,18 +76,18 @@ const ClientChallengeList = () => {
 
   const handleFundConfirm = () => {
     if (fundModal.challenge) {
-      fundMutate(fundModal.challenge._id, {
+      fundMutate(fundModal.challenge.id, {
         onSuccess: () => setFundModal({ isOpen: false, challenge: null }),
       });
     }
   };
 
-  const statusStyles = {
-    draft: "badge-ghost",
-    published: "badge-info",
-    active: "badge-info",
-    judging: "badge-warning",
-    completed: "badge-success",
+  const statusStyles: Record<ChallengeStatus, string> = {
+    DRAFT: "badge-ghost",
+    PUBLISHED: "badge-info",
+    ACTIVE: "badge-info",
+    JUDGING: "badge-warning",
+    COMPLETED: "badge-success",
   };
 
   return (
@@ -88,7 +95,7 @@ const ClientChallengeList = () => {
       <div className="space-y-4">
         {challenges.map((challenge) => (
           <div
-            key={challenge._id}
+            key={challenge.id}
             className="card bg-base-200/50 border border-base-300 shadow-md"
           >
             <div className="card-body p-4 flex-col sm:flex-row justify-between items-start sm:items-center">
@@ -102,7 +109,7 @@ const ClientChallengeList = () => {
                     {challenge.status}
                   </span>
                   <Link
-                    href={`/client/dashboard/challenges/review/${challenge._id}`}
+                    href={`/client/dashboard/challenges/review/${challenge.id}`}
                     className="font-bold text-lg link link-hover"
                   >
                     {challenge.title}
@@ -126,7 +133,7 @@ const ClientChallengeList = () => {
                   </button>
                 )}
                 <Link
-                  href={`/client/dashboard/challenges/edit/${challenge._id}`}
+                  href={`/client/dashboard/challenges/edit/${challenge.id}`}
                   className="btn btn-ghost btn-sm"
                 >
                   <FiEdit /> Edit
@@ -142,14 +149,13 @@ const ClientChallengeList = () => {
           </div>
         ))}
       </div>
-
       <ConfirmationModal
         isOpen={fundModal.isOpen}
         title="Fund Challenge Prize"
-        message={`This will initiate the secure payment process for the $${fundModal.challenge?.prize.toLocaleString()} prize. Are you sure you want to proceed?`}
+        message={`This will initiate the secure payment process for the $${fundModal.challenge?.prize.toLocaleString()} prize. Are you sure?`}
         onConfirm={handleFundConfirm}
         onCancel={() => setFundModal({ isOpen: false, challenge: null })}
-        confirmText="Yes, Proceed to Payment"
+        confirmText="Yes, Proceed"
         variant="primary"
         isActionInProgress={isFunding}
         icon={<FiDollarSign size={48} />}

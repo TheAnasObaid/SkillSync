@@ -13,17 +13,15 @@ const ThemeController = () => {
   useEffect(() => {
     let themeToSet = THEME_DEFAULT;
 
-    if (user?.gender === "female") {
+    if (user?.gender === "FEMALE") {
       themeToSet = THEME_FEMALE;
-    } else if (user?.gender === "male") {
+    } else if (user?.gender === "MALE") {
       themeToSet = THEME_MALE;
     }
 
-    // This is the safe way to change the theme on the client
     document.documentElement.setAttribute("data-theme", themeToSet);
-  }, [user]); // This effect re-runs whenever the user object changes
+  }, [user]);
 
-  // This component renders nothing itself
   return null;
 };
 

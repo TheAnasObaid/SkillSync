@@ -1,19 +1,52 @@
+// ===== File: src/components/Challenge/ChallengeDetailsClient.tsx =====
 "use client";
 
-import { IChallenge, ISubmission } from "@/types";
 import { useState } from "react";
 import { FiClock, FiUsers } from "react-icons/fi";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import SubmissionModal from "../Common/SubmissionModal";
 import UserAvatar from "../Profile/UserAvatar";
-import PublicSubmissionList from "../Submission/PublicSubmissionList";
 import ChallengeSidebar from "./ChallengeSidebar";
-import { usePublicSubmissionsQuery } from "@/hooks/queries/useSubmissionQueries";
+import { Prisma, ChallengeDifficulty } from "@prisma/client";
+import PublicSubmissionList from "../Submission/PublicSubmissionList";
+
+const challengeWithCreator = Prisma.validator<Prisma.ChallengeDefaultArgs>()({
+  include: {
+    createdBy: {
+      select: {
+        id: true,
+        firstName: true,
+        companyName: true,
+        avatarUrl: true,
+      },
+    },
+  },
+});
+// --------------------
+type ChallengeWithCreator = Prisma.ChallengeGetPayload<
+  typeof challengeWithCreator
+>;
+
+const submissionWithDeveloper =
+  Prisma.validator<Prisma.SubmissionDefaultArgs>()({
+    include: {
+      developer: {
+        select: {
+          id: true,
+          firstName: true,
+          avatarUrl: true,
+        },
+      },
+    },
+  });
+type SubmissionWithDeveloper = Prisma.SubmissionGetPayload<
+  typeof submissionWithDeveloper
+>;
 
 interface Props {
-  initialChallenge: IChallenge;
-  initialSubmissions: ISubmission[];
+  initialChallenge: ChallengeWithCreator;
+  initialSubmissions: SubmissionWithDeveloper[];
 }
 
 const ChallengeDetailsClient = ({
@@ -25,46 +58,37 @@ const ChallengeDetailsClient = ({
     "description"
   );
 
-  const { data: submissions, isLoading } = usePublicSubmissionsQuery(
-    initialChallenge._id,
-    initialSubmissions
-  );
-
   const challenge = initialChallenge;
+  const submissions = initialSubmissions;
 
   const formattedDeadline = new Date(challenge.deadline).toLocaleDateString(
     undefined,
-    {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    }
+    { year: "numeric", month: "long", day: "numeric" }
   );
-  const submissionCount = submissions?.length ?? 0;
-  const client =
-    typeof challenge.createdBy === "object" ? challenge.createdBy : null;
+  const submissionCount = submissions.length;
+  const client = challenge.createdBy;
 
-  const difficultyStyles = {
-    beginner: "badge-success",
-    intermediate: "badge-warning",
-    advanced: "badge-error",
+  const difficultyStyles: Record<ChallengeDifficulty, string> = {
+    BEGINNER: "badge-success",
+    INTERMEDIATE: "badge-warning",
+    ADVANCED: "badge-error",
   };
 
   return (
     <>
       <div className="card bg-base-200/50 border border-base-300">
         <div className="max-w-6xl w-full mx-auto px-4 py-8">
-          {client?.profile && (
+          {client && (
             <div className="flex items-center gap-3 mb-4">
               <UserAvatar
-                name={client.profile.firstName}
-                avatarUrl={client.profile.avatar}
+                name={client.firstName}
+                avatarUrl={client.avatarUrl}
                 className="w-10 h-10"
               />
               <div>
                 <p className="text-sm text-base-content/70">Posted by</p>
                 <p className="font-semibold">
-                  {client.profile.companyName || client.profile.firstName}
+                  {client.companyName || client.firstName}
                 </p>
               </div>
             </div>
@@ -128,10 +152,7 @@ const ChallengeDetailsClient = ({
               </div>
             )}
             {activeTab === "submissions" && (
-              <PublicSubmissionList
-                submissions={submissions || []}
-                isLoading={isLoading}
-              />
+              <PublicSubmissionList submissions={submissions} />
             )}
           </div>
           <ChallengeSidebar
@@ -141,11 +162,10 @@ const ChallengeDetailsClient = ({
         </div>
       </div>
 
-      {/* 2. SIMPLIFIED MODAL: No more `onSubmissionSuccess` prop drilling! */}
       <SubmissionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        challengeId={challenge._id}
+        challengeId={challenge.id}
       />
     </>
   );

@@ -1,3 +1,4 @@
+import { User } from "@prisma/client";
 import {
   FiAward,
   FiBriefcase,
@@ -7,36 +8,32 @@ import {
   FiStar,
 } from "react-icons/fi";
 import UserAvatar from "./UserAvatar";
-import { IUser } from "@/types";
 
 interface Props {
-  user: IUser | null;
+  user: User | null;
   onAvatarClick?: () => void;
 }
 
 const ProfileView = ({ user, onAvatarClick }: Props) => {
   if (!user) {
-    return null;
+    return <div className="skeleton h-48 w-full"></div>;
   }
 
   return (
     <div className="space-y-6">
-      <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
-        <div className="card-body p-8 flex flex-col md:flex-row items-center gap-6">
+      <div className="card bg-base-200/50 border border-base-300 shadow-md">
+        <div className="card-body p-8 flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
           <div
             className={
-              onAvatarClick
-                ? "relative group cursor-pointer"
-                : "relative group cursor-default"
+              onAvatarClick ? "relative group cursor-pointer" : "relative group"
             }
             onClick={onAvatarClick}
           >
             <UserAvatar
-              name={user.profile?.firstName}
-              avatarUrl={user.profile?.avatar}
+              name={user.firstName}
+              avatarUrl={user.avatarUrl}
               className="w-24 h-24 text-4xl"
             />
-
             {onAvatarClick && (
               <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <FiCamera className="text-white text-2xl" />
@@ -44,23 +41,22 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
             )}
           </div>
 
-          <div className="text-center md:text-left">
+          <div>
             <h2 className="text-3xl font-bold">
-              {user.profile?.firstName} {user.profile?.lastName}
+              {user.firstName} {user.lastName}
             </h2>
 
-            {user.role === "developer" && user.profile?.experience && (
+            {user.role === "DEVELOPER" && user.experience && (
               <p className="text-info flex items-center justify-center md:justify-start gap-2 mt-1">
-                <FiStar /> {user.profile.experience}
+                <FiStar /> {user.experience}
               </p>
             )}
-
-            {user.role === "client" && user.profile?.companyName && (
+            {user.role === "CLIENT" && user.companyName && (
               <p className="text-primary flex items-center justify-center md:justify-start gap-2 mt-1">
-                <FiBriefcase /> {user.profile.companyName}
+                <FiBriefcase /> {user.companyName}
               </p>
             )}
-            {user.role === "admin" && (
+            {user.role === "ADMIN" && (
               <p className="text-error flex items-center justify-center md:justify-start gap-2 mt-1">
                 <FiShield /> Platform Administrator
               </p>
@@ -72,25 +68,25 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
         </div>
       </div>
 
-      {user.profile?.bio && (
-        <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
+      {user.bio && (
+        <div className="card bg-base-200/50 border border-base-300">
           <div className="card-body p-8">
             <h3 className="font-bold text-xl mb-4">About Me</h3>
             <p className="text-base-content/80 whitespace-pre-line">
-              {user.profile.bio}
+              {user.bio}
             </p>
           </div>
         </div>
       )}
 
-      {user.profile?.skills && user.profile.skills.length > 0 && (
-        <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
+      {user.skills && user.skills.length > 0 && (
+        <div className="card bg-base-200/50 border border-base-300">
           <div className="card-body p-8">
             <h3 className="font-bold text-xl mb-4 flex items-center gap-2">
               <FiAward /> Skills
             </h3>
             <div className="flex flex-wrap gap-2">
-              {user.profile.skills.map((skill: string) => (
+              {user.skills.map((skill: string) => (
                 <div key={skill} className="badge badge-primary badge-soft">
                   {skill}
                 </div>

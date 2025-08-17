@@ -1,7 +1,29 @@
 "use client";
 
 import apiClient from "@/lib/apiClient";
-import { IChallenge, ISubmission } from "@/types";
+import { Prisma, Submission } from "@prisma/client";
+
+// Re-exporting from challenges service to avoid circular dependencies
+export { getPublicChallengeById } from "./challenges";
+const submissionWithDeveloper =
+  Prisma.validator<Prisma.SubmissionDefaultArgs>()({
+    include: { developer: true },
+  });
+export type SubmissionWithDeveloper = Prisma.SubmissionGetPayload<
+  typeof submissionWithDeveloper
+>;
+
+const mySubmissionWithChallenge =
+  Prisma.validator<Prisma.SubmissionDefaultArgs>()({
+    include: {
+      challenge: {
+        select: { id: true, title: true, prize: true, status: true },
+      },
+    },
+  });
+export type MySubmissionWithChallenge = Prisma.SubmissionGetPayload<
+  typeof mySubmissionWithChallenge
+>;
 
 export const submitSolution = async ({
   challengeId,
@@ -9,8 +31,8 @@ export const submitSolution = async ({
 }: {
   challengeId: string;
   formData: FormData;
-}): Promise<ISubmission> => {
-  const { data } = await apiClient.post<ISubmission>(
+}): Promise<Submission> => {
+  const { data } = await apiClient.post<Submission>(
     `/submissions/challenge/${challengeId}`,
     formData,
     {
@@ -26,8 +48,8 @@ export const updateSubmission = async ({
 }: {
   submissionId: string;
   formData: any;
-}): Promise<ISubmission> => {
-  const { data } = await apiClient.put<ISubmission>(
+}): Promise<Submission> => {
+  const { data } = await apiClient.put<Submission>(
     `/submissions/${submissionId}`,
     formData
   );
@@ -51,8 +73,8 @@ export const rateSubmission = async ({
 }: {
   submissionId: string;
   payload: RateSubmissionPayload;
-}): Promise<ISubmission> => {
-  const { data } = await apiClient.post<ISubmission>(
+}): Promise<Submission> => {
+  const { data } = await apiClient.post<Submission>(
     `/submissions/${submissionId}/rate`,
     payload
   );
@@ -61,38 +83,35 @@ export const rateSubmission = async ({
 
 export const selectWinner = async (
   submissionId: string
-): Promise<ISubmission> => {
-  const { data } = await apiClient.patch<ISubmission>(
+): Promise<Submission> => {
+  const { data } = await apiClient.patch<Submission>(
     `/submissions/${submissionId}/winner`
   );
   return data;
 };
 
-export const getMySubmissions = async (): Promise<ISubmission[]> => {
-  const { data } = await apiClient.get<ISubmission[]>("/submissions/me");
+export const getMySubmissions = async (): Promise<
+  MySubmissionWithChallenge[]
+> => {
+  const { data } = await apiClient.get<MySubmissionWithChallenge[]>(
+    "/submissions/me"
+  );
   return data;
 };
 
 export const getSubmissionsForReview = async (
   challengeId: string
-): Promise<ISubmission[]> => {
-  const { data } = await apiClient.get<ISubmission[]>(
+): Promise<SubmissionWithDeveloper[]> => {
+  const { data } = await apiClient.get<SubmissionWithDeveloper[]>(
     `/submissions/challenge/${challengeId}/review`
   );
   return data;
 };
 
-export const getPublicChallengeById = async (
-  id: string
-): Promise<IChallenge> => {
-  const { data } = await apiClient.get<IChallenge>(`/challenges/${id}`);
-  return data;
-};
-
 export const getPublicSubmissions = async (
   challengeId: string
-): Promise<ISubmission[]> => {
-  const { data } = await apiClient.get<ISubmission[]>(
+): Promise<Submission[]> => {
+  const { data } = await apiClient.get<Submission[]>(
     `/submissions/challenge/${challengeId}`
   );
   return data;

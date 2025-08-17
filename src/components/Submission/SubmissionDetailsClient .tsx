@@ -1,6 +1,5 @@
 "use client";
 
-import { IChallenge, ISubmission, IUser } from "@/types";
 import Link from "next/link";
 import {
   FiAward,
@@ -12,24 +11,33 @@ import {
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import UserAvatar from "../Profile/UserAvatar";
+import { Prisma, SubmissionStatus } from "@prisma/client";
+
+const submissionWithDetails = Prisma.validator<Prisma.SubmissionDefaultArgs>()({
+  include: {
+    developer: true,
+    challenge: true,
+  },
+});
+type SubmissionWithDetails = Prisma.SubmissionGetPayload<
+  typeof submissionWithDetails
+>;
 
 interface Props {
-  submission: ISubmission & {
-    developerId: IUser;
-    challengeId: IChallenge;
-  };
+  submission: SubmissionWithDetails;
 }
 
-const statusStyles: { [key: string]: { base: string; text: string } } = {
-  pending: { base: "bg-info/10", text: "text-info" },
-  reviewed: { base: "bg-warning/10", text: "text-warning" },
-  winner: { base: "bg-success/10", text: "text-success" },
-  rejected: { base: "bg-error/10", text: "text-error" },
+const statusStyles: Record<SubmissionStatus, { base: string; text: string }> = {
+  PENDING: { base: "bg-info/10", text: "text-info" },
+  REVIEWED: { base: "bg-warning/10", text: "text-warning" },
+  WINNER: { base: "bg-success/10", text: "text-success" },
+  REJECTED: { base: "bg-error/10", text: "text-error" },
 };
 
 const SubmissionDetailsClient = ({ submission }: Props) => {
-  const { developerId: developer, challengeId: challenge } = submission;
-  const statusStyle = statusStyles[submission.status] || statusStyles.pending;
+  const { developer, challenge } = submission; // Destructure for cleaner access
+  const statusStyle = statusStyles[submission.status] || statusStyles.PENDING;
+
   const submissionDate = new Date(submission.createdAt).toLocaleDateString(
     "en-US",
     { year: "numeric", month: "long", day: "numeric" }
@@ -41,31 +49,27 @@ const SubmissionDetailsClient = ({ submission }: Props) => {
 
   return (
     <div className="max-w-6xl mx-auto py-12 px-4">
-      {/* --- HEADER --- */}
       <header className="mb-8">
         <p className="text-primary font-semibold">
           Submission for: {challenge.title}
         </p>
         <h1 className="text-4xl md:text-5xl font-bold mt-2">
-          Solution by {developer.profile.firstName}
+          Solution by {developer.firstName}
         </h1>
         <div className="flex items-center gap-4 mt-4 text-base-content/70">
           <span>Submitted on {submissionDate}</span>
           <span
-            className={`px-3 py-1 text-sm font-semibold rounded-full ${statusStyle.base} ${statusStyle.text}`}
+            className={`px-3 py-1 text-sm font-semibold rounded-full capitalize ${statusStyle.base} ${statusStyle.text}`}
           >
-            {submission.status}
+            {submission.status.toLowerCase()}
           </span>
         </div>
       </header>
 
       <div className="divider" />
 
-      {/* --- MAIN LAYOUT --- */}
       <div className="grid lg:grid-cols-[1fr_320px] gap-12 mt-8">
-        {/* --- Left Column: Submission Details --- */}
         <main className="space-y-8">
-          {/* Description Card */}
           <div className="card bg-base-200/50 border border-base-300">
             <div className="card-body">
               <h2 className="card-title">Developer's Description</h2>
@@ -76,8 +80,6 @@ const SubmissionDetailsClient = ({ submission }: Props) => {
               </div>
             </div>
           </div>
-
-          {/* Links Card */}
           <div className="card bg-base-200/50 border border-base-300">
             <div className="card-body">
               <h2 className="card-title">Project Links</h2>
@@ -104,32 +106,28 @@ const SubmissionDetailsClient = ({ submission }: Props) => {
             </div>
           </div>
         </main>
-
-        {/* --- Right Column: Sidebar --- */}
         <aside className="space-y-6">
-          {/* Author Card */}
           <div className="card bg-base-200/50 border border-base-300">
             <div className="card-body items-center text-center">
               <UserAvatar
-                name={developer.profile.firstName}
-                avatarUrl={developer.profile.avatar}
+                name={developer.firstName}
+                avatarUrl={developer.avatarUrl}
                 className="w-20 h-20 text-3xl"
               />
               <h3 className="font-bold text-xl mt-2">
-                {developer.profile.firstName} {developer.profile.lastName}
+                {developer.firstName} {developer.lastName}
               </h3>
               <p className="text-sm text-base-content/60 -mt-1">
                 {developer.email}
               </p>
               <Link
-                href={`/users/${developer._id}`}
+                href={`/users/${developer.id}`}
                 className="btn btn-ghost btn-sm mt-4"
               >
                 <FiUser /> View Profile
               </Link>
             </div>
           </div>
-          {/* Challenge Info Card */}
           <div className="card bg-base-200/50 border border-base-300">
             <div className="card-body">
               <h3 className="card-title text-base mb-2">Challenge Info</h3>
@@ -155,7 +153,7 @@ const SubmissionDetailsClient = ({ submission }: Props) => {
               </div>
               <div className="card-actions justify-center mt-4">
                 <Link
-                  href={`/challenges/${challenge._id}`}
+                  href={`/challenges/${challenge.id}`}
                   className="btn btn-outline btn-xs"
                 >
                   View Original Challenge

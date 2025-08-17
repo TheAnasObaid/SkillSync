@@ -1,13 +1,19 @@
 "use client";
 
-import { IChallenge } from "@/types";
-import CtaBlock from "./CtaBlock";
-import { FiAward, FiDownload, FiHash } from "react-icons/fi";
 import { useAuthStore } from "@/store/authStore";
-import { useState, useEffect } from "react";
+import { Challenge } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { FiAward, FiDownload, FiHash } from "react-icons/fi";
+import CtaBlock from "./CtaBlock";
+
+// 1. Define the specific structure of the file objects we store in the JSON field.
+interface ChallengeFile {
+  name: string;
+  path: string;
+}
 
 interface ChallengeSidebarProps {
-  challenge: IChallenge;
+  challenge: Challenge;
   onOpenModal: () => void;
 }
 
@@ -21,7 +27,8 @@ const ChallengeSidebar = ({
     setHasMounted(true);
   }, []);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
+  // We are not using an external API base URL anymore for local files.
+  // The path `/uploads/...` will work directly.
 
   return (
     <aside className="space-y-6 lg:sticky top-24 h-fit">
@@ -56,18 +63,22 @@ const ChallengeSidebar = ({
           <div className="card-body p-4">
             <h3 className="card-title text-base">Resources</h3>
             <div className="space-y-2">
-              {challenge.files.map((file, i) => (
-                <a
-                  key={i}
-                  href={`${API_URL}/${file.path.replace(/\\/g, "/")}`}
-                  download={file.name}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-outline btn-sm btn-block"
-                >
-                  <FiDownload /> {file.name}
-                </a>
-              ))}
+              {/* 2. Use a type assertion to tell TypeScript the shape of each `file`. */}
+              {(challenge.files as unknown as ChallengeFile[]).map(
+                (file, i) => (
+                  <a
+                    key={i}
+                    // 3. The path is now relative from the /public directory.
+                    href={file.path}
+                    download={file.name}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-outline btn-sm btn-block"
+                  >
+                    <FiDownload /> {file.name}
+                  </a>
+                )
+              )}
             </div>
           </div>
         </div>

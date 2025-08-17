@@ -1,33 +1,36 @@
-import { ISubmission } from "@/types";
+"use client";
+
 import Link from "next/link";
 import UserAvatar from "../Profile/UserAvatar";
 import { FiExternalLink } from "react-icons/fi";
+import { Prisma, SubmissionStatus } from "@prisma/client";
+
+const submissionWithDetails = Prisma.validator<Prisma.SubmissionDefaultArgs>()({
+  include: {
+    developer: {
+      select: { id: true, firstName: true, email: true, avatarUrl: true },
+    },
+    challenge: { select: { id: true, title: true } },
+  },
+});
+
+type SubmissionWithDetails = Prisma.SubmissionGetPayload<
+  typeof submissionWithDetails
+>;
 
 interface SubmissionInfoCardProps {
-  submission: ISubmission;
+  submission: SubmissionWithDetails;
 }
 
-const statusStyles: { [key: string]: string } = {
-  pending: "badge-info",
-  reviewed: "badge-ghost",
-  winner: "badge-success",
-  rejected: "badge-error",
+const statusStyles: Record<SubmissionStatus, string> = {
+  PENDING: "badge-info",
+  REVIEWED: "badge-ghost",
+  WINNER: "badge-success",
+  REJECTED: "badge-error",
 };
 
 const SubmissionInfoCard = ({ submission }: SubmissionInfoCardProps) => {
-  const { developerId: developer, challengeId: challenge } = submission;
-
-  const developerName =
-    typeof developer === "object" && developer?.profile
-      ? developer.profile.firstName
-      : "Anonymous";
-  const developerAvatar =
-    typeof developer === "object" && developer?.profile
-      ? developer.profile.avatar
-      : undefined;
-  const challengeTitle =
-    typeof challenge === "object" ? challenge.title : "Unknown Challenge";
-  const challengeId = typeof challenge === "object" ? challenge._id : null;
+  const { developer, challenge } = submission;
 
   return (
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50">
@@ -35,25 +38,21 @@ const SubmissionInfoCard = ({ submission }: SubmissionInfoCardProps) => {
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
             <UserAvatar
-              name={developerName}
-              avatarUrl={developerAvatar}
+              name={developer.firstName}
+              avatarUrl={developer.avatarUrl}
               className="w-10 h-10"
             />
             <div>
-              <p className="font-bold">{developerName}</p>
-              {typeof developer === "object" && (
-                <p className="text-xs text-base-content/60">
-                  {developer.email}
-                </p>
-              )}
+              <p className="font-bold">{developer.firstName}</p>
+              <p className="text-xs text-base-content/60">{developer.email}</p>
             </div>
           </div>
           <div
-            className={`badge badge-outline ${
+            className={`badge badge-outline capitalize ${
               statusStyles[submission.status] || "badge-ghost"
             }`}
           >
-            {submission.status}
+            {submission.status.toLowerCase()}
           </div>
         </div>
 
@@ -62,20 +61,18 @@ const SubmissionInfoCard = ({ submission }: SubmissionInfoCardProps) => {
         <div className="space-y-1">
           <p className="text-sm text-base-content/70">Submitted to:</p>
           <h3 className="font-semibold text-base-content text-lg leading-tight">
-            {challengeTitle}
+            {challenge.title}
           </h3>
         </div>
 
-        {challengeId && (
-          <div className="card-actions justify-end mt-2">
-            <Link
-              href={`/challenges/${challengeId}`}
-              className="btn btn-ghost btn-sm"
-            >
-              View Challenge <FiExternalLink className="ml-2" />
-            </Link>
-          </div>
-        )}
+        <div className="card-actions justify-end mt-2">
+          <Link
+            href={`/challenges/${challenge.id}`}
+            className="btn btn-ghost btn-sm"
+          >
+            View Challenge <FiExternalLink className="ml-2" />
+          </Link>
+        </div>
       </div>
     </div>
   );

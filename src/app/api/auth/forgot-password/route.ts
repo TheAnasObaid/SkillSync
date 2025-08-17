@@ -1,18 +1,16 @@
-import config from "@/config/config";
-import dbConnect from "@/lib/dbConnect";
-import { createBrandedEmail, sendEmail } from "@/lib/email";
-import { handleError } from "@/lib/handleError";
-import { emailSchema } from "@/lib/validationSchemas";
-import User from "@/models/User";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { emailSchema } from "@/lib/validationSchemas";
+import { createBrandedEmail, sendEmail } from "@/lib/email";
+import config from "@/config/config";
+import crypto from "crypto";
 
 export async function POST(request: Request) {
   try {
-    await dbConnect();
     const body = await request.json();
     const { email } = emailSchema.parse(body);
 
-    const user = await User.findOne({ email });
+    const user = await prisma.user.findUnique({ where: { email } });
 
     const successResponse = NextResponse.json({
       message:
@@ -20,14 +18,25 @@ export async function POST(request: Request) {
     });
 
     if (user) {
-      const resetToken = user.createPasswordResetToken();
-      await user.save({ validateBeforeSave: false });
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const hashedResetToken = crypto
+        .createHash("sha256")
+        .update(resetToken)
+        .digest("hex");
+      const passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          passwordResetToken: hashedResetToken,
+          passwordResetExpires,
+        },
+      });
 
       const resetURL = `${config.clientUrl}/reset-password/${resetToken}`;
-
       const emailHtml = createBrandedEmail({
         title: "Password Reset Request",
-        name: user.profile.firstName,
+        name: user.firstName,
         body: "We received a request to reset your password. Click the button below to choose a new one. This link is valid for 10 minutes.",
         buttonLink: resetURL,
         buttonText: "Reset Your Password",
@@ -42,6 +51,10 @@ export async function POST(request: Request) {
 
     return successResponse; // Always return success for security
   } catch (error) {
-    return handleError(error);
+    console.error(error);
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }

@@ -1,4 +1,3 @@
-import { DashboardLink } from "@/types";
 import { BsGrid } from "react-icons/bs";
 import {
   FiArchive,
@@ -9,6 +8,12 @@ import {
 } from "react-icons/fi";
 import { GoPlusCircle } from "react-icons/go";
 import { TbBriefcase2 } from "react-icons/tb";
+
+export type DashboardLink = {
+  href: string;
+  label: string;
+  icon: React.ReactNode;
+};
 
 export const clientSidebarLinks: DashboardLink[] = [
   { href: "/client/dashboard", label: "Dashboard", icon: <BsGrid /> },

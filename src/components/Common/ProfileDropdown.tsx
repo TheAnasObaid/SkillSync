@@ -1,10 +1,10 @@
 import { getDashboardPath } from "@/lib/helper";
-import { IUser } from "@/types";
 import Link from "next/link";
 import UserAvatar from "../Profile/UserAvatar";
+import { User } from "@prisma/client";
 
 interface Props {
-  user: IUser;
+  user: User;
   dashboardHref: string;
   onModalOpen: (isOpen: boolean) => void;
 }
@@ -13,10 +13,7 @@ const ProfileDropdown = ({ user, dashboardHref, onModalOpen }: Props) => {
   return (
     <div className="dropdown dropdown-end">
       <button tabIndex={0} className="btn btn-ghost btn-circle">
-        <UserAvatar
-          name={user.profile?.firstName}
-          avatarUrl={user.profile?.avatar}
-        />
+        <UserAvatar name={user?.firstName} avatarUrl={user?.avatarUrl} />
       </button>
       <ul
         tabIndex={0}
@@ -24,7 +21,7 @@ const ProfileDropdown = ({ user, dashboardHref, onModalOpen }: Props) => {
       >
         <li>
           <p className="justify-between font-semibold">
-            {user.profile?.firstName}
+            {user.firstName}
             <span className="badge badge-primary badge-soft badge-sm">
               {user.role}
             </span>

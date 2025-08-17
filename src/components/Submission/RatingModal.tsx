@@ -1,10 +1,19 @@
 "use client";
 
-import { ISubmission } from "@/types";
 import { FormProvider, SubmitHandler, UseFormReturn } from "react-hook-form";
 import StarRating from "../Common/StarRating";
 import { Textarea } from "../Forms/FormFields";
 import { FiX } from "react-icons/fi";
+import { Prisma } from "@prisma/client";
+
+const submissionWithDeveloper =
+  Prisma.validator<Prisma.SubmissionDefaultArgs>()({
+    include: { developer: true },
+  });
+
+type SubmissionWithDeveloper = Prisma.SubmissionGetPayload<
+  typeof submissionWithDeveloper
+>;
 
 interface RatingFormData {
   rating: number;
@@ -17,7 +26,7 @@ interface Props {
   onSubmit: SubmitHandler<RatingFormData>;
   formMethods: UseFormReturn<RatingFormData>;
   isSubmitting: boolean;
-  submission: ISubmission | null;
+  submission: SubmissionWithDeveloper | null;
 }
 
 const RatingModal = ({
@@ -30,10 +39,8 @@ const RatingModal = ({
 }: Props) => {
   const { register, handleSubmit, watch, setValue } = formMethods;
   const ratingValue = watch("rating");
-  const developerName =
-    submission && typeof submission.developerId === "object"
-      ? submission.developerId.profile.firstName
-      : "";
+
+  const developerName = submission?.developer.firstName || "developer";
 
   if (!isOpen) return null;
 
@@ -50,6 +57,7 @@ const RatingModal = ({
           Review Submission from{" "}
           <span className="text-primary">{developerName}</span>
         </h3>
+
         <FormProvider {...formMethods}>
           <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4 mt-4">
             <div>
@@ -67,14 +75,12 @@ const RatingModal = ({
                 {...register("rating", { required: true, min: 1 })}
               />
             </div>
-
             <Textarea
               name="feedback"
               label="Feedback"
               placeholder="Provide constructive feedback..."
               rows={4}
             />
-
             <div className="modal-action">
               <button
                 type="button"

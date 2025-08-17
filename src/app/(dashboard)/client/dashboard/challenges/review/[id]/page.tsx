@@ -3,7 +3,7 @@ import ReviewSubmissionsClient from "@/components/Submission/ReviewSubmissionsCl
 import { getChallengeById } from "@/lib/data/challenges";
 import { getSession } from "@/lib/auth";
 import { notFound, redirect } from "next/navigation";
-import { IChallenge } from "@/types";
+import { Challenge } from "@prisma/client";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -25,7 +25,7 @@ const ReviewSubmissionsPage = async ({ params }: Props) => {
 
   if (
     typeof challenge.createdBy !== "string" &&
-    challenge.createdBy._id !== session.user._id
+    challenge.createdById !== session.user.id
   ) {
     notFound();
   }
@@ -39,7 +39,7 @@ const ReviewSubmissionsPage = async ({ params }: Props) => {
         </p>
       </div>
       <Suspense fallback={<div className="skeleton h-64 w-full"></div>}>
-        <ReviewSubmissionsClient initialChallenge={challenge as IChallenge} />
+        <ReviewSubmissionsClient initialChallenge={challenge as Challenge} />
       </Suspense>
     </div>
   );

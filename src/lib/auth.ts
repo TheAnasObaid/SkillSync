@@ -1,5 +1,5 @@
 import config from "@/config/config";
-import { IUser, Role } from "@/types";
+import { Role, User } from "@prisma/client";
 import jwt, { JwtPayload } from "jsonwebtoken";
 import { cookies } from "next/headers";
 import "server-only";
@@ -11,9 +11,9 @@ interface SessionPayload extends JwtPayload {
   role: Role;
 }
 
-export const generateToken = (user: IUser): string => {
+export const generateToken = (user: User): string => {
   const payload: SessionPayload = {
-    id: user._id,
+    id: user.id,
     role: user.role,
   };
   return jwt.sign(payload, JWT_SECRET, {
@@ -46,7 +46,7 @@ export const getSession = async () => {
   return {
     isLoggedIn: true,
     user: {
-      _id: decoded.id,
+      id: decoded.id,
       role: decoded.role,
     },
   };

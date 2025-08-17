@@ -9,11 +9,12 @@ import { useState } from "react";
 import { FiMoreVertical, FiSlash } from "react-icons/fi";
 import UserActionMenu from "./UserActionMenu";
 import UserCard from "./UserCard";
+import { User, Role, AccountStatus } from "@prisma/client";
 
 type UserUpdateAction =
-  | { role?: "developer" | "client" | "admin" }
-  | { isVerified?: boolean }
-  | { accountStatus?: "active" | "banned" };
+  | { role: Role }
+  | { isVerified: boolean }
+  | { accountStatus: AccountStatus };
 
 const UserManagementTable = () => {
   const { user: currentUser } = useAuthStore();
@@ -38,7 +39,9 @@ const UserManagementTable = () => {
       title: `Confirm Action`,
       message: `Are you sure you want to change this user's ${action} to "${value}"?`,
       variant:
-        action === "accountStatus" && value === "banned" ? "error" : "primary",
+        action === "accountStatus" && value === AccountStatus.BANNED
+          ? "error"
+          : "primary",
       onConfirm: () => {
         updateUser(
           { userId, updates },
@@ -65,9 +68,9 @@ const UserManagementTable = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:hidden">
         {users.map((user) => (
           <UserCard
-            key={user._id}
+            key={user.id}
             user={user}
-            isCurrentUser={currentUser?._id === user._id}
+            isCurrentUser={currentUser?.id === user.id}
             onUpdate={handleUpdateUser}
           />
         ))}
@@ -87,20 +90,22 @@ const UserManagementTable = () => {
           <tbody>
             {users.map((user) => (
               <tr
-                key={user._id}
+                key={user.id}
                 className={`hover ${
-                  user.accountStatus === "banned" ? "bg-error/10" : ""
+                  user.accountStatus === AccountStatus.BANNED
+                    ? "bg-error/10"
+                    : ""
                 }`}
               >
                 <td>
                   <div className="flex items-center gap-3">
                     <UserAvatar
-                      name={user.profile?.firstName}
-                      avatarUrl={user.profile?.avatar}
+                      name={user.firstName}
+                      avatarUrl={user.avatarUrl}
                     />
                     <div>
                       <div className="font-bold">
-                        {user.profile?.firstName} {user.profile?.lastName}
+                        {user.firstName} {user.lastName}
                       </div>
                       <div className="text-sm text-base-content/40">
                         {user.email}
@@ -109,13 +114,13 @@ const UserManagementTable = () => {
                   </div>
                 </td>
                 <td>
-                  <span className="badge badge-ghost badge-sm">
-                    {user.role}
+                  <span className="badge badge-ghost badge-sm capitalize">
+                    {user.role.toLowerCase()}
                   </span>
                 </td>
                 <td>
                   <div className="flex flex-col items-start gap-1">
-                    {user.accountStatus === "active" ? (
+                    {user.accountStatus === AccountStatus.ACTIVE ? (
                       <div className="badge badge-xs badge-success badge-soft">
                         Active
                       </div>
@@ -141,15 +146,15 @@ const UserManagementTable = () => {
                     <button
                       tabIndex={0}
                       className="btn btn-ghost btn-xs"
-                      disabled={currentUser?._id === user._id}
+                      disabled={currentUser?.id === user.id}
                     >
-                      {currentUser?._id === user._id ? (
+                      {currentUser?.id === user.id ? (
                         <FiSlash />
                       ) : (
                         <FiMoreVertical />
                       )}
                     </button>
-                    {currentUser?._id !== user._id && (
+                    {currentUser?.id !== user.id && (
                       <UserActionMenu user={user} onUpdate={handleUpdateUser} />
                     )}
                   </div>

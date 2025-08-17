@@ -1,10 +1,21 @@
 "use client";
 
 import apiClient from "@/lib/apiClient";
-import { IPortfolioItem, IUser } from "@/types";
+import { PortfolioItem, User } from "@prisma/client";
 
-export const updateMyProfile = async (profileData: any): Promise<IUser> => {
-  const { data } = await apiClient.put<IUser>("/users/me", profileData);
+export const getMyProfile = async (): Promise<
+  User & { portfolio: PortfolioItem[] }
+> => {
+  const { data } = await apiClient.get<User & { portfolio: PortfolioItem[] }>(
+    "/users/me"
+  );
+  return data;
+};
+
+export const updateMyProfile = async (
+  profileData: Partial<User>
+): Promise<User> => {
+  const { data } = await apiClient.put<User>("/users/me", profileData);
   return data;
 };
 
@@ -23,8 +34,8 @@ export const uploadMyAvatar = async (
 
 export const addPortfolioItem = async (
   formData: FormData
-): Promise<IPortfolioItem[]> => {
-  const { data } = await apiClient.post<IPortfolioItem[]>(
+): Promise<PortfolioItem> => {
+  const { data } = await apiClient.post<PortfolioItem>(
     "/users/me/portfolio",
     formData,
     {
@@ -38,10 +49,5 @@ export const deletePortfolioItem = async (
   itemId: string
 ): Promise<{ message: string }> => {
   const { data } = await apiClient.delete(`/users/me/portfolio/${itemId}`);
-  return data;
-};
-
-export const getMyProfile = async (): Promise<IUser> => {
-  const { data } = await apiClient.get<IUser>("/users/me");
   return data;
 };

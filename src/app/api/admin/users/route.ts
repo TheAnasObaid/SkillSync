@@ -1,23 +1,41 @@
-import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import User from "@/models/User";
+import prisma from "@/lib/prisma";
+import { Role } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
     const session = await getSession();
-    if (!session?.user || session.user.role !== "admin") {
-      throw new Error("Forbidden: Admin access required.");
+    if (!session?.user || session.user.role !== Role.ADMIN) {
+      return NextResponse.json(
+        { message: "Forbidden: Admin access required." },
+        { status: 403 }
+      );
     }
 
-    await dbConnect();
-    const users = await User.find({})
-      .select("-password")
-      .sort({ createdAt: -1 });
+    const users = await prisma.user.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        role: true,
+        accountStatus: true,
+        isVerified: true,
+        avatarUrl: true,
+        createdAt: true,
+      },
+    });
 
     return NextResponse.json(users);
   } catch (error) {
-    return handleError(error);
+    console.error("ADMIN GET /api/admin/users Error:", error);
+    return NextResponse.json(
+      { message: "An internal server error occurred" },
+      { status: 500 }
+    );
   }
 }

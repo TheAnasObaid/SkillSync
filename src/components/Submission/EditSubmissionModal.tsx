@@ -1,10 +1,10 @@
 "use client";
 
-import { useForm, FormProvider } from "react-hook-form";
+import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
 import { TextInput, Textarea } from "../Forms/FormFields";
-import { ISubmission } from "@/types";
 import { useEffect } from "react";
 import { FiX } from "react-icons/fi";
+import { Submission } from "@prisma/client";
 
 export interface EditSubmissionFormData {
   githubRepo: string;
@@ -17,7 +17,7 @@ interface EditSubmissionModalProps {
   onClose: () => void;
   onSubmit: (data: EditSubmissionFormData) => void;
   isSubmitting: boolean;
-  submission: ISubmission | null;
+  submission: Submission | null;
 }
 
 const EditSubmissionModal = ({

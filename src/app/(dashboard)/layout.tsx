@@ -5,11 +5,11 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import {
   adminSidebarLinks,
   clientSidebarLinks,
+  DashboardLink,
   developerSidebarLinks,
 } from "@/config/dashboard";
 import { useHasMounted } from "@/hooks/useHasMounted";
 import { useAuthStore } from "@/store/authStore";
-import { DashboardLink } from "@/types";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -41,17 +41,16 @@ const DashboardsLayout = ({ children }: Props) => {
 
   let sidebarLinks: DashboardLink[] = [];
   switch (user.role) {
-    case "client":
+    case "CLIENT":
       sidebarLinks = clientSidebarLinks;
       break;
-    case "developer":
+    case "DEVELOPER":
       sidebarLinks = developerSidebarLinks;
       break;
-    case "admin":
+    case "ADMIN":
       sidebarLinks = adminSidebarLinks;
       break;
     default:
-      // This is a safeguard. In a real scenario, you might redirect or show an error.
       sidebarLinks = [];
   }
 

@@ -1,8 +1,6 @@
 import { getSession } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect";
-import { handleError } from "@/lib/handleError";
-import Challenge from "@/models/Challenge";
-import Submission from "@/models/Submission";
+import prisma from "@/lib/prisma";
+import { Role } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 interface Params {
@@ -10,30 +8,40 @@ interface Params {
 }
 
 export async function DELETE(_: Request, { params }: Params) {
+  const { challengeId } = await params;
+
   try {
     const session = await getSession();
-    if (!session?.user || session.user.role !== "admin") {
-      throw new Error("Forbidden: Admin access required.");
+    if (!session?.user || session.user.role !== Role.ADMIN) {
+      return NextResponse.json(
+        { message: "Forbidden: Admin access required." },
+        { status: 403 }
+      );
     }
 
-    const { challengeId } = await params;
-    await dbConnect();
+    await prisma.challenge.delete({
+      where: { id: challengeId },
+    });
 
-    const challenge = await Challenge.findByIdAndDelete(challengeId);
+    return NextResponse.json({
+      message: "Challenge and all its submissions have been deleted by admin.",
+    });
+  } catch (error: any) {
+    console.error(
+      `ADMIN DELETE /api/admin/challenges/${challengeId} Error:`,
+      error
+    );
 
-    if (!challenge) {
+    if (error.code === "P2025") {
       return NextResponse.json(
         { message: "Challenge not found" },
         { status: 404 }
       );
     }
 
-    await Submission.deleteMany({ challengeId: challengeId });
-
-    return NextResponse.json({
-      message: "Challenge and submissions deleted by admin.",
-    });
-  } catch (error) {
-    return handleError(error);
+    return NextResponse.json(
+      { message: "An internal server error occurred" },
+      { status: 500 }
+    );
   }
 }

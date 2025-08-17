@@ -1,25 +1,30 @@
-import dbConnect from "@/lib/dbConnect";
 import { generateToken } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
+import prisma from "@/lib/prisma";
 import { loginSchema } from "@/lib/validationSchemas";
-import User from "@/models/User";
+import bcrypt from "bcrypt";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    await dbConnect();
     const body = await request.json();
     const { email, password } = loginSchema.parse(body);
 
-    const user = await User.findOne({ email }).select("+password");
+    const user = await prisma.user.findUnique({ where: { email } });
+
     if (!user) {
-      throw new Error("Invalid credentials.");
+      return NextResponse.json(
+        { message: "Invalid credentials." },
+        { status: 401 }
+      );
     }
 
-    const isMatch = await user.comparePassword(password);
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      throw new Error("Invalid credentials.");
+      return NextResponse.json(
+        { message: "Invalid credentials." },
+        { status: 401 }
+      );
     }
 
     if (!user.isVerified) {
@@ -29,13 +34,22 @@ export async function POST(request: Request) {
       );
     }
 
-    if (user.accountStatus === "banned") {
-      throw new Error("Forbidden: Your account has been suspended.");
+    if (user.accountStatus === "BANNED") {
+      return NextResponse.json(
+        { message: "Forbidden: Your account has been suspended." },
+        { status: 403 }
+      );
     }
 
     const token = generateToken(user);
-    const userPayload = user.toObject();
-    delete userPayload.password;
+
+    // Update lastLogin and remove password before sending to client
+    const updatedUser = await prisma.user.update({
+      where: { id: user.id },
+      data: { lastLogin: new Date() },
+    });
+
+    const { password: _, ...userPayload } = updatedUser;
 
     (await cookies()).set("authToken", token, {
       httpOnly: true,
@@ -47,6 +61,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ user: userPayload, token });
   } catch (error) {
-    return handleError(error);
+    console.error(error);
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }

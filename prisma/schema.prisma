@@ -1,12 +1,5 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -15,11 +8,16 @@ datasource db {
 }
 
 // --- ENUMS ---
-// Enums provide type-safety for fields with a limited set of options.
 enum Role {
   DEVELOPER
   CLIENT
   ADMIN
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  OTHER
 }
 
 enum AccountStatus {
@@ -51,14 +49,15 @@ enum SubmissionStatus {
 // --- MODELS ---
 
 model User {
-  id                    String          @id @default(cuid())
+  id                    String          @default(cuid()) @unique
   email                 String          @unique
   password              String
   role                  Role            @default(DEVELOPER)
   accountStatus         AccountStatus   @default(ACTIVE)
   isVerified            Boolean         @default(false)
-  
-  // Profile Information (embedded-like structure)
+  gender                Gender?
+
+  // Profile Information
   firstName             String
   lastName              String?
   companyName           String?
@@ -73,7 +72,7 @@ model User {
   completedChallenges   Int             @default(0)
   earnings              Float           @default(0)
 
-  // Authentication Tokens (handled by NextAuth/Supabase Auth later, but good to have)
+  // Auth Tokens
   verificationToken     String?         @unique
   passwordResetToken    String?         @unique
   passwordResetExpires  DateTime?
@@ -83,9 +82,9 @@ model User {
   updatedAt             DateTime        @updatedAt
 
   // --- RELATIONS ---
-  challenges            Challenge[]     // A User can create many Challenges
-  submissions           Submission[]    // A User can have many Submissions
-  portfolio             PortfolioItem[] // A User can have many Portfolio Items
+  challenges            Challenge[]
+  submissions           Submission[]
+  portfolio             PortfolioItem[]
 }
 
 model PortfolioItem {
@@ -96,7 +95,6 @@ model PortfolioItem {
   liveUrl     String?
   githubUrl   String?
   
-  // Relation to User
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -116,13 +114,11 @@ model Challenge {
   isFunded      Boolean             @default(false)
   deadline      DateTime
 
-  // Relation to User (Creator)
-  createdBy     User                @relation(fields: [createdById], references: [id])
   createdById   String
-
-  // Other Relations & Data
+  createdBy     User                @relation(fields: [createdById], references: [id])
+  
   submissions   Submission[]
-  files         Json[] // Use Json type for flexible file object storage
+  files         Json[]
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
 }
@@ -133,18 +129,14 @@ model Submission {
   description String
   liveDemo    String?
   status      SubmissionStatus @default(PENDING)
-
-  // Feedback from Client
   rating      Int?
   feedback    String?
   
-  // Relation to Challenge
-  challenge   Challenge        @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   challengeId String
+  challenge   Challenge        @relation(fields: [challengeId], references: [id], onDelete: Cascade)
   
-  // Relation to User (Developer)
-  developer   User             @relation(fields: [developerId], references: [id], onDelete: Cascade)
   developerId String
+  developer   User             @relation(fields: [developerId], references: [id], onDelete: Cascade)
   
   files       Json[]
   createdAt   DateTime         @default(now())

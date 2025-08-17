@@ -1,15 +1,19 @@
-import dbConnect from "@/lib/dbConnect";
 import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import User from "@/models/User";
+import prisma from "@/lib/prisma";
 import { writeFile } from "fs/promises";
 import { NextResponse } from "next/server";
 import path from "path";
+import fs from "fs";
 
 export async function POST(request: Request) {
   try {
     const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: "Authentication required." },
+        { status: 401 }
+      );
+    }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
@@ -21,30 +25,40 @@ export async function POST(request: Request) {
       );
     }
 
+    // --- File Saving Logic (remains the same) ---
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const filename = `${session.user._id}-${Date.now()}${path.extname(
+    // Use the correct `id` property
+    const filename = `${session.user.id}-${Date.now()}${path.extname(
       file.name
     )}`;
     const uploadsDir = path.join(process.cwd(), "public", "uploads", "avatars");
     const filePath = path.join(uploadsDir, filename);
 
-    // Ensure the directory exists
-    const fs = require("fs");
     if (!fs.existsSync(uploadsDir)) {
       fs.mkdirSync(uploadsDir, { recursive: true });
     }
 
     await writeFile(filePath, buffer);
-    const avatarUrl = `uploads/avatars/${filename}`;
+    // The URL path should be relative from the `public` directory
+    const avatarUrl = `/uploads/avatars/${filename}`;
 
-    await dbConnect();
-    await User.findByIdAndUpdate(session.user._id, {
-      "profile.avatar": avatarUrl,
+    // --- Prisma Database Update ---
+    await prisma.user.update({
+      where: {
+        id: session.user.id, // Use the correct `id` property
+      },
+      data: {
+        avatarUrl: avatarUrl, // Update the flattened `avatarUrl` field
+      },
     });
 
     return NextResponse.json({ message: "Avatar updated.", avatarUrl });
   } catch (error) {
-    return handleError(error);
+    console.error("POST /api/users/me/avatar Error:", error);
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }

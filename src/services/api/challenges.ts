@@ -1,19 +1,19 @@
 "use client";
 
 import apiClient from "@/lib/apiClient";
-import { IChallenge } from "@/types";
+import { Challenge } from "@prisma/client";
 
 export const createChallenge = async (
   formData: FormData
-): Promise<IChallenge> => {
-  const { data } = await apiClient.post<IChallenge>("/challenges", formData, {
+): Promise<Challenge> => {
+  const { data } = await apiClient.post<Challenge>("/challenges", formData, {
     headers: { "Content-Type": "multipart/form-data" },
   });
   return data;
 };
 
-export const getMyChallenges = async (): Promise<IChallenge[]> => {
-  const { data } = await apiClient.get<IChallenge[]>("/challenges/me");
+export const getMyChallengesAsClient = async (): Promise<Challenge[]> => {
+  const { data } = await apiClient.get<Challenge[]>("/challenges/me");
   return data;
 };
 
@@ -23,8 +23,8 @@ export const updateChallenge = async ({
 }: {
   id: string;
   formData: FormData;
-}): Promise<IChallenge> => {
-  const { data } = await apiClient.put<IChallenge>(
+}): Promise<Challenge> => {
+  const { data } = await apiClient.put<Challenge>(
     `/challenges/${id}`,
     formData,
     {
@@ -43,14 +43,14 @@ export const deleteChallenge = async (
 
 export const fundChallenge = async (
   id: string
-): Promise<{ challenge: IChallenge }> => {
+): Promise<{ challenge: Challenge }> => {
   const { data } = await apiClient.patch(`/challenges/${id}/fund`);
   return data;
 };
 
 export const getPublicChallengeById = async (
   id: string
-): Promise<IChallenge> => {
-  const { data } = await apiClient.get<IChallenge>(`/challenges/${id}`);
+): Promise<Challenge> => {
+  const { data } = await apiClient.get<Challenge>(`/challenges/${id}`);
   return data;
 };

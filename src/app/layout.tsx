@@ -31,7 +31,6 @@ export default function RootLayout({
           toastOptions={{
             className:
               "font-semibold rounded-full shadow-lg flex items-center gap-2 px-4 py-2 border",
-
             success: {
               icon: <FiCheckCircle size={20} />,
               style: {
@@ -40,7 +39,6 @@ export default function RootLayout({
                 borderColor: "#00fb7f30",
               },
             },
-
             error: {
               icon: <FiXCircle size={20} />,
               style: {
@@ -49,7 +47,6 @@ export default function RootLayout({
                 borderColor: "#ff626630",
               },
             },
-
             loading: {
               icon: <FiLoader size={20} className="animate-spin" />,
               style: {

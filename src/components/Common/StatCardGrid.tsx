@@ -1,41 +1,32 @@
-import { StatCardProps } from "@/types";
+import { ReactNode } from "react";
 import StatCard from "./StatCard";
 
-export type StatItem = StatCardProps;
+export interface StatItem {
+  icon: ReactNode;
+  label: string;
+  value: number | string;
+  link?: string;
+  linkText?: string;
+  color?: "green" | "blue" | "orange" | "red";
+}
 
 interface Props {
   stats: StatItem[];
-  loading?: boolean;
 }
 
-const StatCardGrid = async ({ stats, loading = false }: Props) => {
-  if (loading) {
-    return (
-      <div className="flex flex-wrap gap-6">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="skeleton h-40 w-full"></div>
-        ))}
-      </div>
-    );
-  }
-
+const StatCardGrid = ({ stats }: Props) => {
   return (
-    <div className="flex flex-wrap gap-6 w-full">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {stats.map((stat, index) => (
-        <div
+        <StatCard
           key={index}
-          className="flex-1 basis-full sm:basis-[calc(50%-0.75rem)] lg:basis-[calc(33.33%-1rem)]"
-        >
-          <StatCard
-            key={index}
-            icon={stat.icon}
-            label={stat.label}
-            value={stat.value}
-            color={stat.color}
-            link={stat.link}
-            linkText={stat.linkText}
-          />
-        </div>
+          icon={stat.icon}
+          label={stat.label}
+          value={stat.value}
+          color={stat.color}
+          link={stat.link}
+          linkText={stat.linkText}
+        />
       ))}
     </div>
   );
