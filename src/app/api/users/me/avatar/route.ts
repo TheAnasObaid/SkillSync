@@ -1,9 +1,7 @@
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import { writeFile } from "fs/promises";
+import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-import path from "path";
-import fs from "fs";
 
 export async function POST(request: Request) {
   try {
@@ -25,35 +23,34 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- File Saving Logic (remains the same) ---
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    // Use the correct `id` property
-    const filename = `${session.user.id}-${Date.now()}${path.extname(
-      file.name
-    )}`;
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", "avatars");
-    const filePath = path.join(uploadsDir, filename);
+    // 1. Create a unique path for the file
+    const filePath = `public/${session.user.id}/${Date.now()}-${file.name}`;
 
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    // 2. Upload the file to the 'avatars' bucket in Supabase Storage
+    const { error: uploadError } = await supabase.storage
+      .from("avatars")
+      .upload(filePath, file);
+
+    if (uploadError) {
+      console.error("Supabase upload error:", uploadError);
+      throw new Error("Failed to upload avatar.");
     }
 
-    await writeFile(filePath, buffer);
-    // The URL path should be relative from the `public` directory
-    const avatarUrl = `/uploads/avatars/${filename}`;
+    // 3. Get the public URL of the uploaded file
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
-    // --- Prisma Database Update ---
+    // 4. Update the user's record in Prisma with the new public URL
     await prisma.user.update({
-      where: {
-        id: session.user.id, // Use the correct `id` property
-      },
-      data: {
-        avatarUrl: avatarUrl, // Update the flattened `avatarUrl` field
-      },
+      where: { id: session.user.id },
+      data: { avatarUrl: publicUrl },
     });
 
-    return NextResponse.json({ message: "Avatar updated.", avatarUrl });
+    return NextResponse.json({
+      message: "Avatar updated.",
+      avatarUrl: publicUrl,
+    });
   } catch (error) {
     console.error("POST /api/users/me/avatar Error:", error);
     return NextResponse.json(

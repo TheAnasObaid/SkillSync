@@ -22,7 +22,7 @@ const RegisterForm = () => {
       <FormProvider {...form}>
         <form onSubmit={onSubmit} className="grid gap-4">
           <TextInput
-            name="name"
+            name="firstName"
             label="First Name"
             type="text"
             placeholder="e.g., John"

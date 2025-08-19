@@ -1,9 +1,7 @@
 import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
-import fs from "fs";
-import { writeFile } from "fs/promises";
+import { supabase } from "@/lib/supabase";
 import { NextResponse } from "next/server";
-import path from "path";
 
 export async function POST(request: Request) {
   try {
@@ -25,36 +23,33 @@ export async function POST(request: Request) {
       );
     }
 
-    // --- File Upload Logic ---
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const filename = `${session.user.id}-portfolio-${Date.now()}${path.extname(
+    // 1. Upload the file to the 'project-files' bucket
+    const filePath = `public/${session.user.id}/portfolio-${Date.now()}-${
       file.name
-    )}`;
-    const uploadsDir = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "portfolio"
-    );
-    const filePath = path.join(uploadsDir, filename);
+    }`;
+    const { error: uploadError } = await supabase.storage
+      .from("project-files")
+      .upload(filePath, file);
 
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    if (uploadError) {
+      console.error("Supabase upload error:", uploadError);
+      throw new Error("Failed to upload portfolio image.");
     }
 
-    await writeFile(filePath, buffer);
-    const imageUrl = `/uploads/portfolio/${filename}`; // Use a relative path
+    // 2. Get the public URL
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("project-files").getPublicUrl(filePath);
 
-    // --- Prisma Relational Create ---
+    // 3. Create the new portfolio item in Prisma with the public URL
     const newItem = await prisma.portfolioItem.create({
       data: {
         title: formData.get("title") as string,
         description: formData.get("description") as string,
         liveUrl: formData.get("liveUrl") as string | null,
         githubUrl: formData.get("githubUrl") as string | null,
-        imageUrl: imageUrl,
-        userId: session.user.id, // Connect to the user
+        imageUrl: publicUrl,
+        userId: session.user.id,
       },
     });
 
