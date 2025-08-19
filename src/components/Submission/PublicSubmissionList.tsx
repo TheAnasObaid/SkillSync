@@ -13,7 +13,7 @@ const submissionWithDeveloper =
         select: {
           id: true,
           firstName: true,
-          avatarUrl: true,
+          image: true,
         },
       },
     },

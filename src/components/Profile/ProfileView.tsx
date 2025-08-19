@@ -31,7 +31,7 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
           >
             <UserAvatar
               name={user.firstName}
-              avatarUrl={user.avatarUrl}
+              avatarUrl={user.image}
               className="w-24 h-24 text-4xl"
             />
             {onAvatarClick && (

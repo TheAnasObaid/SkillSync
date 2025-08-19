@@ -1,13 +1,14 @@
-import "server-only";
 import prisma from "@/lib/prisma";
+import { ChallengeStatus, SubmissionStatus } from "@prisma/client";
+import "server-only";
 
 export const getPlatformStats = async () => {
   try {
     const stats = await prisma.$transaction([
       prisma.user.count(),
       prisma.challenge.count(),
-      prisma.challenge.count({ where: { status: "COMPLETED" } }),
-      prisma.submission.count({ where: { status: "PENDING" } }),
+      prisma.challenge.count({ where: { status: ChallengeStatus.COMPLETED } }),
+      prisma.submission.count({ where: { status: SubmissionStatus.PENDING } }),
     ]);
     return {
       totalUsers: stats[0],
@@ -21,10 +22,8 @@ export const getPlatformStats = async () => {
   }
 };
 
-export const getAllUsers = async () => {
+export const getUsersForAdminPanel = async () => {
   try {
-    // Prisma is type-safe. We can explicitly select the fields we want,
-    // which automatically excludes the password.
     const users = await prisma.user.findMany({
       orderBy: { createdAt: "desc" },
       select: {
@@ -32,16 +31,20 @@ export const getAllUsers = async () => {
         email: true,
         role: true,
         accountStatus: true,
-        isVerified: true,
+        emailVerified: true,
         createdAt: true,
         firstName: true,
         lastName: true,
-        avatarUrl: true,
+        image: true,
+        name: true,
       },
     });
     return users;
   } catch (error) {
-    console.error("Database Error: Failed to fetch all users.", error);
+    console.error(
+      "Database Error: Failed to fetch users for admin panel.",
+      error
+    );
     throw new Error("Could not fetch users.");
   }
 };

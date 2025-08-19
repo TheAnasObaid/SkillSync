@@ -7,7 +7,7 @@ const adminSubmissionWithDetails =
   Prisma.validator<Prisma.SubmissionDefaultArgs>()({
     include: {
       developer: {
-        select: { id: true, firstName: true, email: true, avatarUrl: true },
+        select: { id: true, firstName: true, email: true, image: true },
       },
       challenge: { select: { id: true, title: true } },
     },

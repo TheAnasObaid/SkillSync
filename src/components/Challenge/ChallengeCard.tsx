@@ -6,7 +6,7 @@ import { Prisma, ChallengeDifficulty } from "@prisma/client";
 const challengeCardData = Prisma.validator<Prisma.ChallengeDefaultArgs>()({
   include: {
     createdBy: {
-      select: { firstName: true, companyName: true, avatarUrl: true },
+      select: { firstName: true, companyName: true, image: true },
     },
     _count: {
       select: { submissions: true },
@@ -40,7 +40,7 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
             <div className="flex items-center gap-3">
               <UserAvatar
                 name={client.firstName}
-                avatarUrl={client.avatarUrl}
+                avatarUrl={client.image}
                 className="w-8 h-8"
               />
               <div>

@@ -2,11 +2,7 @@ import "server-only";
 
 const config = {
   clientUrl: process.env.CLIENT_URL,
-
   databaseUrl: process.env.DATABASE_URL,
-
-  jwtSecret: process.env.JWT_SECRET,
-
   email: {
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT || "587", 10),
@@ -16,9 +12,9 @@ const config = {
   },
 };
 
-if (!config.databaseUrl || !config.jwtSecret || !config.clientUrl) {
+if (!config.databaseUrl || !config.clientUrl) {
   throw new Error(
-    "FATAL ERROR: A required environment variable (DATABASE_URL, JWT_SECRET, or CLIENT_URL) is missing."
+    "FATAL ERROR: A required environment variable (DATABASE_URL or CLIENT_URL) is missing."
   );
 }
 

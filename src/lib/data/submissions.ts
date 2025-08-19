@@ -9,7 +9,6 @@ export const getPublicSubmissionsForChallenge = async (challengeId: string) => {
     const submissions = await prisma.submission.findMany({
       where: {
         challengeId: challengeId,
-        // For public view, you might only want to show winners, or all non-pending
         status: { in: [SubmissionStatus.WINNER, SubmissionStatus.REJECTED] },
       },
       orderBy: { createdAt: "desc" },
@@ -18,7 +17,7 @@ export const getPublicSubmissionsForChallenge = async (challengeId: string) => {
           select: {
             id: true,
             firstName: true,
-            avatarUrl: true,
+            image: true,
           },
         },
       },

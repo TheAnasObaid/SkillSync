@@ -13,7 +13,7 @@ const publicSubmission = Prisma.validator<Prisma.SubmissionDefaultArgs>()({
       select: {
         id: true,
         firstName: true,
-        avatarUrl: true,
+        image: true,
       },
     },
   },
@@ -56,7 +56,7 @@ const SubmissionCard = ({ submission }: Props) => {
           >
             <UserAvatar
               name={developer.firstName}
-              avatarUrl={developer.avatarUrl}
+              avatarUrl={developer.image}
             />
             <div>
               <div className="font-bold link link-hover">

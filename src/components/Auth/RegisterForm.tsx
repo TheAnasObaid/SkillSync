@@ -1,13 +1,49 @@
 "use client";
 
-import { useRegisterForm } from "@/hooks/useRegisterForm";
-import { FormProvider } from "react-hook-form";
+import { RegisterFormData, registerSchema } from "@/lib/validationSchemas";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { Select, TextInput } from "../Forms/FormFields";
-import AuthCardLayout from "./AuthCardLayout";
 import AuthCardHeader from "./AuthCardHeader";
+import AuthCardLayout from "./AuthCardLayout";
+import { registerUser } from "@/services/api/auth";
+import { FaGoogle } from "react-icons/fa";
+import { signIn } from "next-auth/react";
 
 const RegisterForm = () => {
-  const { form, isSubmitting, onSubmit } = useRegisterForm();
+  const router = useRouter();
+
+  const formMethods = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      firstName: "",
+      email: "",
+      password: "",
+      role: "developer",
+      gender: "male",
+    },
+  });
+
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+  } = formMethods;
+
+  const onSubmit: SubmitHandler<RegisterFormData> = async (data) => {
+    try {
+      const response = await registerUser(data);
+      toast.success(response.message || "Registration successful!");
+
+      router.push(`/check-inbox?email=${data.email}`);
+    } catch (error: any) {
+      toast.error(
+        error.response?.data?.message ||
+          "Registration failed. Please try again."
+      );
+    }
+  };
 
   return (
     <AuthCardLayout
@@ -19,8 +55,9 @@ const RegisterForm = () => {
         title="Create Your Account"
         subtitle="Join a community of top developers and clients."
       />
-      <FormProvider {...form}>
-        <form onSubmit={onSubmit} className="grid gap-4">
+
+      <FormProvider {...formMethods}>
+        <form onSubmit={handleSubmit(onSubmit)} className="grid gap-4">
           <TextInput
             name="firstName"
             label="First Name"
@@ -48,6 +85,7 @@ const RegisterForm = () => {
             <option value="developer">Developer</option>
             <option value="client">Client</option>
           </Select>
+
           <button
             type="submit"
             className="btn btn-primary w-full mt-2"
@@ -58,6 +96,16 @@ const RegisterForm = () => {
             ) : (
               "Create Account"
             )}
+          </button>
+
+          <div className="divider">OR</div>
+
+          <button
+            type="button"
+            onClick={() => signIn("google", { callbackUrl: "/" })}
+            className="btn btn-outline w-full flex items-center gap-2"
+          >
+            <FaGoogle /> Sign up with Google
           </button>
         </form>
       </FormProvider>

@@ -13,7 +13,7 @@ const ProfileDropdown = ({ user, dashboardHref, onModalOpen }: Props) => {
   return (
     <div className="dropdown dropdown-end">
       <button tabIndex={0} className="btn btn-ghost btn-circle">
-        <UserAvatar name={user?.firstName} avatarUrl={user?.avatarUrl} />
+        <UserAvatar name={user?.firstName} avatarUrl={user?.image} />
       </button>
       <ul
         tabIndex={0}

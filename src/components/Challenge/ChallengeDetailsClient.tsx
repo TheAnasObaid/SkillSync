@@ -1,4 +1,3 @@
-// ===== File: src/components/Challenge/ChallengeDetailsClient.tsx =====
 "use client";
 
 import { useState } from "react";
@@ -18,7 +17,7 @@ const challengeWithCreator = Prisma.validator<Prisma.ChallengeDefaultArgs>()({
         id: true,
         firstName: true,
         companyName: true,
-        avatarUrl: true,
+        image: true,
       },
     },
   },
@@ -35,7 +34,7 @@ const submissionWithDeveloper =
         select: {
           id: true,
           firstName: true,
-          avatarUrl: true,
+          image: true,
         },
       },
     },
@@ -82,7 +81,7 @@ const ChallengeDetailsClient = ({
             <div className="flex items-center gap-3 mb-4">
               <UserAvatar
                 name={client.firstName}
-                avatarUrl={client.avatarUrl}
+                avatarUrl={client.image}
                 className="w-10 h-10"
               />
               <div>

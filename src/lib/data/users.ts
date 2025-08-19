@@ -1,14 +1,15 @@
-import "server-only";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { ChallengeStatus, Role, SubmissionStatus } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
 import { unstable_noStore as noStore } from "next/cache";
-import { ChallengeStatus, SubmissionStatus, Role } from "@prisma/client";
+import "server-only";
 
 export const getMyProfile = async () => {
   noStore();
   try {
-    const session = await getSession();
-    if (!session?.user) return null;
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return null;
 
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -18,7 +19,7 @@ export const getMyProfile = async () => {
           orderBy: { createdAt: "desc" },
           include: {
             challenge: {
-              select: { id: true, title: true, prize: true },
+              select: { id: true, title: true, prize: true, status: true },
             },
           },
         },
@@ -42,12 +43,12 @@ export const getPublicUserProfile = async (userId: string) => {
   noStore();
   try {
     const user = await prisma.user.findUnique({
-      where: { id: userId, role: Role.DEVELOPER }, // Only allow viewing public developer profiles
+      where: { id: userId, role: Role.DEVELOPER },
       select: {
         id: true,
         firstName: true,
         lastName: true,
-        avatarUrl: true,
+        image: true,
         bio: true,
         skills: true,
         experience: true,
@@ -70,7 +71,7 @@ export const getPublicUserProfile = async (userId: string) => {
 export const getMyDeveloperStats = async () => {
   noStore();
   try {
-    const session = await getSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== Role.DEVELOPER) return null;
 
     const developerId = session.user.id;
@@ -98,7 +99,7 @@ export const getMyDeveloperStats = async () => {
 export const getMyClientStats = async () => {
   noStore();
   try {
-    const session = await getSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== Role.CLIENT) return null;
 
     const clientId = session.user.id;

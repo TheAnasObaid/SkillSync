@@ -1,15 +1,15 @@
 import "server-only";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
 import { unstable_noStore as noStore } from "next/cache";
-import { ChallengeStatus } from "@prisma/client";
+import { ChallengeStatus, Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 
 export const getAllPublicChallenges = async () => {
   noStore();
   try {
     const challenges = await prisma.challenge.findMany({
       where: {
-        // Only fetch challenges that should be publicly visible
         status: {
           in: [
             ChallengeStatus.PUBLISHED,
@@ -21,7 +21,11 @@ export const getAllPublicChallenges = async () => {
       orderBy: { createdAt: "desc" },
       include: {
         createdBy: {
-          select: { firstName: true, companyName: true, avatarUrl: true },
+          select: {
+            firstName: true,
+            companyName: true,
+            image: true,
+          },
         },
         _count: {
           select: { submissions: true },
@@ -46,7 +50,7 @@ export const getChallengeById = async (id: string) => {
             id: true,
             firstName: true,
             companyName: true,
-            avatarUrl: true,
+            image: true,
           },
         },
       },
@@ -64,9 +68,9 @@ export const getChallengeById = async (id: string) => {
 export const getMyChallengesAsClient = async () => {
   noStore();
   try {
-    const session = await getSession();
-    if (!session?.user || session.user.role !== "CLIENT") {
-      // Return empty array if not a client or not logged in, to avoid errors
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user || session.user.role !== Role.CLIENT) {
       return [];
     }
 

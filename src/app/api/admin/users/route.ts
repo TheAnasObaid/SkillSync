@@ -1,3 +1,4 @@
+import { getUsersForAdminPanel } from "@/lib/data/admin";
 import prisma from "@/lib/prisma";
 import { Role } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
@@ -15,22 +16,7 @@ export async function GET() {
       );
     }
 
-    const users = await prisma.user.findMany({
-      orderBy: {
-        createdAt: "desc",
-      },
-      select: {
-        id: true,
-        email: true,
-        firstName: true,
-        lastName: true,
-        role: true,
-        accountStatus: true,
-        emailVerified: true,
-        image: true,
-        createdAt: true,
-      },
-    });
+    const users = await getUsersForAdminPanel();
 
     return NextResponse.json(users);
   } catch (error) {

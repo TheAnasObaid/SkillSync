@@ -120,7 +120,7 @@ const SubmissionsTable = ({
                   <div className="flex items-center gap-4 flex-grow">
                     <UserAvatar
                       name={developer.firstName}
-                      avatarUrl={developer.avatarUrl}
+                      avatarUrl={developer.image}
                       className="w-12 h-12"
                     />
                     <div>

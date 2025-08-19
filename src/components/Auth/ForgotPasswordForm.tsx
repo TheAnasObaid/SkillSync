@@ -1,29 +1,49 @@
 "use client";
 
 import { TextInput } from "@/components/Forms/FormFields";
-import { useForgotPassword } from "@/hooks/useForgetPassword";
-import Link from "next/link";
-import { FormProvider } from "react-hook-form";
-import { FiCheckCircle, FiLogIn } from "react-icons/fi";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { signIn } from "next-auth/react";
+import { useState } from "react";
+import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
+import { FiCheckCircle } from "react-icons/fi";
+import { z } from "zod";
 import AuthCardHeader from "./AuthCardHeader";
 import AuthCardLayout from "./AuthCardLayout";
 
-const SuccessMessage = () => (
-  <div className="text-center space-y-4">
-    <FiCheckCircle className="text-success text-6xl mx-auto" />
-    <h2 className="text-2xl font-bold">Check Your Inbox</h2>
-    <p className="text-base-content/70">
-      If an account with that email address exists, we've sent a link to reset
-      your password.
-    </p>
-    <Link href="/login" className="btn btn-primary btn-outline">
-      <FiLogIn /> Back to Login
-    </Link>
-  </div>
-);
+const forgotPasswordSchema = z.object({
+  email: z.email("Invalid email address"),
+});
+type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;
 
 const ForgotPasswordForm = () => {
-  const { form, isSubmitting, isSuccess, onSubmit } = useForgotPassword();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSuccess, setIsSuccess] = useState(false);
+
+  const formMethods = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+  });
+
+  const onSubmit: SubmitHandler<ForgotPasswordFormData> = async (data) => {
+    setIsSubmitting(true);
+    try {
+      const res = await signIn("email", {
+        email: data.email,
+        redirect: false,
+        callbackUrl: "/",
+      });
+
+      if (res?.error) {
+        throw new Error(res.error);
+      }
+
+      setIsSuccess(true);
+    } catch (error) {
+      toast.error("Failed to send login link. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <AuthCardLayout
@@ -36,17 +56,20 @@ const ForgotPasswordForm = () => {
           <FiCheckCircle className="text-success text-6xl" />
           <h2 className="text-xl font-bold">Check Your Inbox</h2>
           <p className="text-base-content/70">
-            If an account exists for that email, a reset link has been sent.
+            A magic link has been sent to your email address.
           </p>
         </div>
       ) : (
         <>
           <AuthCardHeader
             title="Forgot Password?"
-            subtitle="Enter your email and we'll send you a link to reset it."
+            subtitle="Enter your email and we'll send you a secure link to sign in."
           />
-          <FormProvider {...form}>
-            <form onSubmit={onSubmit} className="grid gap-4">
+          <FormProvider {...formMethods}>
+            <form
+              onSubmit={formMethods.handleSubmit(onSubmit)}
+              className="grid gap-4"
+            >
               <TextInput
                 name="email"
                 label="Your Email Address"
@@ -61,7 +84,7 @@ const ForgotPasswordForm = () => {
                 {isSubmitting ? (
                   <span className="loading loading-spinner" />
                 ) : (
-                  "Send Reset Link"
+                  "Send Magic Link"
                 )}
               </button>
             </form>
