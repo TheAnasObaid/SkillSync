@@ -1,12 +1,13 @@
-import { getSession } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { supabase } from "@/lib/supabase";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
+import { authOptions } from "../../../auth/[...nextauth]/route";
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    if (!session?.user) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json(
         { message: "Authentication required." },
         { status: 401 }
@@ -23,10 +24,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // 1. Create a unique path for the file
     const filePath = `public/${session.user.id}/${Date.now()}-${file.name}`;
 
-    // 2. Upload the file to the 'avatars' bucket in Supabase Storage
     const { error: uploadError } = await supabase.storage
       .from("avatars")
       .upload(filePath, file);
@@ -36,15 +35,13 @@ export async function POST(request: Request) {
       throw new Error("Failed to upload avatar.");
     }
 
-    // 3. Get the public URL of the uploaded file
     const {
       data: { publicUrl },
     } = supabase.storage.from("avatars").getPublicUrl(filePath);
 
-    // 4. Update the user's record in Prisma with the new public URL
     await prisma.user.update({
       where: { id: session.user.id },
-      data: { avatarUrl: publicUrl },
+      data: { image: publicUrl },
     });
 
     return NextResponse.json({

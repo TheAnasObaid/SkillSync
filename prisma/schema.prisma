@@ -47,21 +47,23 @@ enum SubmissionStatus {
 }
 
 // --- MODELS ---
-
 model User {
-  id                    String          @default(cuid()) @unique
+  id                    String          @id @default(cuid())
   email                 String          @unique
-  password              String
+  // Password is now optional, for users who sign in with Google/GitHub
+  password              String?
   role                  Role            @default(DEVELOPER)
   accountStatus         AccountStatus   @default(ACTIVE)
-  isVerified            Boolean         @default(false)
+  // gender remains the same
   gender                Gender?
 
   // Profile Information
+  name                  String? // NextAuth uses a generic `name` field
   firstName             String
   lastName              String?
   companyName           String?
-  avatarUrl             String?
+  // avatarUrl will be replaced by NextAuth's `image` field
+  image                 String? // NextAuth's standard field for profile pictures
   bio                   String?
   skills                String[]
   experience            String?
@@ -72,20 +74,58 @@ model User {
   completedChallenges   Int             @default(0)
   earnings              Float           @default(0)
 
-  // Auth Tokens
-  verificationToken     String?         @unique
-  passwordResetToken    String?         @unique
-  passwordResetExpires  DateTime?
-
   lastLogin             DateTime?
   createdAt             DateTime        @default(now())
   updatedAt             DateTime        @updatedAt
+
+  // NextAuth specific fields
+  emailVerified         DateTime?
+  accounts              Account[]
+  sessions              Session[]
 
   // --- RELATIONS ---
   challenges            Challenge[]
   submissions           Submission[]
   portfolio             PortfolioItem[]
 }
+
+// --- NEXTAUTH.JS MODELS ---
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
 
 model PortfolioItem {
   id          String   @id @default(cuid())

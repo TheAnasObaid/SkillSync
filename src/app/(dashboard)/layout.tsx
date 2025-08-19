@@ -5,33 +5,26 @@ import DashboardLayout from "@/components/Layout/DashboardLayout";
 import {
   adminSidebarLinks,
   clientSidebarLinks,
-  DashboardLink,
   developerSidebarLinks,
+  DashboardLink,
 } from "@/config/dashboard";
-import { useHasMounted } from "@/hooks/useHasMounted";
-import { useAuthStore } from "@/store/authStore";
+import { useSession, signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
-interface Props {
-  children: React.ReactNode;
-}
-
-const DashboardsLayout = ({ children }: Props) => {
+const DashboardsLayout = ({ children }: { children: React.ReactNode }) => {
+  const { data: session, status } = useSession();
   const router = useRouter();
-  const hasMounted = useHasMounted();
-
-  const { user, token } = useAuthStore();
 
   useEffect(() => {
-    if (hasMounted) {
-      if (!token || !user) {
-        router.push("/login");
-      }
-    }
-  }, [user, token, hasMounted, router]);
+    if (status === "loading") return;
 
-  if (!hasMounted || !user) {
+    if (status === "unauthenticated") {
+      signIn();
+    }
+  }, [status]);
+
+  if (status === "loading" || !session?.user) {
     return (
       <div className="flex h-screen w-full items-center justify-center bg-base-200">
         <span className="loading loading-spinner loading-lg text-primary"></span>
@@ -39,6 +32,7 @@ const DashboardsLayout = ({ children }: Props) => {
     );
   }
 
+  const { user } = session;
   let sidebarLinks: DashboardLink[] = [];
   switch (user.role) {
     case "CLIENT":

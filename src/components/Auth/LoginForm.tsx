@@ -2,21 +2,40 @@
 
 import { useLoginForm } from "@/hooks/useLoginForm";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormProvider } from "react-hook-form";
 import { FiAlertTriangle, FiCheckCircle } from "react-icons/fi";
 import { TextInput } from "../Forms/FormFields";
 import AuthCardHeader from "./AuthCardHeader";
 import AuthCardLayout from "./AuthCardLayout";
+import toast from "react-hot-toast";
+import { LoginFormData } from "@/lib/validationSchemas";
+import { signIn } from "next-auth/react";
 
 const LoginForm = () => {
+  const router = useRouter();
   const searchParams = useSearchParams();
+  const callbackUrl = searchParams.get("callbackUrl") || "/";
   const isVerified = searchParams.get("verified") === "true";
   const verificationError = searchParams.get("error");
 
+  const onSubmit = async (data: LoginFormData) => {
+    const result = await signIn("credentials", {
+      redirect: false,
+      email: data.email,
+      password: data.password,
+    });
+
+    if (result?.error) {
+      toast.error(result.error);
+    } else {
+      toast.success("Login successful!");
+      router.push(callbackUrl);
+    }
+  };
+
   const {
     form,
-    onSubmit,
     isSubmitting,
     unverifiedError,
     isResending,
@@ -80,6 +99,9 @@ const LoginForm = () => {
             ) : (
               "Sign In"
             )}
+          </button>
+          <button onClick={() => signIn("google", { callbackUrl })}>
+            Sign in with Google
           </button>
         </form>
       </FormProvider>

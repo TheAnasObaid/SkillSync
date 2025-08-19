@@ -1,18 +1,27 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { authOptions } from "../../auth/[...nextauth]/route";
+
+const updateSubmissionSchema = z
+  .object({
+    githubRepo: z.url().min(1),
+    description: z.string().min(1),
+    liveDemo: z.url().optional().or(z.literal("")),
+  })
+  .strict();
 
 interface Params {
   params: Promise<{ submissionId: string }>;
 }
 
-// UPDATE a submission (by the developer who owns it)
 export async function PUT(request: Request, { params }: Params) {
   const { submissionId } = await params;
 
   try {
-    const session = await getSession();
-    if (!session?.user) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json(
         { message: "Authentication required." },
         { status: 401 }
@@ -20,22 +29,36 @@ export async function PUT(request: Request, { params }: Params) {
     }
 
     const body = await request.json();
+    const validatedData = updateSubmissionSchema.parse(body);
 
     const updatedSubmission = await prisma.submission.update({
       where: {
         id: submissionId,
-        developerId: session.user.id, // Security check
+        developerId: session.user.id,
       },
-      data: {
-        githubRepo: body.githubRepo,
-        description: body.description,
-        liveDemo: body.liveDemo,
-      },
+      data: validatedData,
     });
 
     return NextResponse.json(updatedSubmission);
-  } catch (error) {
+  } catch (error: any) {
     console.error(`PUT /api/submissions/${submissionId} Error:`, error);
+
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: "Invalid data provided.", issues: error.issues },
+        { status: 400 }
+      );
+    }
+    if (error.code === "P2025") {
+      return NextResponse.json(
+        {
+          message:
+            "Submission not found or you do not have permission to update it.",
+        },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(
       { message: "Failed to update submission." },
       { status: 500 }
@@ -43,25 +66,34 @@ export async function PUT(request: Request, { params }: Params) {
   }
 }
 
-// DELETE/WITHDRAW a submission (by the developer who owns it)
 export async function DELETE(request: Request, { params }: Params) {
   const { submissionId } = await params;
 
   try {
-    const session = await getSession();
-    if (!session?.user) {
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
       return NextResponse.json(
         { message: "Authentication required." },
         { status: 401 }
       );
     }
 
-    await prisma.submission.delete({
+    const deleteResult = await prisma.submission.deleteMany({
       where: {
         id: submissionId,
-        developerId: session.user.id, // Security check
+        developerId: session.user.id,
       },
     });
+
+    if (deleteResult.count === 0) {
+      return NextResponse.json(
+        {
+          message:
+            "Submission not found or you do not have permission to delete it.",
+        },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({ message: "Submission withdrawn successfully." });
   } catch (error) {

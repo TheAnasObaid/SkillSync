@@ -1,21 +1,32 @@
-import { NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
-import { getSession } from "@/lib/auth";
+import { supabase } from "@/lib/supabase";
 import { Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { authOptions } from "../../../auth/[...nextauth]/route";
 
 interface Params {
   params: Promise<{ challengeId: string }>;
 }
 
+const submissionSchema = z.object({
+  githubRepo: z.url({ message: "Please enter a valid GitHub URL." }),
+  description: z
+    .string()
+    .min(10, { message: "Description must be at least 10 characters." }),
+  liveDemo: z.url().optional().or(z.literal("")),
+});
+
 export async function POST(request: Request, { params }: Params) {
   const { challengeId } = await params;
 
   try {
-    const session = await getSession();
+    const session = await getServerSession(authOptions);
     if (!session?.user || session.user.role !== Role.DEVELOPER) {
       return NextResponse.json(
-        { message: "Authentication required: Must be a developer." },
-        { status: 401 }
+        { message: "Forbidden: Must be a developer to submit a solution." },
+        { status: 403 }
       );
     }
 
@@ -36,17 +47,49 @@ export async function POST(request: Request, { params }: Params) {
     }
 
     const formData = await request.formData();
-    // File upload logic will be added in the Supabase Storage phase.
+    const file = formData.get("file") as File | null;
+
+    const formObject = {
+      githubRepo: formData.get("githubRepo"),
+      description: formData.get("description"),
+      liveDemo: formData.get("liveDemo"),
+    };
+    const validatedData = submissionSchema.parse(formObject);
+
+    let fileUrl: string | null = null;
+    let fileName: string | null = null;
+
+    if (file && file.size > 0) {
+      const filePath = `public/${
+        session.user.id
+      }/submissions/${challengeId}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("project-files")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        throw new Error("Failed to upload submission file.");
+      }
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("project-files").getPublicUrl(filePath);
+      fileUrl = publicUrl;
+      fileName = file.name;
+    }
+
+    const dataToCreate: any = {
+      ...validatedData,
+      challengeId: challengeId,
+      developerId: session.user.id,
+    };
+
+    if (fileUrl && fileName) {
+      dataToCreate.files = [{ name: fileName, path: fileUrl }];
+    }
 
     const newSubmission = await prisma.submission.create({
-      data: {
-        githubRepo: formData.get("githubRepo") as string,
-        description: formData.get("description") as string,
-        liveDemo: formData.get("liveDemo") as string | null,
-        challengeId: challengeId,
-        developerId: session.user.id,
-        // files: [] // Will be handled later
-      },
+      data: dataToCreate,
     });
 
     return NextResponse.json(newSubmission, { status: 201 });
@@ -55,6 +98,12 @@ export async function POST(request: Request, { params }: Params) {
       `POST /api/submissions/challenge/${challengeId} Error:`,
       error
     );
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: "Invalid form data.", issues: error.issues },
+        { status: 400 }
+      );
+    }
     return NextResponse.json(
       { message: "An internal server error occurred." },
       { status: 500 }

@@ -1,6 +1,7 @@
-import { getSession } from "@/lib/auth";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 
 interface Params {
@@ -11,7 +12,8 @@ export async function DELETE(_: Request, { params }: Params) {
   const { challengeId } = await params;
 
   try {
-    const session = await getSession();
+    const session = await getServerSession(authOptions);
+
     if (!session?.user || session.user.role !== Role.ADMIN) {
       return NextResponse.json(
         { message: "Forbidden: Admin access required." },
