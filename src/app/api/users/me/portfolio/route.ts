@@ -33,7 +33,10 @@ export async function POST(request: Request) {
 
     if (uploadError) {
       console.error("Supabase upload error:", uploadError);
-      throw new Error("Failed to upload portfolio image.");
+      return NextResponse.json(
+        { message: "Failed to upload portfolio image." },
+        { status: 500 }
+      );
     }
 
     const {

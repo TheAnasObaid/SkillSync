@@ -69,7 +69,10 @@ export async function POST(request: Request, { params }: Params) {
 
       if (uploadError) {
         console.error("Supabase upload error:", uploadError);
-        throw new Error("Failed to upload submission file.");
+        return NextResponse.json(
+          { message: "Failed to upload submission file." },
+          { status: 500 }
+        );
       }
       const {
         data: { publicUrl },

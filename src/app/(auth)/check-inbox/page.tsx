@@ -2,13 +2,14 @@ import { Suspense } from "react";
 import { FiMail } from "react-icons/fi";
 
 interface CheckInboxPageProps {
-  searchParams: {
+  searchParams: Promise<{
     email?: string;
-  };
+  }>;
 }
 
-const CheckInboxPage = ({ searchParams }: CheckInboxPageProps) => {
-  const email = searchParams.email || "your email address";
+const CheckInboxPage = async ({ searchParams }: CheckInboxPageProps) => {
+  const { email } = await searchParams;
+  const displayEmail = email || "your email address";
 
   return (
     <Suspense>
@@ -21,7 +22,7 @@ const CheckInboxPage = ({ searchParams }: CheckInboxPageProps) => {
           We've sent a verification link to:
           <br />
           <strong className="text-base-content/90 font-semibold">
-            {email}
+            {displayEmail}
           </strong>
         </p>
         <p className="text-sm text-base-content/60 mt-4">

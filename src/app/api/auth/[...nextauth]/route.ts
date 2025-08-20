@@ -1,4 +1,4 @@
-import NextAuth, { AuthOptions, DefaultSession } from "next-auth";
+import NextAuth, { AuthOptions, DefaultSession, Session } from "next-auth";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import prisma from "@/lib/prisma";
 import CredentialsProvider from "next-auth/providers/credentials";
@@ -28,11 +28,7 @@ declare module "next-auth/jwt" {
 
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
-
-  session: {
-    strategy: "jwt",
-  },
-
+  session: { strategy: "jwt" },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,
@@ -56,42 +52,32 @@ export const authOptions: AuthOptions = {
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
+        if (!credentials?.email || !credentials?.password)
           throw new Error("Missing credentials");
-        }
-
         const user = await prisma.user.findUnique({
           where: { email: credentials.email },
         });
-
-        if (!user || !user.password) {
-          throw new Error("Invalid credentials");
-        }
-
+        if (!user || !user.password) throw new Error("Invalid credentials");
         const isValid = await bcrypt.compare(
           credentials.password,
           user.password
         );
-
-        if (!isValid) {
-          throw new Error("Invalid credentials");
-        }
-
+        if (!isValid) throw new Error("Invalid credentials");
         return user;
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, user, trigger, session }) {
-      if (trigger === "signIn" && user) {
-        token.id = user.id;
+    async jwt({ token, user }) {
+      if (user) {
         const dbUser = user as User;
+        token.id = dbUser.id;
         token.role = dbUser.role;
         token.accountStatus = dbUser.accountStatus;
       }
       return token;
     },
-    async session({ session, token }: { session: DefaultSession; token: JWT }) {
+    async session({ session, token }: { session: Session; token: JWT }) {
       if (session.user && token) {
         session.user.id = token.id;
         session.user.role = token.role;

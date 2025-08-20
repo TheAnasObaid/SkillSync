@@ -47,7 +47,10 @@ export async function PUT(request: Request, { params }: Params) {
 
       if (uploadError) {
         console.error("Supabase upload error:", uploadError);
-        throw new Error("Failed to upload updated challenge file.");
+        return NextResponse.json(
+          { message: "Failed to upload updated challenge file." },
+          { status: 500 }
+        );
       }
 
       const {

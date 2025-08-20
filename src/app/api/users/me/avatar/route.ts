@@ -32,7 +32,10 @@ export async function POST(request: Request) {
 
     if (uploadError) {
       console.error("Supabase upload error:", uploadError);
-      throw new Error("Failed to upload avatar.");
+      return NextResponse.json(
+        { message: "Failed to upload avatar." },
+        { status: 500 }
+      );
     }
 
     const {
