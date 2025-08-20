@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ReactNode } from "react";
-import { FiInbox } from "react-icons/fi"; // FiInbox is a great generic icon for "empty"
+import { FiInbox } from "react-icons/fi";
 
 interface EmptyStateProps {
   icon?: ReactNode;
@@ -11,7 +11,6 @@ interface EmptyStateProps {
 }
 
 const EmptyState = ({
-  // Provide default values for a common use case
   icon = <FiInbox className="mx-auto text-5xl text-base-content/30" />,
   title = "Nothing Here Yet",
   message = "There's no data to display at the moment.",

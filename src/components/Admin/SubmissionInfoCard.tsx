@@ -8,7 +8,7 @@ import { Prisma, SubmissionStatus } from "@prisma/client";
 const submissionWithDetails = Prisma.validator<Prisma.SubmissionDefaultArgs>()({
   include: {
     developer: {
-      select: { id: true, firstName: true, email: true, avatarUrl: true },
+      select: { id: true, firstName: true, email: true, image: true },
     },
     challenge: { select: { id: true, title: true } },
   },
@@ -39,7 +39,7 @@ const SubmissionInfoCard = ({ submission }: SubmissionInfoCardProps) => {
           <div className="flex items-center gap-3">
             <UserAvatar
               name={developer.firstName}
-              avatarUrl={developer.avatarUrl}
+              image={developer.image}
               className="w-10 h-10"
             />
             <div>

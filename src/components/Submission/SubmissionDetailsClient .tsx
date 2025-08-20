@@ -111,7 +111,7 @@ const SubmissionDetailsClient = ({ submission }: Props) => {
             <div className="card-body items-center text-center">
               <UserAvatar
                 name={developer.firstName}
-                avatarUrl={developer.image}
+                image={developer.image}
                 className="w-20 h-20 text-3xl"
               />
               <h3 className="font-bold text-xl mt-2">

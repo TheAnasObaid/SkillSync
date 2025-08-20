@@ -15,13 +15,11 @@ import {
 } from "react-icons/fi";
 import UserAvatar from "../Profile/UserAvatar";
 
-// 1. Define the exact shape of the submission data this table needs, including the nested developer.
 const submissionWithDeveloper =
   Prisma.validator<Prisma.SubmissionDefaultArgs>()({
     include: { developer: true },
   });
 
-// 2. Infer the type from the validator.
 type SubmissionWithDeveloper = Prisma.SubmissionGetPayload<
   typeof submissionWithDeveloper
 >;
@@ -39,7 +37,6 @@ const SubmissionsTable = ({
   onSelectWinner,
   isCompleted,
 }: Props) => {
-  // Internal state for filtering and sorting is a good pattern for client components.
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("desc");
@@ -120,7 +117,7 @@ const SubmissionsTable = ({
                   <div className="flex items-center gap-4 flex-grow">
                     <UserAvatar
                       name={developer.firstName}
-                      avatarUrl={developer.image}
+                      image={developer.image}
                       className="w-12 h-12"
                     />
                     <div>

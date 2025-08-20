@@ -54,10 +54,7 @@ const SubmissionCard = ({ submission }: Props) => {
             className="flex items-center gap-3 z-10"
             onClick={handleInnerLinkClick}
           >
-            <UserAvatar
-              name={developer.firstName}
-              avatarUrl={developer.image}
-            />
+            <UserAvatar name={developer.firstName} image={developer.image} />
             <div>
               <div className="font-bold link link-hover">
                 {developer.firstName || "Anonymous"}

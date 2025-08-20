@@ -1,22 +1,20 @@
-// ===== File: src/components/Admin/UserCard.tsx =====
 "use client";
 
+import { AccountStatus, User } from "@prisma/client";
 import { FiMoreVertical, FiSlash } from "react-icons/fi";
-import UserActionMenu from "./UserActionMenu";
 import UserAvatar from "../Profile/UserAvatar";
-import { User, AccountStatus, Role } from "@prisma/client";
+import UserActionMenu from "./UserActionMenu";
 
-// Define the precise user data this card needs
 type UserCardData = Pick<
   User,
   | "id"
   | "firstName"
   | "lastName"
   | "email"
-  | "avatarUrl"
+  | "image"
   | "role"
   | "accountStatus"
-  | "isVerified"
+  | "emailVerified"
 >;
 
 interface UserCardProps {
@@ -35,7 +33,7 @@ const UserCard = ({ user, isCurrentUser, onUpdate }: UserCardProps) => {
       <div className="card-body p-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
-            <UserAvatar name={user.firstName} avatarUrl={user.avatarUrl} />
+            <UserAvatar name={user.firstName} image={user.image} />
             <div>
               <p className="font-bold">
                 {user.firstName} {user.lastName}
@@ -70,7 +68,7 @@ const UserCard = ({ user, isCurrentUser, onUpdate }: UserCardProps) => {
             ) : (
               <div className="badge badge-error badge-soft">Banned</div>
             )}
-            {user.isVerified ? (
+            {user.emailVerified ? (
               <div className="badge badge-info badge-soft">Verified</div>
             ) : (
               <div className="badge badge-warning badge-soft">Not Verified</div>

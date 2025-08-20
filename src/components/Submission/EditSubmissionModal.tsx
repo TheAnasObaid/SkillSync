@@ -1,10 +1,10 @@
 "use client";
 
-import { useForm, FormProvider, SubmitHandler } from "react-hook-form";
-import { TextInput, Textarea } from "../Forms/FormFields";
-import { useEffect } from "react";
-import { FiX } from "react-icons/fi";
 import { Submission } from "@prisma/client";
+import { useEffect } from "react";
+import { FormProvider, useForm } from "react-hook-form";
+import { FiX } from "react-icons/fi";
+import { TextInput, Textarea } from "../Forms/FormFields";
 
 export interface EditSubmissionFormData {
   githubRepo: string;

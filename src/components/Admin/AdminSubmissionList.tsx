@@ -72,7 +72,7 @@ const AdminSubmissionList = () => {
                 >
                   <UserAvatar
                     name={developer.firstName}
-                    avatarUrl={developer.avatarUrl}
+                    image={developer.image}
                   />
                   <div>
                     <p className="font-bold group-hover/userlink:link">

@@ -56,6 +56,8 @@ export const getPublicUserProfile = async (userId: string) => {
         totalRatings: true,
         completedChallenges: true,
         portfolio: true,
+        role: true,
+        companyName: true,
       },
     });
     return user;

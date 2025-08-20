@@ -40,7 +40,7 @@ const ChallengeCard = ({ challenge }: ChallengeCardProps) => {
             <div className="flex items-center gap-3">
               <UserAvatar
                 name={client.firstName}
-                avatarUrl={client.image}
+                image={client.image}
                 className="w-8 h-8"
               />
               <div>

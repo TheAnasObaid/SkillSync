@@ -6,22 +6,23 @@ import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { Prisma } from "@prisma/client";
 
-// Define the exact shape of the public user profile data
-const publicUserProfile = Prisma.validator<Prisma.UserDefaultArgs>()({
-  select: {
-    id: true,
-    firstName: true,
-    lastName: true,
-    avatarUrl: true,
-    bio: true,
-    skills: true,
-    experience: true,
-    rating: true,
-    totalRatings: true,
-    completedChallenges: true,
-    portfolio: true,
-  },
+const publicUserProfileValidator = Prisma.validator<Prisma.UserSelect>()({
+  id: true,
+  firstName: true,
+  lastName: true,
+  image: true,
+  bio: true,
+  skills: true,
+  experience: true,
+  rating: true,
+  totalRatings: true,
+  completedChallenges: true,
+  portfolio: true,
 });
+
+type PublicUserProfile = Prisma.UserGetPayload<{
+  select: typeof publicUserProfileValidator;
+}>;
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -38,7 +39,7 @@ const ProfileDataLoader = async ({ userId }: { userId: string }) => {
 
   return (
     <div className="max-w-4xl w-full mx-auto py-12 px-4 space-y-12">
-      <ProfileView user={user as any} />
+      <ProfileView user={user} />
       <Reputation user={user} />
       <PortfolioList initialPortfolio={portfolio} profileOwnerId={user.id} />
     </div>

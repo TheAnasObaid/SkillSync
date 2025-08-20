@@ -16,7 +16,7 @@ import EditSubmissionModal, {
 import SubmissionCard from "./SubmissionCard";
 
 interface Props {
-  initialSubmissions?: Submission[]; // Allow passing initial data for dashboard preview
+  initialSubmissions?: Submission[];
 }
 
 const DeveloperSubmissionList = ({ initialSubmissions }: Props) => {

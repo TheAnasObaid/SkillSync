@@ -12,17 +12,17 @@ const avatarColors = [
 
 interface Props {
   name?: string | null;
-  avatarUrl?: string | null;
+  image?: string | null;
   className?: string;
 }
 
-const UserAvatar = ({ name, avatarUrl, className = "w-10 h-10" }: Props) => {
-  if (avatarUrl) {
+const UserAvatar = ({ name, image, className = "w-10 h-10" }: Props) => {
+  if (image) {
     return (
       <div className={`avatar ${className}`}>
         <div className="w-full h-full rounded-full relative overflow-hidden">
           <Image
-            src={avatarUrl}
+            src={image}
             alt={name || "User Avatar"}
             fill
             className="object-cover"

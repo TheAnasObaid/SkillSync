@@ -1,4 +1,4 @@
-import { User } from "@prisma/client";
+import { Role } from "@prisma/client";
 import {
   FiAward,
   FiBriefcase,
@@ -10,7 +10,18 @@ import {
 import UserAvatar from "./UserAvatar";
 
 interface Props {
-  user: User | null;
+  user: {
+    id: string;
+    firstName: string | null;
+    lastName: string | null;
+    email?: string;
+    image: string | null;
+    role: Role;
+    experience: string | null;
+    companyName: string | null;
+    bio: string | null;
+    skills: string[];
+  } | null;
   onAvatarClick?: () => void;
 }
 
@@ -31,7 +42,7 @@ const ProfileView = ({ user, onAvatarClick }: Props) => {
           >
             <UserAvatar
               name={user.firstName}
-              avatarUrl={user.image}
+              image={user.image}
               className="w-24 h-24 text-4xl"
             />
             {onAvatarClick && (

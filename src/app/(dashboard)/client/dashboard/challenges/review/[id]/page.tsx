@@ -1,9 +1,9 @@
 import { Suspense } from "react";
 import ReviewSubmissionsClient from "@/components/Submission/ReviewSubmissionsClients";
 import { getChallengeById } from "@/lib/data/challenges";
-import { getSession } from "@/lib/auth";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { notFound, redirect } from "next/navigation";
-import { Challenge } from "@prisma/client";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -11,22 +11,19 @@ interface Props {
 
 const ReviewSubmissionsPage = async ({ params }: Props) => {
   const { id } = await params;
-  const session = await getSession();
-
-  const challenge = await getChallengeById(id);
+  const session = await getServerSession(authOptions);
 
   if (!session?.user) {
-    redirect("/login");
+    redirect(`/login?callbackUrl=/client/dashboard/challenges/review/${id}`);
   }
+
+  const challenge = await getChallengeById(id);
 
   if (!challenge) {
     notFound();
   }
 
-  if (
-    typeof challenge.createdBy !== "string" &&
-    challenge.createdById !== session.user.id
-  ) {
+  if (challenge.createdById !== session.user.id) {
     notFound();
   }
 
@@ -39,7 +36,7 @@ const ReviewSubmissionsPage = async ({ params }: Props) => {
         </p>
       </div>
       <Suspense fallback={<div className="skeleton h-64 w-full"></div>}>
-        <ReviewSubmissionsClient initialChallenge={challenge as Challenge} />
+        <ReviewSubmissionsClient initialChallenge={challenge} />
       </Suspense>
     </div>
   );

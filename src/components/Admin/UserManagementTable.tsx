@@ -4,20 +4,22 @@ import ConfirmationModal from "@/components/Common/ConfirmationModal";
 import UserAvatar from "@/components/Profile/UserAvatar";
 import { useUpdateUserByAdminMutation } from "@/hooks/mutations/useAdminMutations";
 import { useAllUsersQuery } from "@/hooks/queries/useAdminQueries";
-import { useAuthStore } from "@/store/authStore";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
 import { FiMoreVertical, FiSlash } from "react-icons/fi";
 import UserActionMenu from "./UserActionMenu";
 import UserCard from "./UserCard";
-import { User, Role, AccountStatus } from "@prisma/client";
+import { Role, AccountStatus } from "@prisma/client";
 
-type UserUpdateAction =
+export type UserUpdateAction =
   | { role: Role }
-  | { isVerified: boolean }
+  | { setVerified: boolean }
   | { accountStatus: AccountStatus };
 
 const UserManagementTable = () => {
-  const { user: currentUser } = useAuthStore();
+  const { data: session } = useSession();
+  const currentUser = session?.user;
+
   const { data: users, isLoading, isError } = useAllUsersQuery();
   const { mutate: updateUser, isPending: isUpdating } =
     useUpdateUserByAdminMutation();
@@ -34,10 +36,15 @@ const UserManagementTable = () => {
     const action = Object.keys(updates)[0];
     const value = Object.values(updates)[0];
 
+    let valueDisplay = value;
+    if (action === "setVerified") {
+      valueDisplay = value ? "verified" : "not verified";
+    }
+
     setModalState({
       isOpen: true,
       title: `Confirm Action`,
-      message: `Are you sure you want to change this user's ${action} to "${value}"?`,
+      message: `Are you sure you want to change this user's status to "${valueDisplay}"?`,
       variant:
         action === "accountStatus" && value === AccountStatus.BANNED
           ? "error"
@@ -99,10 +106,7 @@ const UserManagementTable = () => {
               >
                 <td>
                   <div className="flex items-center gap-3">
-                    <UserAvatar
-                      name={user.firstName}
-                      avatarUrl={user.avatarUrl}
-                    />
+                    <UserAvatar name={user.firstName} image={user.image} />
                     <div>
                       <div className="font-bold">
                         {user.firstName} {user.lastName}
@@ -129,7 +133,7 @@ const UserManagementTable = () => {
                         Banned
                       </div>
                     )}
-                    {user.isVerified ? (
+                    {user.emailVerified ? (
                       <div className="badge badge-xs badge-info badge-soft">
                         Verified
                       </div>

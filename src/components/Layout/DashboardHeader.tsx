@@ -1,36 +1,26 @@
 "use client";
 
 import { getDashboardPath } from "@/lib/helper";
-import { useAuthStore } from "@/store/authStore";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useState } from "react";
 import { FiLogOut } from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import Logo from "../Common/Logo";
 import ProfileDropdown from "../Common/ProfileDropdown";
 import NotificationBell from "./NotificationBell";
-import { useLogoutMutation } from "@/hooks/mutations/useLogoutMutation";
 
 const DashboardHeader = () => {
-  const router = useRouter();
   const pathname = usePathname();
-  const { token, user } = useAuthStore();
-  const [isClient, setIsClient] = useState(false);
+  const { data: session, status } = useSession();
+  const user = session?.user;
 
   const [isModalOpen, setModalOpen] = useState(false);
-  const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation();
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   const handleLogout = () => {
-    router.push("/");
+    signOut({ callbackUrl: "/" });
     setModalOpen(false);
-    logout({
-      onSuccessCallback: () => setModalOpen(false),
-    });
   };
 
   const dashboardHref = user ? getDashboardPath(user.role) : "/";
@@ -45,35 +35,25 @@ const DashboardHeader = () => {
             </div>
             <div className="navbar-end flex items-center gap-4">
               <NotificationBell />
-              {isClient && (
-                <>
-                  {token && user ? (
-                    <ProfileDropdown
-                      user={user}
-                      dashboardHref={dashboardHref}
-                      onModalOpen={(isOpen) => setModalOpen(isOpen)}
-                    />
-                  ) : (
-                    <nav className="flex items-center gap-2">
-                      {pathname !== "/login" && (
-                        <Link
-                          href="/login"
-                          className="btn btn-secondary btn-sm"
-                        >
-                          Sign In
-                        </Link>
-                      )}
-                      {pathname !== "/register" && (
-                        <Link
-                          href="/register"
-                          className="btn btn-primary btn-sm"
-                        >
-                          Sign Up
-                        </Link>
-                      )}
-                    </nav>
-                  )}
-                </>
+
+              {status === "loading" && (
+                <div className="skeleton h-10 w-10 rounded-full"></div>
+              )}
+
+              {status === "unauthenticated" && (
+                <nav className="flex items-center gap-2">
+                  <Link href="/login" className="btn btn-primary btn-sm">
+                    Sign In
+                  </Link>
+                </nav>
+              )}
+
+              {status === "authenticated" && user && (
+                <ProfileDropdown
+                  user={user as any}
+                  dashboardHref={dashboardHref}
+                  onModalOpen={setModalOpen}
+                />
               )}
             </div>
           </div>
@@ -88,7 +68,7 @@ const DashboardHeader = () => {
         onCancel={() => setModalOpen(false)}
         confirmText="Yes, Logout"
         icon={<FiLogOut size={48} />}
-        isActionInProgress={isLoggingOut}
+        isActionInProgress={false}
       />
     </>
   );

@@ -1,4 +1,3 @@
-// ===== File: src/componens/Admin/AdminProfileClient.tsx =====
 "use client";
 
 import {

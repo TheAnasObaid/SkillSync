@@ -1,11 +1,7 @@
 "use client";
 
-import { User, Role, AccountStatus } from "@prisma/client";
-
-type UserUpdateAction =
-  | { role: Role }
-  | { isVerified: boolean }
-  | { accountStatus: AccountStatus };
+import { AccountStatus, Role, User } from "@prisma/client";
+import { UserUpdateAction } from "./UserManagementTable";
 
 interface UserActionMenuProps {
   user: User;
@@ -18,9 +14,9 @@ const UserActionMenu = ({ user, onUpdate }: UserActionMenuProps) => {
       tabIndex={0}
       className="menu border font-normal border-base-300 dropdown-content z-[1] p-2 shadow bg-base-200 rounded-box w-52"
     >
-      {!user.isVerified && (
+      {!user.emailVerified && (
         <li>
-          <a onClick={() => onUpdate(user.id, { isVerified: true })}>
+          <a onClick={() => onUpdate(user.id, { setVerified: true })}>
             Mark as Verified
           </a>
         </li>
