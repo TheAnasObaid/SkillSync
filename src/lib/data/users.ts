@@ -1,9 +1,9 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import prisma from "@/lib/prisma";
 import { ChallengeStatus, Role, SubmissionStatus } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { unstable_noStore as noStore } from "next/cache";
 import "server-only";
+import { authOptions } from "../authOptions";
 
 export const getMyProfile = async () => {
   noStore();

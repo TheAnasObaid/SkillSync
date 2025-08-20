@@ -1,9 +1,9 @@
+import { authOptions } from "@/lib/authOptions";
 import prisma from "@/lib/prisma";
 import { ChallengeStatus, Role } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { authOptions } from "../../../auth/[...nextauth]/route";
 
 interface Params {
   params: Promise<{ submissionId: string }>;

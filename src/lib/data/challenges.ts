@@ -3,7 +3,7 @@ import prisma from "@/lib/prisma";
 import { unstable_noStore as noStore } from "next/cache";
 import { ChallengeStatus, Role } from "@prisma/client";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "../authOptions";
 
 export const getAllPublicChallenges = async () => {
   noStore();

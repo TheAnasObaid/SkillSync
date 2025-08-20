@@ -2,8 +2,8 @@ import { Suspense } from "react";
 import ReviewSubmissionsClient from "@/components/Submission/ReviewSubmissionsClients";
 import { getChallengeById } from "@/lib/data/challenges";
 import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { notFound, redirect } from "next/navigation";
+import { authOptions } from "@/lib/authOptions";
 
 interface Props {
   params: Promise<{ id: string }>;
