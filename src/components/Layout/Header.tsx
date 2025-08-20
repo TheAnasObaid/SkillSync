@@ -1,9 +1,8 @@
 "use client";
 
-import { useLogoutMutation } from "@/hooks/mutations/useLogoutMutation";
 import { useHasMounted } from "@/hooks/useHasMounted";
 import { getDashboardPath } from "@/lib/helper";
-import { useAuthStore } from "@/store/authStore";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -15,30 +14,24 @@ import ProfileDropdown from "../Common/ProfileDropdown";
 import NotificationBell from "./NotificationBell";
 
 const Header = () => {
-  const router = useRouter();
-  const { user } = useAuthStore();
-  const hasMounted = useHasMounted();
+  const { data: session, status } = useSession();
+  const user = session?.user;
   const [isModalOpen, setModalOpen] = useState(false);
-  const { mutate: logout, isPending: isLoggingOut } = useLogoutMutation();
 
   const handleLogout = () => {
-    router.push("/");
+    signOut({ callbackUrl: "/" });
     setModalOpen(false);
-    logout({
-      onSuccessCallback: () => setModalOpen(false),
-    });
   };
+  const router = useRouter();
+  const hasMounted = useHasMounted();
 
   const dashboardHref = getDashboardPath(user?.role || null);
 
-  // 3. CREATE THE NAVIGATION HANDLER FUNCTION
   const handleDrawerNavigation = (path: string) => {
-    // First, find the checkbox and uncheck it to close the drawer
     const checkbox = document.getElementById("main-drawer") as HTMLInputElement;
     if (checkbox) {
       checkbox.checked = false;
     }
-    // Then, navigate to the new page
     router.push(path);
   };
 
@@ -57,11 +50,11 @@ const Header = () => {
                 <div>
                   {hasMounted && (
                     <>
-                      {user ? (
+                      {status === "authenticated" && user ? (
                         <div className="flex gap-2">
                           <NotificationBell />
                           <ProfileDropdown
-                            user={user}
+                            user={user as any}
                             dashboardHref={dashboardHref}
                             onModalOpen={setModalOpen}
                           />
@@ -179,7 +172,7 @@ const Header = () => {
         onCancel={() => setModalOpen(false)}
         confirmText="Yes, Logout"
         icon={<FiLogOut size={48} />}
-        isActionInProgress={isLoggingOut}
+        isActionInProgress={status === "loading"}
       />
     </>
   );

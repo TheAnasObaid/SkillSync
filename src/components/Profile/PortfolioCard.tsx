@@ -1,34 +1,31 @@
 "use client";
 
 import useImageFallback from "@/hooks/useImageFallback";
-import { IPortfolioItem } from "@/types";
+import { PortfolioItem } from "@prisma/client";
+import Image from "next/image";
 import Link from "next/link";
 import { FiExternalLink, FiGithub, FiTrash } from "react-icons/fi";
 
 interface Props {
-  item: IPortfolioItem;
-  onDelete: (item: IPortfolioItem) => void;
+  item: PortfolioItem;
+  onDelete: (item: PortfolioItem) => void;
   isOwner: boolean;
 }
 
 const PortfolioCard = ({ item, onDelete, isOwner }: Props) => {
-  const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "";
-
-  const primaryImageUrl = item.imageUrl.startsWith("http")
-    ? item.imageUrl
-    : `${API_URL}/${item.imageUrl.replace(/\\/g, "/")}`;
   const placeholderImageUrl =
     "https://placehold.co/600x400/1a1a1a/ffffff?text=Project";
-
-  const imageProps = useImageFallback(primaryImageUrl, placeholderImageUrl);
+  const imageProps = useImageFallback(item.imageUrl, placeholderImageUrl);
 
   return (
     <div className="card bg-base-200/50 border border-base-300 shadow-md transition-all hover:border-primary/50 group">
       <figure className="relative h-48 bg-base-300">
-        <img
+        <Image
           {...imageProps}
           alt={item.title}
-          className="object-cover w-full h-full"
+          fill
+          className="object-cover"
+          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
         />
         {isOwner && (
           <button

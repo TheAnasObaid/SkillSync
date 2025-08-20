@@ -1,17 +1,26 @@
-import { IChallenge } from "@/types";
+import { ChallengeStatus, Prisma } from "@prisma/client";
 import Link from "next/link";
 import { FiAward, FiChevronRight, FiInbox, FiUsers } from "react-icons/fi";
 
+const challengeWithSubmissionCount =
+  Prisma.validator<Prisma.ChallengeDefaultArgs>()({
+    include: { _count: { select: { submissions: true } } },
+  });
+
+type ChallengeWithSubmissionCount = Prisma.ChallengeGetPayload<
+  typeof challengeWithSubmissionCount
+>;
+
 interface Props {
-  challenges: IChallenge[];
+  challenges: ChallengeWithSubmissionCount[];
 }
 
-const statusStyles: { [key: string]: string } = {
-  draft: "badge-ghost",
-  published: "badge-info",
-  active: "badge-info",
-  judging: "badge-warning",
-  completed: "badge-success",
+const statusStyles: Record<ChallengeStatus, string> = {
+  DRAFT: "badge-ghost",
+  PUBLISHED: "badge-info",
+  ACTIVE: "badge-info",
+  JUDGING: "badge-warning",
+  COMPLETED: "badge-success",
 };
 
 const RecentChallengePreview = ({ challenges }: Props) => {
@@ -35,18 +44,16 @@ const RecentChallengePreview = ({ challenges }: Props) => {
     );
   }
 
-  // --- A redesigned, more informative card list ---
   return (
     <div className="space-y-3">
       {challenges.map((challenge) => (
         <Link
-          key={challenge._id}
-          href={`/client/dashboard/challenges/review/${challenge._id}`}
-          className="card bg-base-200/50 border border-base-300 shadow-sm transition-all duration-200 ease-in-out hover:border-primary/50 hover:shadow-md hover:-translate-y-px"
+          key={challenge.id}
+          href={`/client/dashboard/challenges/review/${challenge.id}`}
+          className="card bg-base-200/50 border border-base-300 shadow-sm transition-all hover:border-primary/50 hover:shadow-md hover:-translate-y-px"
         >
           <div className="card-body p-4">
             <div className="flex justify-between items-center">
-              {/* Left Side: Title and Status */}
               <div className="flex-grow">
                 <p className="font-bold text-base-content text-lg">
                   {challenge.title}
@@ -59,8 +66,6 @@ const RecentChallengePreview = ({ challenges }: Props) => {
                   {challenge.status}
                 </div>
               </div>
-
-              {/* Right Side: Key Stats and Action */}
               <div className="flex items-center gap-6">
                 <div className="hidden sm:flex items-center gap-2 text-primary">
                   <FiAward size={18} />
@@ -71,7 +76,7 @@ const RecentChallengePreview = ({ challenges }: Props) => {
                 <div className="hidden sm:flex items-center gap-2 text-info">
                   <FiUsers size={18} />
                   <span className="font-semibold">
-                    {challenge.submissions.length} Submissions
+                    {challenge._count.submissions} Submissions
                   </span>
                 </div>
                 <FiChevronRight size={24} className="text-base-content/50" />

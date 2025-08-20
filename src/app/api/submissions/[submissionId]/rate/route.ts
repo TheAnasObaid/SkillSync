@@ -1,69 +1,102 @@
-import { getSession } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect";
-import { handleError } from "@/lib/handleError";
-import Challenge from "@/models/Challenge";
-import Submission from "@/models/Submission";
-import User from "@/models/User";
+import { authOptions } from "@/lib/authOptions";
+import prisma from "@/lib/prisma";
+import { ChallengeStatus, Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
+import { z } from "zod";
 
 interface Params {
   params: Promise<{ submissionId: string }>;
 }
 
+const rateSubmissionSchema = z.object({
+  rating: z.number().min(1).max(5),
+  feedback: z.string().optional(),
+});
+
 export async function POST(request: Request, { params }: Params) {
+  const { submissionId } = await params;
+
   try {
-    const session = await getSession();
-    if (!session?.user || session.user.role !== "client") {
-      throw new Error("Authentication required: Must be a client.");
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== Role.CLIENT) {
+      return NextResponse.json(
+        { message: "Forbidden: Must be a client to rate a submission." },
+        { status: 403 }
+      );
     }
 
-    const { rating, feedback } = await request.json();
-    if (!rating)
-      return NextResponse.json(
-        { message: "Rating is required." },
-        { status: 400 }
-      );
+    const body = await request.json();
+    const { rating, feedback } = rateSubmissionSchema.parse(body);
 
-    await dbConnect();
+    const updatedSubmission = await prisma.$transaction(async (tx) => {
+      const submission = await tx.submission.findUnique({
+        where: { id: submissionId },
+        include: { challenge: { select: { createdById: true, status: true } } },
+      });
 
-    const { submissionId } = await params;
-    const submission = await Submission.findById(submissionId).populate({
-      path: "challengeId",
-      select: "createdBy",
+      if (!submission) {
+        throw new Error("Submission not found.");
+      }
+
+      if (submission.challenge.createdById !== session.user.id) {
+        throw new Error("Forbidden: You are not the owner of this challenge.");
+      }
+
+      const updateData: any = { rating, feedback };
+      if (submission.challenge.status !== ChallengeStatus.COMPLETED) {
+        updateData.status = "REVIEWED";
+      }
+
+      const currentSubmission = await tx.submission.update({
+        where: { id: submissionId },
+        data: updateData,
+      });
+
+      const developer = await tx.user.findUnique({
+        where: { id: currentSubmission.developerId },
+        select: { rating: true, totalRatings: true },
+      });
+
+      if (developer) {
+        const oldTotalRatingValue = developer.rating * developer.totalRatings;
+        const newTotalRatings = developer.totalRatings + 1;
+        const newAverageRating =
+          (oldTotalRatingValue + rating) / newTotalRatings;
+
+        await tx.user.update({
+          where: { id: currentSubmission.developerId },
+          data: {
+            rating: newAverageRating,
+            totalRatings: newTotalRatings,
+          },
+        });
+      }
+
+      return currentSubmission;
     });
 
-    if (!submission) throw new Error("Submission not found.");
+    return NextResponse.json(updatedSubmission);
+  } catch (error: any) {
+    console.error(`POST /api/submissions/${submissionId}/rate Error:`, error);
 
-    const challenge = await Challenge.findById(submission.challengeId);
-    if (!challenge) throw new Error("Associated challenge not found.");
-
-    if (
-      (submission.challengeId as any).createdBy.toString() !== session.user._id
-    ) {
-      throw new Error("Forbidden: You are not the owner of this challenge.");
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: "Invalid rating data provided." },
+        { status: 400 }
+      );
     }
 
-    submission.ratings = { overall: rating };
-    submission.feedback = feedback;
-
-    if (challenge.status !== "completed") {
-      submission.status = "reviewed";
+    if (error.message === "Submission not found.") {
+      return NextResponse.json({ message: error.message }, { status: 404 });
     }
-    await submission.save();
-
-    const developer = await User.findById(submission.developerId);
-    if (developer) {
-      const oldTotalRating =
-        developer.reputation.rating * developer.reputation.totalRatings;
-      const newTotalRatings = developer.reputation.totalRatings + 1;
-
-      developer.reputation.rating = (oldTotalRating + rating) / newTotalRatings;
-      developer.reputation.totalRatings = newTotalRatings;
-      await developer.save();
+    if (error.message.startsWith("Forbidden")) {
+      return NextResponse.json({ message: error.message }, { status: 403 });
     }
 
-    return NextResponse.json(submission);
-  } catch (error) {
-    return handleError(error);
+    return NextResponse.json(
+      { message: "Failed to rate submission." },
+      { status: 500 }
+    );
   }
 }

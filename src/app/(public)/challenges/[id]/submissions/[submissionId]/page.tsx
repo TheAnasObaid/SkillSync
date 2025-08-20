@@ -1,21 +1,22 @@
 import SubmissionDetailsClient from "@/components/Submission/SubmissionDetailsClient ";
 import { getSubmissionDetails } from "@/lib/data/submissions";
-import { IChallenge, ISubmission, IUser } from "@/types";
+import { Prisma } from "@prisma/client";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 interface Props {
   params: Promise<{ submissionId: string }>;
 }
 
-const SubmissionDetailsPage = async ({ params }: Props) => {
-  const { submissionId } = await params;
-
-  return (
-    <Suspense fallback={<SubmissionSkeleton />}>
-      <SubmissionDataLoader submissionId={submissionId} />
-    </Suspense>
-  );
-};
+const submissionWithDetails = Prisma.validator<Prisma.SubmissionDefaultArgs>()({
+  include: {
+    developer: true,
+    challenge: true,
+  },
+});
+type SubmissionWithDetails = Prisma.SubmissionGetPayload<
+  typeof submissionWithDetails
+>;
 
 const SubmissionDataLoader = async ({
   submissionId,
@@ -25,25 +26,21 @@ const SubmissionDataLoader = async ({
   const submission = await getSubmissionDetails(submissionId);
 
   if (!submission) {
-    return (
-      <div className="text-center py-20">
-        <h1 className="text-3xl font-bold">Submission Not Found</h1>
-        <p className="text-base-content/70 mt-2">
-          The submission you are looking for does not exist or has been removed.
-        </p>
-      </div>
-    );
+    notFound();
   }
 
   return (
-    <SubmissionDetailsClient
-      submission={
-        submission as ISubmission & {
-          developerId: IUser;
-          challengeId: IChallenge;
-        }
-      }
-    />
+    <SubmissionDetailsClient submission={submission as SubmissionWithDetails} />
+  );
+};
+
+const SubmissionDetailsPage = async ({ params }: Props) => {
+  const { submissionId } = await params;
+
+  return (
+    <Suspense fallback={<SubmissionSkeleton />}>
+      <SubmissionDataLoader submissionId={submissionId} />
+    </Suspense>
   );
 };
 

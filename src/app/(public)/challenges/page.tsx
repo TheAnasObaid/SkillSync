@@ -1,19 +1,21 @@
 import ChallengeList from "@/components/Challenge/ChallengeList";
+import PageTitle from "@/components/Common/PageTitle";
 import { Suspense } from "react";
+import { FiArchive } from "react-icons/fi";
 
 const ChallengesPage = () => {
   return (
-    <div className="max-w-7xl mx-auto py-12 px-4">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-bold">Open Challenges</h1>
-        <p className="text-lg text-base-content/70 mt-2">
-          Find your next project and showcase your skills.
-        </p>
-      </div>
+    <div className="max-w-7xl mx-auto px-4">
+      <PageTitle
+        icon={<FiArchive size={40} />}
+        title="Open Challenges"
+        subtitle="Find your next project and showcase your skills."
+      />
       <Suspense
         fallback={
-          <div className="text-center">
-            <span className="loading loading-spinner loading-lg text-secondary"></span>
+          <div className="grid grid-cols-1 gap-8">
+            <div className="skeleton h-80 w-full"></div>
+            <div className="skeleton h-80 w-full"></div>
           </div>
         }
       >

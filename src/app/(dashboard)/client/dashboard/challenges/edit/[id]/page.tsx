@@ -1,6 +1,5 @@
 import ChallengeForm from "@/components/Challenge/ChallengeForm";
 import { getChallengeById } from "@/lib/data/challenges";
-import { IChallenge } from "@/types";
 import { Suspense } from "react";
 
 interface EditChallengePageProps {
@@ -13,7 +12,6 @@ const EditChallengePage = async ({ params }: EditChallengePageProps) => {
   return (
     <div>
       <h2 className="text-3xl font-bold mb-6">Edit Challenge</h2>
-
       <Suspense fallback={<ChallengeFormSkeleton />}>
         <EditChallengeDataLoader challengeId={id} />
       </Suspense>
@@ -29,15 +27,14 @@ const EditChallengeDataLoader = async ({
   const challenge = await getChallengeById(challengeId);
 
   if (!challenge) {
-    return <div className="alert alert-error">Challenge not found.</div>;
+    return (
+      <div className="alert alert-error">
+        Challenge not found or you do not have permission to edit it.
+      </div>
+    );
   }
 
-  return (
-    <ChallengeForm
-      isEditing={true}
-      existingChallenge={challenge as IChallenge}
-    />
-  );
+  return <ChallengeForm isEditing={true} existingChallenge={challenge} />;
 };
 
 const ChallengeFormSkeleton = () => (

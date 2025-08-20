@@ -1,12 +1,12 @@
 export const getDashboardPath = (
-  role: "client" | "developer" | "admin" | null
+  role: "CLIENT" | "DEVELOPER" | "ADMIN" | null
 ): string => {
   switch (role) {
-    case "admin":
+    case "ADMIN":
       return "/admin";
-    case "developer":
+    case "DEVELOPER":
       return "/developer/dashboard";
-    case "client":
+    case "CLIENT":
       return "/client/dashboard";
     default:
       return "/";

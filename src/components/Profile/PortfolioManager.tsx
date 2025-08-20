@@ -4,34 +4,43 @@ import {
   useAddPortfolioItemMutation,
   useDeletePortfolioItemMutation,
 } from "@/hooks/mutations/useProfileMutations";
-import { DeveloperPortfolioFormData, IPortfolioItem } from "@/types";
+import { useMyProfileQuery } from "@/hooks/queries/useUserQueries";
+import { PortfolioItem } from "@prisma/client";
 import { useState } from "react";
 import { FormProvider, SubmitHandler, useForm } from "react-hook-form";
-import { FiPlus } from "react-icons/fi";
+import { FiPlus, FiTrash2 } from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import Modal from "../Common/Modal";
 import { FileInput, TextInput, Textarea } from "../Forms/FormFields";
 import PortfolioCard from "./PortfolioCard";
 
-interface Props {
-  initialPortfolio: IPortfolioItem[];
+interface PortfolioFormData {
+  title: string;
+  description: string;
+  liveUrl?: string;
+  githubUrl?: string;
+  portfolioImage?: FileList;
 }
 
-const PortfolioManager = ({ initialPortfolio }: Props) => {
+const PortfolioManager = () => {
+  const { data: user } = useMyProfileQuery();
+  const portfolio = user?.portfolio || [];
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [deleteModal, setDeleteModal] = useState({
-    isOpen: false,
-    item: null as IPortfolioItem | null,
-  });
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    item?: PortfolioItem | null;
+  }>({ isOpen: false, item: null });
 
   const { mutate: addItem, isPending: isAdding } =
     useAddPortfolioItemMutation();
+
   const { mutate: deleteItem, isPending: isDeleting } =
     useDeletePortfolioItemMutation();
 
-  const formMethods = useForm<DeveloperPortfolioFormData>();
+  const formMethods = useForm<PortfolioFormData>();
 
-  const handleAddSubmit: SubmitHandler<DeveloperPortfolioFormData> = (data) => {
+  const handleAddSubmit: SubmitHandler<PortfolioFormData> = (data) => {
     const formData = new FormData();
     formData.append("title", data.title);
     formData.append("description", data.description);
@@ -50,7 +59,7 @@ const PortfolioManager = ({ initialPortfolio }: Props) => {
 
   const handleDeleteConfirm = () => {
     if (deleteModal.item) {
-      deleteItem(deleteModal.item._id!, {
+      deleteItem(deleteModal.item.id, {
         onSuccess: () => setDeleteModal({ isOpen: false, item: null }),
       });
     }
@@ -59,20 +68,20 @@ const PortfolioManager = ({ initialPortfolio }: Props) => {
   return (
     <>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">My Portfolio</h2>
+        <h2 className="text-3xl font-bold">My Portfolio</h2>
         <button
-          className="btn btn-primary btn-sm"
+          className="btn btn-primary"
           onClick={() => setIsModalOpen(true)}
         >
           <FiPlus /> Add Project
         </button>
       </div>
 
-      {initialPortfolio.length > 0 ? (
+      {portfolio.length > 0 ? (
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {initialPortfolio.map((item) => (
+          {portfolio.map((item) => (
             <PortfolioCard
-              key={item._id}
+              key={item.id}
               item={item}
               onDelete={() => setDeleteModal({ isOpen: true, item })}
               isOwner={true}
@@ -145,6 +154,7 @@ const PortfolioManager = ({ initialPortfolio }: Props) => {
         confirmText="Yes, Delete"
         variant="error"
         isActionInProgress={isDeleting}
+        icon={<FiTrash2 size={48} />}
       />
     </>
   );

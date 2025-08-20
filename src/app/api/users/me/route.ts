@@ -1,58 +1,93 @@
-import dbConnect from "@/lib/dbConnect";
-import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import User from "@/models/User";
 import { NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth/next";
+import { z } from "zod";
+import { authOptions } from "@/lib/authOptions";
+
+const updateProfileSchema = z
+  .object({
+    firstName: z.string().min(1).optional(),
+    lastName: z.string().optional(),
+    bio: z.string().optional(),
+    companyName: z.string().optional(),
+    skills: z.array(z.string()).optional(),
+    experience: z.string().optional(),
+  })
+  .strict();
 
 export async function GET() {
   try {
-    const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { message: "Authentication required." },
+        { status: 401 }
+      );
+    }
 
-    await dbConnect();
-    const user = await User.findById(session.user._id)
-      .select("-password")
-      .lean();
-    if (!user) throw new Error("User not found.");
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        portfolio: {
+          orderBy: { createdAt: "desc" },
+        },
+        submissions: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            challenge: {
+              select: { id: true, title: true, prize: true, status: true },
+            },
+          },
+        },
+      },
+    });
 
-    return NextResponse.json(user);
+    if (!user) {
+      return NextResponse.json({ message: "User not found." }, { status: 404 });
+    }
+
+    const { password, ...userWithoutPassword } = user;
+    return NextResponse.json(userWithoutPassword);
   } catch (error) {
-    return handleError(error);
+    console.error("GET /api/users/me Error:", error);
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }
 
 export async function PUT(request: Request) {
   try {
-    const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { message: "Authentication required." },
+        { status: 401 }
+      );
+    }
 
     const body = await request.json();
+    const validatedData = updateProfileSchema.parse(body);
 
-    const updateData: { [key: string]: any } = {
-      email: body.email,
-      "profile.firstName": body.name,
-      "profile.lastName": body.profile.lastName,
-      "profile.bio": body.profile.bio,
-      "profile.skills": body.profile.skills,
-      "profile.experience": body.profile.experience,
-      "profile.companyName": body.profile.companyName,
-    };
+    const updatedUser = await prisma.user.update({
+      where: { id: session.user.id },
+      data: validatedData,
+    });
 
-    Object.keys(updateData).forEach(
-      (key) => updateData[key] === undefined && delete updateData[key]
-    );
-
-    await dbConnect();
-    const updatedUser = await User.findByIdAndUpdate(
-      session.user._id,
-      { $set: updateData },
-      { new: true, runValidators: true, context: "query" }
-    ).select("-password");
-
-    if (!updatedUser) throw new Error("User not found.");
-
-    return NextResponse.json(updatedUser);
+    const { password, ...userWithoutPassword } = updatedUser;
+    return NextResponse.json(userWithoutPassword);
   } catch (error) {
-    return handleError(error);
+    console.error("PUT /api/users/me Error:", error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: "Invalid data provided.", issues: error.issues },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }

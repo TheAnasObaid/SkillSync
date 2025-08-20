@@ -1,9 +1,7 @@
-import { getSession } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect";
-import { handleError } from "@/lib/handleError";
-import Challenge from "@/models/Challenge";
-import User from "@/models/User";
-import Submission from "@/models/Submission";
+import { authOptions } from "@/lib/authOptions";
+import prisma from "@/lib/prisma";
+import { Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 
 interface Params {
@@ -11,35 +9,60 @@ interface Params {
 }
 
 export async function GET(request: Request, { params }: Params) {
+  const { challengeId } = await params;
+
   try {
-    const session = await getSession();
-    if (!session?.user || session.user.role !== "client") {
-      throw new Error(
-        "Authentication required: Must be a client to review submissions."
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== Role.CLIENT) {
+      return NextResponse.json(
+        { message: "Forbidden: Must be a client to review submissions." },
+        { status: 403 }
       );
     }
 
-    const { challengeId } = await params;
-    await dbConnect();
+    const challenge = await prisma.challenge.findUnique({
+      where: {
+        id: challengeId,
+        createdById: session.user.id,
+      },
+    });
 
-    const challenge = await Challenge.findById(challengeId).select("createdBy");
     if (!challenge) {
-      throw new Error("Challenge not found.");
-    }
-
-    if (challenge.createdBy.toString() !== session.user._id) {
-      throw new Error(
-        "Forbidden: You are not authorized to view these submissions."
+      return NextResponse.json(
+        { message: "Forbidden: Challenge not found or you are not the owner." },
+        { status: 403 }
       );
     }
 
-    const submissions = await Submission.find({ challengeId })
-      .populate("developerId", "profile.firstName email profile.avatar")
-      .sort({ createdAt: -1 })
-      .lean();
+    const submissions = await prisma.submission.findMany({
+      where: {
+        challengeId: challengeId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        developer: {
+          select: {
+            id: true,
+            firstName: true,
+            email: true,
+
+            image: true,
+          },
+        },
+      },
+    });
 
     return NextResponse.json(submissions);
   } catch (error) {
-    return handleError(error);
+    console.error(
+      `GET /api/submissions/challenge/${challengeId}/review Error:`,
+      error
+    );
+    return NextResponse.json(
+      { message: "An internal server error occurred" },
+      { status: 500 }
+    );
   }
 }

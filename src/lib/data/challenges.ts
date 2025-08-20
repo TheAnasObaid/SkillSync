@@ -1,40 +1,61 @@
-import dbConnect from "@/lib/dbConnect";
-import Challenge from "@/models/Challenge";
-import { IChallenge } from "@/types";
-import { unstable_noStore as noStore } from "next/cache";
 import "server-only";
-import { getSession } from "../auth";
+import prisma from "@/lib/prisma";
+import { unstable_noStore as noStore } from "next/cache";
+import { ChallengeStatus, Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../authOptions";
 
-import "@/models/User"; // Eagerly import the User model to register it with Mongoose
-
-export const getAllChallenges = async (): Promise<IChallenge[]> => {
-  noStore(); // Opts out of static rendering, ensures data is fresh
+export const getAllPublicChallenges = async () => {
+  noStore();
   try {
-    await dbConnect();
-
-    const challenges = await Challenge.find({ status: "published" })
-      .populate(
-        "createdBy",
-        "profile.firstName profile.companyName profile.avatar"
-      )
-      .sort({ createdAt: -1 });
-    return JSON.parse(JSON.stringify(challenges));
+    const challenges = await prisma.challenge.findMany({
+      where: {
+        status: {
+          in: [
+            ChallengeStatus.PUBLISHED,
+            ChallengeStatus.JUDGING,
+            ChallengeStatus.COMPLETED,
+          ],
+        },
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        createdBy: {
+          select: {
+            firstName: true,
+            companyName: true,
+            image: true,
+          },
+        },
+        _count: {
+          select: { submissions: true },
+        },
+      },
+    });
+    return challenges;
   } catch (error) {
-    console.error("Database Error: Failed to fetch all challenges.", error);
+    console.error("Database Error: Failed to fetch public challenges.", error);
     throw new Error("Could not fetch challenges.");
   }
 };
 
-export const getChallengeById = async (
-  id: string
-): Promise<IChallenge | null> => {
+export const getChallengeById = async (id: string) => {
   noStore();
   try {
-    await dbConnect();
-    const challenge = await Challenge.findById(id)
-      .populate("createdBy", "profile.firstName profile.companyName")
-      .lean();
-    return challenge ? JSON.parse(JSON.stringify(challenge)) : null;
+    const challenge = await prisma.challenge.findUnique({
+      where: { id },
+      include: {
+        createdBy: {
+          select: {
+            id: true,
+            firstName: true,
+            companyName: true,
+            image: true,
+          },
+        },
+      },
+    });
+    return challenge;
   } catch (error) {
     console.error(
       `Database Error: Failed to fetch challenge by ID: ${id}`,
@@ -44,22 +65,30 @@ export const getChallengeById = async (
   }
 };
 
-export const getMyChallenges = async (): Promise<IChallenge[]> => {
+export const getMyChallengesAsClient = async () => {
   noStore();
   try {
-    const session = await getSession();
-    if (!session?.user) {
-      throw new Error("Authentication required.");
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user || session.user.role !== Role.CLIENT) {
+      return [];
     }
 
-    await dbConnect();
-    const challenges = await Challenge.find({
-      createdBy: session.user._id,
-    }).sort({ createdAt: -1 });
-
-    return JSON.parse(JSON.stringify(challenges));
+    const challenges = await prisma.challenge.findMany({
+      where: { createdById: session.user.id },
+      orderBy: { createdAt: "desc" },
+      include: {
+        _count: {
+          select: { submissions: true },
+        },
+      },
+    });
+    return challenges;
   } catch (error) {
-    console.error("Database Error: Failed to fetch user's challenges.", error);
+    console.error(
+      "Database Error: Failed to fetch client's challenges.",
+      error
+    );
     throw new Error("Could not fetch your challenges.");
   }
 };

@@ -10,15 +10,17 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
 
+const MY_CHALLENGES_QUERY_KEY = ["challenges", "my-client"];
+
 export const useCreateChallengeMutation = () => {
   const queryClient = useQueryClient();
   const router = useRouter();
 
   return useMutation({
-    mutationFn: createChallenge,
+    mutationFn: (formData: FormData) => createChallenge(formData),
     onSuccess: () => {
       toast.success("Challenge created successfully!");
-      queryClient.invalidateQueries({ queryKey: ["challenges", "my"] });
+      queryClient.invalidateQueries({ queryKey: MY_CHALLENGES_QUERY_KEY });
       router.push("/client/dashboard/challenges");
     },
     onError: (error: any) => {
@@ -41,8 +43,8 @@ export const useUpdateChallengeMutation = () => {
     mutationFn: (variables: UpdateChallengeVars) => updateChallenge(variables),
     onSuccess: (_, variables) => {
       toast.success("Challenge updated!");
+      queryClient.invalidateQueries({ queryKey: MY_CHALLENGES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ["challenges", variables.id] });
-      queryClient.invalidateQueries({ queryKey: ["challenges", "my"] });
       router.push("/client/dashboard/challenges");
     },
     onError: (error: any) => {
@@ -57,10 +59,10 @@ export const useDeleteChallengeMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: deleteChallenge,
+    mutationFn: (challengeId: string) => deleteChallenge(challengeId),
     onSuccess: () => {
       toast.success("Challenge deleted.");
-      queryClient.invalidateQueries({ queryKey: ["challenges", "my"] });
+      queryClient.invalidateQueries({ queryKey: MY_CHALLENGES_QUERY_KEY });
     },
     onError: (error: any) => {
       toast.error(
@@ -74,11 +76,11 @@ export const useFundChallengeMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: fundChallenge,
-    onSuccess: (data, challengeId) => {
+    mutationFn: (challengeId: string) => fundChallenge(challengeId),
+    onSuccess: (_, challengeId) => {
       toast.success("Challenge funded successfully!");
+      queryClient.invalidateQueries({ queryKey: MY_CHALLENGES_QUERY_KEY });
       queryClient.invalidateQueries({ queryKey: ["challenges", challengeId] });
-      queryClient.invalidateQueries({ queryKey: ["challenges", "my"] });
     },
     onError: (error: any) => {
       toast.error(

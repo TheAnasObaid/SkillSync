@@ -1,31 +1,34 @@
 "use client";
 
 import { useDeletePortfolioItemMutation } from "@/hooks/mutations/useProfileMutations";
-import { useAuthStore } from "@/store/authStore";
-import { IPortfolioItem } from "@/types";
+import { PortfolioItem } from "@prisma/client";
+import { useSession } from "next-auth/react";
 import { useState } from "react";
+import { FiTrash2 } from "react-icons/fi";
 import ConfirmationModal from "../Common/ConfirmationModal";
 import PortfolioCard from "./PortfolioCard";
 
 interface Props {
-  initialPortfolio: IPortfolioItem[];
+  initialPortfolio: PortfolioItem[];
   profileOwnerId: string;
 }
 
 const PortfolioList = ({ initialPortfolio, profileOwnerId }: Props) => {
-  const { user: loggedInUser } = useAuthStore();
-  const isOwner = loggedInUser?._id === profileOwnerId;
+  const { data: session } = useSession();
+  const loggedInUser = session?.user;
 
-  const [deleteModal, setDeleteModal] = useState({
-    isOpen: false,
-    item: null as IPortfolioItem | null,
-  });
+  const isOwner = loggedInUser?.id === profileOwnerId;
+
+  const [deleteModal, setDeleteModal] = useState<{
+    isOpen: boolean;
+    item: PortfolioItem | null;
+  }>({ isOpen: false, item: null });
   const { mutate: deleteItem, isPending: isDeleting } =
     useDeletePortfolioItemMutation();
 
   const handleDeleteConfirm = () => {
     if (deleteModal.item) {
-      deleteItem(deleteModal.item._id!, {
+      deleteItem(deleteModal.item.id, {
         onSuccess: () => setDeleteModal({ isOpen: false, item: null }),
       });
     }
@@ -39,7 +42,7 @@ const PortfolioList = ({ initialPortfolio, profileOwnerId }: Props) => {
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {initialPortfolio.map((item) => (
               <PortfolioCard
-                key={item._id}
+                key={item.id}
                 item={item}
                 isOwner={isOwner}
                 onDelete={() => setDeleteModal({ isOpen: true, item })}
@@ -47,7 +50,7 @@ const PortfolioList = ({ initialPortfolio, profileOwnerId }: Props) => {
             ))}
           </div>
         ) : (
-          <div className="text-center text-base-content/70">
+          <div className="text-center text-base-content/70 py-10">
             <p>
               This developer hasn't added any projects to their portfolio yet.
             </p>
@@ -63,6 +66,7 @@ const PortfolioList = ({ initialPortfolio, profileOwnerId }: Props) => {
         confirmText="Yes, Delete"
         variant="error"
         isActionInProgress={isDeleting}
+        icon={<FiTrash2 size={48} />}
       />
     </>
   );

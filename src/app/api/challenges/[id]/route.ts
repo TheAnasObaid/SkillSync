@@ -1,32 +1,33 @@
-import dbConnect from "@/lib/dbConnect";
-import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import Challenge from "@/models/Challenge";
-import Submission from "@/models/Submission";
-import { NextResponse } from "next/server";
-import { writeFile } from "fs/promises";
-import path from "path";
+import { authOptions } from "@/lib/authOptions";
+import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
 import { challengeApiSchema } from "@/lib/validationSchemas";
+import { Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
+import { NextResponse } from "next/server";
+import { z } from "zod";
 
 interface Params {
   params: Promise<{ id: string }>;
 }
 
-// --- UPDATE A CHALLENGE (The Fix) ---
 export async function PUT(request: Request, { params }: Params) {
+  const { id } = await params;
+
   try {
-    const session = await getSession();
-    if (!session?.user || session.user.role !== "client") {
-      throw new Error("Authentication required.");
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== Role.CLIENT) {
+      return NextResponse.json(
+        { message: "Forbidden: Must be a client to update a challenge." },
+        { status: 403 }
+      );
     }
 
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
-    // Convert FormData to a plain object for Zod validation
     const formObject: { [key: string]: any } = {};
     formData.forEach((value, key) => {
-      // Don't include the file in the object for Zod parsing
       if (key !== "file") {
         formObject[key] = value;
       }
@@ -34,76 +35,121 @@ export async function PUT(request: Request, { params }: Params) {
 
     const validatedData = challengeApiSchema.parse(formObject);
 
-    // This will be the final object sent to MongoDB
-    const updatePayload: any = { ...validatedData };
+    const dataToUpdate: any = { ...validatedData };
 
     if (file && file.size > 0) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      // Create a unique filename
-      const filename = `${session.user._id}-${Date.now()}-${file.name.replace(
-        /\s/g,
-        "_"
-      )}`;
-      const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      const filePath = path.join(uploadsDir, filename);
+      const filePath = `public/${
+        session.user.id
+      }/challenges/${id}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("project-files")
+        .upload(filePath, file);
 
-      await writeFile(filePath, buffer);
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        return NextResponse.json(
+          { message: "Failed to upload updated challenge file." },
+          { status: 500 }
+        );
+      }
 
-      // If a new file is uploaded, overwrite the existing files array
-      updatePayload.files = [{ name: file.name, path: `uploads/${filename}` }];
-    } else {
-      // IMPORTANT: If no new file is uploaded, we must NOT overwrite the existing files.
-      // We explicitly remove it from the payload so it doesn't get set to 'undefined'.
-      delete updatePayload.files;
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("project-files").getPublicUrl(filePath);
+      // Overwrite the files array with the new file info
+      dataToUpdate.files = [{ name: file.name, path: publicUrl }];
     }
 
-    await dbConnect();
-    const { id } = await params;
-    const updatedChallenge = await Challenge.findOneAndUpdate(
-      // Condition: Find the challenge by ID AND ensure the logged-in user is the owner
-      { _id: id, createdBy: session.user._id },
-      // Update with the new data
-      { $set: updatePayload },
-      // Options: Return the new, updated document
-      { new: true, runValidators: true }
-    );
-
-    if (!updatedChallenge) {
-      throw new Error(
-        "Forbidden: Challenge not found or you are not the owner."
-      );
-    }
+    const updatedChallenge = await prisma.challenge.update({
+      where: {
+        id: id,
+        createdById: session.user.id,
+      },
+      data: dataToUpdate,
+    });
 
     return NextResponse.json(updatedChallenge);
   } catch (error) {
-    return handleError(error);
+    console.error(`PUT /api/challenges/${id} Error:`, error);
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: "Invalid form data.", issues: error.issues },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { message: "Failed to update challenge." },
+      { status: 500 }
+    );
   }
 }
 
-// --- DELETE A CHALLENGE (This function was already correct) ---
 export async function DELETE(request: Request, { params }: Params) {
+  const { id } = await params;
+
   try {
-    const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
-
-    await dbConnect();
-    const { id } = await params;
-
-    const challenge = await Challenge.findOneAndDelete({
-      _id: id,
-      createdBy: session.user._id,
-    });
-
-    if (!challenge) {
-      throw new Error(
-        "Forbidden: Challenge not found or you are not the owner."
+    const session = await getServerSession(authOptions);
+    if (!session?.user) {
+      return NextResponse.json(
+        { message: "Authentication required." },
+        { status: 401 }
       );
     }
 
-    await Submission.deleteMany({ challengeId: id });
-    return NextResponse.json({ message: "Challenge deleted successfully." });
+    const challenge = await prisma.challenge.findUnique({
+      where: { id },
+      select: { createdById: true, files: true },
+    });
+
+    if (!challenge) {
+      return NextResponse.json(
+        { message: "Challenge not found." },
+        { status: 404 }
+      );
+    }
+
+    const isOwner = challenge.createdById === session.user.id;
+    const isAdmin = session.user.role === Role.ADMIN;
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json(
+        {
+          message:
+            "Forbidden: You do not have permission to delete this challenge.",
+        },
+        { status: 403 }
+      );
+    }
+
+    if (challenge.files && challenge.files.length > 0) {
+      const filePaths = (challenge.files as any[]).map((file) => {
+        const url = new URL(file.path);
+        return url.pathname.substring(url.pathname.indexOf("/public/") + 8);
+      });
+
+      const { error: deleteError } = await supabase.storage
+        .from("project-files")
+        .remove(filePaths);
+
+      if (deleteError) {
+        console.error("Supabase file delete error:", deleteError);
+        // We can choose to either stop the process or just log the error and continue.
+        // For now, we'll log it and proceed to delete the DB record.
+      }
+    }
+
+    await prisma.challenge.delete({
+      where: { id: id },
+    });
+
+    return NextResponse.json({
+      message: "Challenge and associated files deleted successfully.",
+    });
   } catch (error) {
-    return handleError(error);
+    console.error(`DELETE /api/challenges/${id} Error:`, error);
+    return NextResponse.json(
+      { message: "Failed to delete challenge." },
+      { status: 500 }
+    );
   }
 }

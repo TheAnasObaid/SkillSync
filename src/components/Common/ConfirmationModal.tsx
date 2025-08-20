@@ -14,7 +14,7 @@ interface ConfirmationModalProps {
   cancelText?: string;
   variant?: "primary" | "error" | "warning" | "info";
   isActionInProgress?: boolean;
-  icon?: ReactNode; // FIX: Add the optional icon prop
+  icon?: ReactNode;
 }
 
 const ConfirmationModal = ({
@@ -27,7 +27,7 @@ const ConfirmationModal = ({
   cancelText = "Cancel",
   variant = "primary",
   isActionInProgress = false,
-  icon, // FIX: Destructure the new prop
+  icon,
 }: ConfirmationModalProps) => {
   const themeClasses = {
     primary: { button: "btn-primary", icon: "text-primary" },
@@ -36,7 +36,6 @@ const ConfirmationModal = ({
     info: { button: "btn-info", icon: "text-info" },
   };
 
-  // FIX: Define default icons to use if a specific one isn't provided
   const getDefaultIcon = () => {
     switch (variant) {
       case "error":
@@ -50,7 +49,6 @@ const ConfirmationModal = ({
   };
 
   const currentTheme = themeClasses[variant];
-  // FIX: Use the provided icon, or fall back to the default
   const displayIcon = icon || getDefaultIcon();
 
   return (

@@ -1,14 +1,10 @@
 "use client";
 
-import { IUser } from "@/types";
-
-type UserUpdateAction =
-  | { role: "developer" | "client" | "admin" }
-  | { isVerified: boolean }
-  | { accountStatus: "active" | "banned" };
+import { AccountStatus, Role, User } from "@prisma/client";
+import { UserUpdateAction } from "./UserManagementTable";
 
 interface UserActionMenuProps {
-  user: IUser;
+  user: User;
   onUpdate: (userId: string, updates: UserUpdateAction) => void;
 }
 
@@ -18,23 +14,23 @@ const UserActionMenu = ({ user, onUpdate }: UserActionMenuProps) => {
       tabIndex={0}
       className="menu border font-normal border-base-300 dropdown-content z-[1] p-2 shadow bg-base-200 rounded-box w-52"
     >
-      {!user.isVerified && (
+      {!user.emailVerified && (
         <li>
-          <a onClick={() => onUpdate(user._id, { isVerified: true })}>
+          <a onClick={() => onUpdate(user.id, { setVerified: true })}>
             Mark as Verified
           </a>
         </li>
       )}
 
-      {user.role === "admin" ? (
+      {user.role === Role.ADMIN ? (
         <>
           <li>
-            <a onClick={() => onUpdate(user._id, { role: "developer" })}>
+            <a onClick={() => onUpdate(user.id, { role: Role.DEVELOPER })}>
               Demote to Developer
             </a>
           </li>
           <li>
-            <a onClick={() => onUpdate(user._id, { role: "client" })}>
+            <a onClick={() => onUpdate(user.id, { role: Role.CLIENT })}>
               Demote to Client
             </a>
           </li>
@@ -42,20 +38,20 @@ const UserActionMenu = ({ user, onUpdate }: UserActionMenuProps) => {
       ) : (
         <>
           <li>
-            <a onClick={() => onUpdate(user._id, { role: "admin" })}>
+            <a onClick={() => onUpdate(user.id, { role: Role.ADMIN })}>
               Promote to Admin
             </a>
           </li>
-          {user.role === "client" && (
+          {user.role === Role.CLIENT && (
             <li>
-              <a onClick={() => onUpdate(user._id, { role: "developer" })}>
+              <a onClick={() => onUpdate(user.id, { role: Role.DEVELOPER })}>
                 Change to Developer
               </a>
             </li>
           )}
-          {user.role === "developer" && (
+          {user.role === Role.DEVELOPER && (
             <li>
-              <a onClick={() => onUpdate(user._id, { role: "client" })}>
+              <a onClick={() => onUpdate(user.id, { role: Role.CLIENT })}>
                 Change to Client
               </a>
             </li>
@@ -64,11 +60,14 @@ const UserActionMenu = ({ user, onUpdate }: UserActionMenuProps) => {
       )}
 
       <div className="divider my-1"></div>
-      {user.accountStatus === "active" ? (
+
+      {user.accountStatus === AccountStatus.ACTIVE ? (
         <li>
           <a
             className="text-error"
-            onClick={() => onUpdate(user._id, { accountStatus: "banned" })}
+            onClick={() =>
+              onUpdate(user.id, { accountStatus: AccountStatus.BANNED })
+            }
           >
             Ban User
           </a>
@@ -77,7 +76,9 @@ const UserActionMenu = ({ user, onUpdate }: UserActionMenuProps) => {
         <li>
           <a
             className="text-success"
-            onClick={() => onUpdate(user._id, { accountStatus: "active" })}
+            onClick={() =>
+              onUpdate(user.id, { accountStatus: AccountStatus.ACTIVE })
+            }
           >
             Unban User
           </a>

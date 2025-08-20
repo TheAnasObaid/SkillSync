@@ -1,12 +1,24 @@
 "use client";
 
-import { IUser } from "@/types";
+import { AccountStatus, User } from "@prisma/client";
 import { FiMoreVertical, FiSlash } from "react-icons/fi";
-import UserActionMenu from "./UserActionMenu";
 import UserAvatar from "../Profile/UserAvatar";
+import UserActionMenu from "./UserActionMenu";
+
+type UserCardData = Pick<
+  User,
+  | "id"
+  | "firstName"
+  | "lastName"
+  | "email"
+  | "image"
+  | "role"
+  | "accountStatus"
+  | "emailVerified"
+>;
 
 interface UserCardProps {
-  user: IUser;
+  user: UserCardData;
   isCurrentUser: boolean;
   onUpdate: (userId: string, updates: any) => void;
 }
@@ -15,19 +27,16 @@ const UserCard = ({ user, isCurrentUser, onUpdate }: UserCardProps) => {
   return (
     <div
       className={`card bg-base-200/50 border border-base-300 ${
-        user.accountStatus === "banned" ? "bg-error/10" : ""
+        user.accountStatus === AccountStatus.BANNED ? "bg-error/10" : ""
       }`}
     >
       <div className="card-body p-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center gap-3">
-            <UserAvatar
-              name={user.profile?.firstName}
-              avatarUrl={user.profile?.avatar}
-            />
+            <UserAvatar name={user.firstName} image={user.image} />
             <div>
               <p className="font-bold">
-                {user.profile?.firstName} {user.profile?.lastName}
+                {user.firstName} {user.lastName}
               </p>
               <p className="text-xs text-base-content/60">{user.email}</p>
             </div>
@@ -42,7 +51,7 @@ const UserCard = ({ user, isCurrentUser, onUpdate }: UserCardProps) => {
               {isCurrentUser ? <FiSlash /> : <FiMoreVertical />}
             </button>
             {!isCurrentUser && (
-              <UserActionMenu user={user} onUpdate={onUpdate} />
+              <UserActionMenu user={user as User} onUpdate={onUpdate} />
             )}
           </div>
         </div>
@@ -50,14 +59,16 @@ const UserCard = ({ user, isCurrentUser, onUpdate }: UserCardProps) => {
         <div className="divider my-2"></div>
 
         <div className="flex justify-between items-center">
-          <span className="badge badge-ghost">{user.role}</span>
+          <span className="badge badge-ghost capitalize">
+            {user.role.toLowerCase()}
+          </span>
           <div className="flex items-center gap-2">
-            {user.accountStatus === "active" ? (
+            {user.accountStatus === AccountStatus.ACTIVE ? (
               <div className="badge badge-success badge-soft">Active</div>
             ) : (
               <div className="badge badge-error badge-soft">Banned</div>
             )}
-            {user.isVerified ? (
+            {user.emailVerified ? (
               <div className="badge badge-info badge-soft">Verified</div>
             ) : (
               <div className="badge badge-warning badge-soft">Not Verified</div>

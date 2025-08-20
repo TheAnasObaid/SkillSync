@@ -1,26 +1,21 @@
-import { getAllChallenges } from "@/lib/data/challenges";
-import { IChallenge } from "@/types";
-import EmptyState from "../Common/EmptyState";
+import { getAllPublicChallenges } from "@/lib/data/challenges";
 import ChallengeCard from "./ChallengeCard";
 
 const ChallengeList = async () => {
-  const challenges: IChallenge[] = await getAllChallenges();
+  const challenges = await getAllPublicChallenges();
 
   if (!challenges || challenges.length === 0) {
     return (
-      <EmptyState
-        title="No Open Challenges"
-        message="There are no challenges available at the moment. Please check back soon!"
-        ctaText="Return Home"
-        ctaLink="/"
-      />
+      <p className="text-center text-base-content/70">
+        No challenges available at the moment.
+      </p>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <div className="grid grid-cols-1 gap-8">
       {challenges.map((challenge) => (
-        <ChallengeCard key={challenge._id} challenge={challenge} />
+        <ChallengeCard key={challenge.id} challenge={challenge} />
       ))}
     </div>
   );

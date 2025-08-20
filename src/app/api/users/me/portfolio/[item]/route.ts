@@ -1,27 +1,47 @@
+import { authOptions } from "@/lib/authOptions";
+import prisma from "@/lib/prisma";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import dbConnect from "@/lib/dbConnect";
-import User from "@/models/User";
 
 interface Params {
   params: Promise<{ itemId: string }>;
 }
 
 export async function DELETE(_: Request, { params }: Params) {
+  const { itemId } = await params;
+
   try {
-    const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { message: "Authentication required." },
+        { status: 401 }
+      );
+    }
 
-    await dbConnect();
-
-    const { itemId } = await params;
-    await User.findByIdAndUpdate(session.user._id, {
-      $pull: { "profile.portfolio": { _id: itemId } },
+    await prisma.portfolioItem.delete({
+      where: {
+        id: itemId,
+        userId: session.user.id,
+      },
     });
 
     return NextResponse.json({ message: "Portfolio item deleted." });
   } catch (error) {
-    return handleError(error);
+    console.error(`DELETE /api/users/me/portfolio/${itemId} Error:`, error);
+
+    if ((error as any).code === "P2025") {
+      return NextResponse.json(
+        {
+          message: "Item not found or you do not have permission to delete it.",
+        },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }

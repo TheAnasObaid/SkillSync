@@ -2,9 +2,7 @@ import "server-only";
 
 const config = {
   clientUrl: process.env.CLIENT_URL,
-  serverUrl: process.env.NEXT_PUBLIC_API_URL,
-  mongoUri: process.env.MONGO_URI,
-  jwtSecret: process.env.JWT_SECRET,
+  databaseUrl: process.env.DATABASE_URL,
   email: {
     host: process.env.EMAIL_HOST,
     port: parseInt(process.env.EMAIL_PORT || "587", 10),
@@ -14,9 +12,9 @@ const config = {
   },
 };
 
-if (!config.mongoUri || !config.jwtSecret || !config.clientUrl) {
+if (!config.databaseUrl || !config.clientUrl) {
   throw new Error(
-    "FATAL ERROR: A required environment variable (MONGO_URI, JWT_SECRET, or CLIENT_URL) is missing."
+    "FATAL ERROR: A required environment variable (DATABASE_URL or CLIENT_URL) is missing."
   );
 }
 

@@ -1,23 +1,40 @@
-import dbConnect from "@/lib/dbConnect";
-import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import Challenge from "@/models/Challenge";
+import { authOptions } from "@/lib/authOptions";
+import prisma from "@/lib/prisma";
+import { Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const session = await getSession();
-    if (!session?.user || session.user.role !== "client") {
-      throw new Error("Authentication required.");
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user || session.user.role !== Role.CLIENT) {
+      return NextResponse.json(
+        { message: "Forbidden: Must be a client to view this resource." },
+        { status: 403 }
+      );
     }
 
-    await dbConnect();
-    const challenges = await Challenge.find({
-      createdBy: session.user._id,
-    }).sort({ createdAt: -1 });
+    const challenges = await prisma.challenge.findMany({
+      where: {
+        createdById: session.user.id,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+      include: {
+        _count: {
+          select: { submissions: true },
+        },
+      },
+    });
 
     return NextResponse.json(challenges);
   } catch (error) {
-    return handleError(error);
+    console.error("GET /api/challenges/me Error:", error);
+    return NextResponse.json(
+      { message: "An internal server error occurred" },
+      { status: 500 }
+    );
   }
 }

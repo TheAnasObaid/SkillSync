@@ -1,11 +1,19 @@
-import { IUser } from "@/types";
 import { FiAward } from "react-icons/fi";
+import { Prisma } from "@prisma/client";
 
-interface Props {
-  user: IUser;
-}
+const userReputationData = Prisma.validator<Prisma.UserDefaultArgs>()({
+  select: {
+    rating: true,
+    totalRatings: true,
+    completedChallenges: true,
+  },
+});
 
-const Reputation = ({ user }: Props) => {
+type UserReputationProps = {
+  user: Prisma.UserGetPayload<typeof userReputationData>;
+};
+
+const Reputation = ({ user }: UserReputationProps) => {
   return (
     <div className="card bg-base-200/50 border border-base-300">
       <div className="card-body">
@@ -16,17 +24,16 @@ const Reputation = ({ user }: Props) => {
           <div className="stat">
             <div className="stat-title">Avg. Rating</div>
             <div className="stat-value text-primary">
-              {user.reputation?.rating.toFixed(1) || "N/A"} ★
+              {user.rating.toFixed(1) || "N/A"} ★
             </div>
-            {/* FIX: Changed from completedChallenges to totalRatings for accuracy */}
             <div className="stat-desc">
-              From {user.reputation?.totalRatings || 0} reviews
+              From {user.totalRatings || 0} reviews
             </div>
           </div>
           <div className="stat">
             <div className="stat-title">Challenges Won</div>
             <div className="stat-value text-secondary">
-              {user.reputation?.completedChallenges || 0}
+              {user.completedChallenges || 0}
             </div>
             <div className="stat-desc">Total successful projects</div>
           </div>

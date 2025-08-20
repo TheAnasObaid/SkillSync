@@ -1,6 +1,6 @@
 import RecentChallengePreview from "@/components/Client/RecentChallengePreview";
 import StatCardGrid, { StatItem } from "@/components/Common/StatCardGrid";
-import { getMyChallenges } from "@/lib/data/challenges";
+import { getMyChallengesAsClient } from "@/lib/data/challenges";
 import { getMyClientStats } from "@/lib/data/users";
 import Link from "next/link";
 import { Suspense } from "react";
@@ -9,7 +9,7 @@ import { FiArchive, FiCheckSquare, FiClipboard } from "react-icons/fi";
 const ClientDashboardPage = async () => {
   const [statsData, allChallengesData] = await Promise.all([
     getMyClientStats(),
-    getMyChallenges(),
+    getMyChallengesAsClient(),
   ]);
 
   const recentChallenges = allChallengesData.slice(0, 3);
@@ -48,11 +48,9 @@ const ClientDashboardPage = async () => {
           Here's a summary of your posted challenges.
         </p>
       </div>
-
       <Suspense fallback={<StatCardGridSkeleton />}>
         <StatCardGrid stats={clientStats} />
       </Suspense>
-
       <div>
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-2xl font-bold">Recent Challenges</h2>

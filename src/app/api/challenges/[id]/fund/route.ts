@@ -1,38 +1,51 @@
+import { authOptions } from "@/lib/authOptions";
+import prisma from "@/lib/prisma";
+import { Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import Challenge from "@/models/Challenge";
-import dbConnect from "@/lib/dbConnect";
 
 interface Params {
   params: Promise<{ id: string }>;
 }
 
 export async function PATCH(request: Request, { params }: Params) {
+  const { id } = await params;
+
   try {
-    const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
+    const session = await getServerSession(authOptions);
 
-    await dbConnect();
-
-    const { id } = await params;
-    const challenge = await Challenge.findOneAndUpdate(
-      { _id: id, createdBy: session.user._id }, // Security check
-      { isFunded: true },
-      { new: true, runValidators: true }
-    );
-
-    if (!challenge) {
-      throw new Error(
-        "Forbidden: Challenge not found or you are not the owner."
+    if (!session?.user || session.user.role !== Role.CLIENT) {
+      return NextResponse.json(
+        { message: "Forbidden: Must be a client to fund a challenge." },
+        { status: 403 }
       );
     }
+
+    const challenge = await prisma.challenge.update({
+      where: {
+        id: id,
+        createdById: session.user.id,
+      },
+      data: { isFunded: true },
+    });
 
     return NextResponse.json({
       message: "Challenge successfully funded.",
       challenge,
     });
-  } catch (error) {
-    return handleError(error);
+  } catch (error: any) {
+    console.error(`PATCH /api/challenges/${id}/fund Error:`, error);
+
+    if (error.code === "P2025") {
+      return NextResponse.json(
+        { message: "Challenge not found or you are not the owner." },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(
+      { message: "Failed to fund challenge." },
+      { status: 500 }
+    );
   }
 }

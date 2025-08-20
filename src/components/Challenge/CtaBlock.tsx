@@ -1,6 +1,6 @@
 "use client";
 
-import { Role } from "@/types";
+import { Role } from "@prisma/client";
 import Link from "next/link";
 import { FiGitBranch, FiLogIn, FiInfo } from "react-icons/fi";
 
@@ -10,7 +10,7 @@ interface CtaBlockProps {
 }
 
 const CtaBlock = ({ role, onOpenModal }: CtaBlockProps) => {
-  if (role === "developer") {
+  if (role === "DEVELOPER") {
     return (
       <div className="card bg-primary/10 border border-primary/20 text-center">
         <div className="card-body p-6">
@@ -30,7 +30,7 @@ const CtaBlock = ({ role, onOpenModal }: CtaBlockProps) => {
     );
   }
 
-  if (role === "client") {
+  if (role === "CLIENT") {
     return (
       <div className="alert alert-info alert-soft">
         <FiInfo />

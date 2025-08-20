@@ -1,6 +1,10 @@
 "use client";
 
-import { getAllSubmissions, getAllUsers } from "@/services/api/admin";
+import {
+  getAllSubmissions,
+  getAllUsers,
+  AdminSubmission,
+} from "@/services/api/admin";
 import { useQuery } from "@tanstack/react-query";
 
 export const useAllUsersQuery = () => {
@@ -11,7 +15,7 @@ export const useAllUsersQuery = () => {
 };
 
 export const useAllSubmissionsQuery = () => {
-  return useQuery({
+  return useQuery<AdminSubmission[]>({
     queryKey: ["submissions", "all"],
     queryFn: getAllSubmissions,
   });

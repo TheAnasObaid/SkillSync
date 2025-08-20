@@ -1,15 +1,18 @@
-import dbConnect from "@/lib/dbConnect";
-import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import User from "@/models/User";
-import { writeFile } from "fs/promises";
+import { authOptions } from "@/lib/authOptions";
+import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
-import path from "path";
 
 export async function POST(request: Request) {
   try {
-    const session = await getSession();
-    if (!session?.user) throw new Error("Authentication required.");
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) {
+      return NextResponse.json(
+        { message: "Authentication required." },
+        { status: 401 }
+      );
+    }
 
     const formData = await request.formData();
     const file = formData.get("portfolioImage") as File | null;
@@ -21,44 +24,42 @@ export async function POST(request: Request) {
       );
     }
 
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-    const filename = `${session.user._id}-portfolio-${Date.now()}${path.extname(
+    const filePath = `public/${session.user.id}/portfolio-${Date.now()}-${
       file.name
-    )}`;
-    const uploadsDir = path.join(
-      process.cwd(),
-      "public",
-      "uploads",
-      "portfolio"
-    );
-    const filePath = path.join(uploadsDir, filename);
+    }`;
+    const { error: uploadError } = await supabase.storage
+      .from("project-files")
+      .upload(filePath, file);
 
-    const fs = require("fs");
-    if (!fs.existsSync(uploadsDir)) {
-      fs.mkdirSync(uploadsDir, { recursive: true });
+    if (uploadError) {
+      console.error("Supabase upload error:", uploadError);
+      return NextResponse.json(
+        { message: "Failed to upload portfolio image." },
+        { status: 500 }
+      );
     }
 
-    await writeFile(filePath, buffer);
-    const imageUrl = `uploads/portfolio/${filename}`;
+    const {
+      data: { publicUrl },
+    } = supabase.storage.from("project-files").getPublicUrl(filePath);
 
-    const newItem = {
-      title: formData.get("title"),
-      description: formData.get("description"),
-      liveUrl: formData.get("liveUrl"),
-      githubUrl: formData.get("githubUrl"),
-      imageUrl: imageUrl,
-    };
+    const newItem = await prisma.portfolioItem.create({
+      data: {
+        title: formData.get("title") as string,
+        description: formData.get("description") as string,
+        liveUrl: formData.get("liveUrl") as string | null,
+        githubUrl: formData.get("githubUrl") as string | null,
+        imageUrl: publicUrl,
+        userId: session.user.id,
+      },
+    });
 
-    await dbConnect();
-    const user = await User.findByIdAndUpdate(
-      session.user._id,
-      { $push: { "profile.portfolio": newItem } },
-      { new: true }
-    ).select("profile.portfolio");
-
-    return NextResponse.json(user?.profile.portfolio);
+    return NextResponse.json(newItem, { status: 201 });
   } catch (error) {
-    return handleError(error);
+    console.error("POST /api/users/me/portfolio Error:", error);
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }

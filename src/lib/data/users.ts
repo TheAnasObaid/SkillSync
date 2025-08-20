@@ -1,23 +1,35 @@
-import dbConnect from "@/lib/dbConnect";
-import Challenge from "@/models/Challenge";
-import Submission from "@/models/Submission";
-import User from "@/models/User";
-import { ClientStats, DeveloperStats, IUser } from "@/types";
+import prisma from "@/lib/prisma";
+import { ChallengeStatus, Role, SubmissionStatus } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
 import { unstable_noStore as noStore } from "next/cache";
 import "server-only";
-import { getSession } from "../auth";
+import { authOptions } from "../authOptions";
 
-export const getMyProfile = async (): Promise<IUser | null> => {
+export const getMyProfile = async () => {
   noStore();
   try {
-    const session = await getSession();
-    if (!session?.user) return null;
+    const session = await getServerSession(authOptions);
+    if (!session?.user?.id) return null;
 
-    await dbConnect();
-    const user = await User.findById(session.user._id)
-      .select("-password")
-      .lean();
-    return user ? JSON.parse(JSON.stringify(user)) : null;
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        portfolio: { orderBy: { createdAt: "desc" } },
+        submissions: {
+          orderBy: { createdAt: "desc" },
+          include: {
+            challenge: {
+              select: { id: true, title: true, prize: true, status: true },
+            },
+          },
+        },
+      },
+    });
+
+    if (!user) return null;
+
+    const { password, ...userWithoutPassword } = user;
+    return userWithoutPassword;
   } catch (error) {
     console.error(
       "Database Error: Failed to fetch current user's profile.",
@@ -27,15 +39,28 @@ export const getMyProfile = async (): Promise<IUser | null> => {
   }
 };
 
-export const getPublicUserProfile = async (
-  userId: string
-): Promise<IUser | null> => {
+export const getPublicUserProfile = async (userId: string) => {
   noStore();
   try {
-    await dbConnect();
-    const user = await User.findById(userId).select("profile reputation role");
-    if (!user || user.role !== "developer") return null;
-    return JSON.parse(JSON.stringify(user));
+    const user = await prisma.user.findUnique({
+      where: { id: userId, role: Role.DEVELOPER },
+      select: {
+        id: true,
+        firstName: true,
+        lastName: true,
+        image: true,
+        bio: true,
+        skills: true,
+        experience: true,
+        rating: true,
+        totalRatings: true,
+        completedChallenges: true,
+        portfolio: true,
+        role: true,
+        companyName: true,
+      },
+    });
+    return user;
   } catch (error) {
     console.error(
       `Database Error: Failed to fetch public user profile for ${userId}.`,
@@ -45,46 +70,55 @@ export const getPublicUserProfile = async (
   }
 };
 
-export const getMyDeveloperStats = async (): Promise<DeveloperStats | null> => {
+export const getMyDeveloperStats = async () => {
   noStore();
   try {
-    const session = await getSession();
-    if (!session?.user || session.user.role !== "developer") return null;
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== Role.DEVELOPER) return null;
 
-    await dbConnect();
-    const developerId = session.user._id;
-    const [totalSubmissions, winningSubmissions, pendingReviews] =
-      await Promise.all([
-        Submission.countDocuments({ developerId }),
-        Submission.countDocuments({ developerId, status: "winner" }),
-        Submission.countDocuments({ developerId, status: "pending" }),
-      ]);
-    return { totalSubmissions, winningSubmissions, pendingReviews };
+    const developerId = session.user.id;
+    const stats = await prisma.$transaction([
+      prisma.submission.count({ where: { developerId } }),
+      prisma.submission.count({
+        where: { developerId, status: SubmissionStatus.WINNER },
+      }),
+      prisma.submission.count({
+        where: { developerId, status: SubmissionStatus.PENDING },
+      }),
+    ]);
+
+    return {
+      totalSubmissions: stats[0],
+      winningSubmissions: stats[1],
+      pendingReviews: stats[2],
+    };
   } catch (error) {
     console.error("Database Error: Failed to fetch developer stats.", error);
     throw new Error("Could not fetch developer stats.");
   }
 };
 
-export const getMyClientStats = async (): Promise<ClientStats | null> => {
+export const getMyClientStats = async () => {
   noStore();
   try {
-    const session = await getSession();
-    if (!session?.user || session.user.role !== "client") return null;
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== Role.CLIENT) return null;
 
-    await dbConnect();
-    const clientId = session.user._id;
-    const challenges = await Challenge.find({ createdBy: clientId })
-      .select("_id status")
-      .lean();
-    const challengeIds = challenges.map((c) => c._id);
+    const clientId = session.user.id;
+    const challenges = await prisma.challenge.findMany({
+      where: { createdById: clientId },
+      select: { id: true, status: true },
+    });
+    const challengeIds = challenges.map((c) => c.id);
 
     const totalChallengesPosted = challenges.length;
     const activeChallenges = challenges.filter(
-      (c) => c.status === "active"
+      (c) =>
+        c.status === ChallengeStatus.PUBLISHED ||
+        c.status === ChallengeStatus.JUDGING
     ).length;
-    const totalSubmissionsReceived = await Submission.countDocuments({
-      challengeId: { $in: challengeIds },
+    const totalSubmissionsReceived = await prisma.submission.count({
+      where: { challengeId: { in: challengeIds } },
     });
 
     return {

@@ -1,30 +1,42 @@
+import { authOptions } from "@/lib/authOptions";
+import prisma from "@/lib/prisma";
+import { supabase } from "@/lib/supabase";
+import { Role } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
-import { handleError } from "@/lib/handleError";
-import Submission from "@/models/Submission";
-import Challenge from "@/models/Challenge";
-import { writeFile } from "fs/promises";
-import path from "path";
-import dbConnect from "@/lib/dbConnect";
+import { z } from "zod";
 
 interface Params {
   params: Promise<{ challengeId: string }>;
 }
 
+const submissionSchema = z.object({
+  githubRepo: z.url({ message: "Please enter a valid GitHub URL." }),
+  description: z
+    .string()
+    .min(10, { message: "Description must be at least 10 characters." }),
+  liveDemo: z.url().optional().or(z.literal("")),
+});
+
 export async function POST(request: Request, { params }: Params) {
+  const { challengeId } = await params;
+
   try {
-    const session = await getSession();
-    if (!session?.user || session.user.role !== "developer") {
-      throw new Error("Authentication required: Must be a developer.");
+    const session = await getServerSession(authOptions);
+    if (!session?.user || session.user.role !== Role.DEVELOPER) {
+      return NextResponse.json(
+        { message: "Forbidden: Must be a developer to submit a solution." },
+        { status: 403 }
+      );
     }
 
-    await dbConnect();
-
-    const { challengeId } = await params;
-    const existingSubmission = await Submission.findOne({
-      challengeId: challengeId,
-      developerId: session.user._id,
+    const existingSubmission = await prisma.submission.findFirst({
+      where: {
+        challengeId: challengeId,
+        developerId: session.user.id,
+      },
     });
+
     if (existingSubmission) {
       return NextResponse.json(
         {
@@ -37,33 +49,67 @@ export async function POST(request: Request, { params }: Params) {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
-    const submissionData: any = {
+    const formObject = {
       githubRepo: formData.get("githubRepo"),
       description: formData.get("description"),
-      liveDemo: formData.get("liveDemo") || undefined,
-      challengeId: challengeId,
-      developerId: session.user._id,
+      liveDemo: formData.get("liveDemo"),
     };
+    const validatedData = submissionSchema.parse(formObject);
 
-    if (file) {
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
-      const filename = `${Date.now()}-${file.name.replace(/\s/g, "_")}`;
-      const uploadsDir = path.join(process.cwd(), "public", "uploads");
-      const filePath = path.join(uploadsDir, filename);
+    let fileUrl: string | null = null;
+    let fileName: string | null = null;
 
-      await writeFile(filePath, buffer);
-      submissionData.files = [{ name: file.name, path: `uploads/${filename}` }];
+    if (file && file.size > 0) {
+      const filePath = `public/${
+        session.user.id
+      }/submissions/${challengeId}/${Date.now()}-${file.name}`;
+      const { error: uploadError } = await supabase.storage
+        .from("project-files")
+        .upload(filePath, file);
+
+      if (uploadError) {
+        console.error("Supabase upload error:", uploadError);
+        return NextResponse.json(
+          { message: "Failed to upload submission file." },
+          { status: 500 }
+        );
+      }
+      const {
+        data: { publicUrl },
+      } = supabase.storage.from("project-files").getPublicUrl(filePath);
+      fileUrl = publicUrl;
+      fileName = file.name;
     }
 
-    const newSubmission = await Submission.create(submissionData);
+    const dataToCreate: any = {
+      ...validatedData,
+      challengeId: challengeId,
+      developerId: session.user.id,
+    };
 
-    await Challenge.findByIdAndUpdate(challengeId, {
-      $push: { submissions: newSubmission._id },
+    if (fileUrl && fileName) {
+      dataToCreate.files = [{ name: fileName, path: fileUrl }];
+    }
+
+    const newSubmission = await prisma.submission.create({
+      data: dataToCreate,
     });
 
     return NextResponse.json(newSubmission, { status: 201 });
   } catch (error) {
-    return handleError(error);
+    console.error(
+      `POST /api/submissions/challenge/${challengeId} Error:`,
+      error
+    );
+    if (error instanceof z.ZodError) {
+      return NextResponse.json(
+        { message: "Invalid form data.", issues: error.issues },
+        { status: 400 }
+      );
+    }
+    return NextResponse.json(
+      { message: "An internal server error occurred." },
+      { status: 500 }
+    );
   }
 }
